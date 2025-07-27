@@ -1,0 +1,129 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}StockPro - Accueil{% endblock %}
+
+{% block body %}
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Gestion de Stock Multi-Dépôts</h1>
+            <p>Solution complète pour la gestion centralisée de vos équipements techniques (TPE, SIM, Cartes) avec suivi en temps réel des mouvements entre dépôts.</p>
+            
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">Nos Solutions</h2>
+            <p class="section-subtitle">Une plateforme complète pour optimiser la gestion de votre stock multi-dépôts</p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📦</div>
+                    <h3>GESTION DES ÉQUIPEMENTS</h3>
+                    <p>Gestion centralisée des TPE, cartes SIM et cartes avec suivi complet du cycle de vie de chaque équipement</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🏢</div>
+                    <h3>GESTION MULTI-DÉPÔTS</h3>
+                    <p>Création et gestion flexible de plusieurs dépôts avec affectation automatique des équipements</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>SUIVI DES MOUVEMENTS</h3>
+                    <p>Traçabilité complète des entrées, sorties et transferts avec validation automatique de disponibilité</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <h3>RAPPORTS & ANALYTICS</h3>
+                    <p>Génération de rapports détaillés et historiques pour un meilleur suivi logistique</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>SÉCURITÉ AVANCÉE</h3>
+                    <p>Système de permissions par rôle avec authentification sécurisée et accès contrôlé</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>TEMPS RÉEL</h3>
+                    <p>Synchronisation instantanée des données entre tous les dépôts avec interface responsive</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h3>500+</h3>
+                    <p>Équipements gérés</p>
+                </div>
+                <div class="stat-item">
+                    <h3>50+</h3>
+                    <p>Dépôts connectés</p>
+                </div>
+                <div class="stat-item">
+                    <h3>99.9%</h3>
+                    <p>Disponibilité</p>
+                </div>
+                <div class="stat-item">
+                    <h3>24/7</h3>
+                    <p>Support technique</p>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        // Page-specific JavaScript for homepage
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate stats on scroll
+            const animateStats = () => {
+                const stats = document.querySelectorAll('.stat-item h3');
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const target = entry.target;
+                            const finalValue = target.textContent;
+                            const isPercentage = finalValue.includes('%');
+                            const hasPlus = finalValue.includes('+');
+                            const numValue = parseFloat(finalValue);
+                            
+                            let currentValue = 0;
+                            const increment = numValue / 50;
+                            
+                            const timer = setInterval(() => {
+                                currentValue += increment;
+                                if (currentValue >= numValue) {
+                                    currentValue = numValue;
+                                    clearInterval(timer);
+                                }
+                                
+                                let displayValue = Math.floor(currentValue);
+                                if (isPercentage) displayValue += '%';
+                                if (hasPlus) displayValue += '+';
+                                if (finalValue.includes('/')) displayValue = finalValue;
+                                
+                                target.textContent = displayValue;
+                            }, 40);
+                        }
+                    });
+                });
+                
+                stats.forEach(stat => observer.observe(stat));
+            };
+
+            animateStats();
+        });
+    </script>
+{% endblock %}

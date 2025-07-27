@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscription{% endblock %}
+
+{% block body %}
+    <div class="login-container">
+        <div class="header">
+            <h1>Créer un compte</h1>
+            <p>Remplissez le formulaire pour vous inscrire</p>
+        </div>
+        {{ form_start(registrationForm) }}
+            {{ form_row(registrationForm.email) }}
+            {{ form_row(registrationForm.plainPassword.first) }}
+            {{ form_row(registrationForm.plainPassword.second) }}
+            <div style="margin-top: 1rem;">
+                {{ form_widget(registrationForm.submit) }}
+            </div>
+        {{ form_end(registrationForm) }}
+        <div class="forgot-password" style="margin-top: 1rem;">
+            <a href="{{ path('app_login') }}">Déjà un compte ? Se connecter</a>
+        </div>
+    </div>
+{% endblock %}

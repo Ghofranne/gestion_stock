@@ -1,0 +1,230 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}StockPro - Gestion du Stock{% endblock %}
+
+{% block body %}
+    <div class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="dashboard-title">Gestion du Stock</h1>
+                        <p class="dashboard-subtitle">Gérez vos équipements et mouvements de stock</p>
+                    </div>
+                    <div class="header-actions">
+                        <a href="{{ path('equipment_add') }}" class="btn">➕ Ajouter Équipement</a>
+                        <a href="{{ path('movement_add') }}" class="btn btn-secondary">📦 Nouveau Mouvement</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Filters -->
+            <div class="filters-card">
+                <form method="GET" class="filters-form">
+                    <div class="filters-row">
+                        <div class="filter-group">
+                            <label>Type d'équipement</label>
+                            <select name="type">
+                                <option value="">Tous les types</option>
+                                <option value="tpe" {{ app.request.query.get('type') == 'tpe' ? 'selected' : '' }}>TPE</option>
+                                <option value="sim" {{ app.request.query.get('type') == 'sim' ? 'selected' : '' }}>Cartes SIM</option>
+                                <option value="carte" {{ app.request.query.get('type') == 'carte' ? 'selected' : '' }}>Cartes</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label>Dépôt</label>
+                            <select name="depot">
+                                <option value="">Tous les dépôts</option>
+                                {% for depot in depots ?? [
+                                    {id: 1, name: 'Dépôt Central'},
+                                    {id: 2, name: 'Dépôt Nord'},
+                                    {id: 3, name: 'Dépôt Sud'},
+                                    {id: 4, name: 'Dépôt Est'}
+                                ] %}
+                                    <option value="{{ depot.id }}" {{ app.request.query.get('depot') == depot.id ? 'selected' : '' }}>
+                                        {{ depot.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label>Status</label>
+                            <select name="status">
+                                <option value="">Tous les status</option>
+                                <option value="available" {{ app.request.query.get('status') == 'available' ? 'selected' : '' }}>Disponible</option>
+                                <option value="assigned" {{ app.request.query.get('status') == 'assigned' ? 'selected' : '' }}>Assigné</option>
+                                <option value="maintenance" {{ app.request.query.get('status') == 'maintenance' ? 'selected' : '' }}>Maintenance</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label>Recherche</label>
+                            <input type="text" name="search" placeholder="Numéro série, modèle..." value="{{ app.request.query.get('search') }}">
+                        </div>
+                        
+                        <div class="filter-actions">
+                            <button type="submit" class="btn">🔍 Filtrer</button>
+                            <a href="{{ path('stock') }}" class="btn btn-secondary">Réinitialiser</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Equipment Table -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h3>Équipements ({{ equipments|length ?? '1,247' }} résultats)</h3>
+                    <div class="table-actions">
+                        <button class="btn btn-secondary" onclick="exportData()">📊 Exporter</button>
+                        <select id="bulkActions" class="bulk-select">
+                            <option value="">Actions groupées</option>
+                            <option value="transfer">Transférer</option>
+                            <option value="maintenance">Maintenance</option>
+                            <option value="delete">Supprimer</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <table class="table" id="equipmentTable">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="selectAll"></th>
+                            <th>N° Série</th>
+                            <th>Type</th>
+                            <th>Modèle</th>
+                            <th>Dépôt</th>
+                            <th>Status</th>
+                            <th>Date Ajout</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for equipment in equipments ?? [
+                            {id: 1, serial: 'TPE001234', type: 'TPE', model: 'Ingenico IPP350', depot: 'Dépôt Central', status: 'available', dateAdded: 'now'|date_modify('-10 days')},
+                            {id: 2, serial: 'SIM789012', type: 'SIM', model: 'Orange Business', depot: 'Dépôt Nord', status: 'assigned', dateAdded: 'now'|date_modify('-5 days')},
+                            {id: 3, serial: 'CARTE345678', type: 'Carte', model: 'Visa Business', depot: 'Dépôt Sud', status: 'available', dateAdded: 'now'|date_modify('-2 days')},
+                            {id: 4, serial: 'TPE567890', type: 'TPE', model: 'Verifone V240m', depot: 'Dépôt Est', status: 'maintenance', dateAdded: 'now'|date_modify('-15 days')},
+                            {id: 5, serial: 'SIM123456', type: 'SIM', model: 'SFR Pro', depot: 'Dépôt Central', status: 'available', dateAdded: 'now'|date_modify('-1 day')}
+                        ] %}
+                            <tr>
+                                <td><input type="checkbox" class="row-select" value="{{ equipment.id }}"></td>
+                                <td><strong>{{ equipment.serial }}</strong></td>
+                                <td>
+                                    <span class="equipment-type type-{{ equipment.type|lower }}">
+                                        {{ equipment.type }}
+                                    </span>
+                                </td>
+                                <td>{{ equipment.model }}</td>
+                                <td>{{ equipment.depot }}</td>
+                                <td>
+                                    <span class="status status-{{ equipment.status }}">
+                                        {% if equipment.status == 'available' %}
+                                            ✅ Disponible
+                                        {% elseif equipment.status == 'assigned' %}
+                                            📋 Assigné
+                                        {% elseif equipment.status == 'maintenance' %}
+                                            🔧 Maintenance
+                                        {% endif %}
+                                    </span>
+                                </td>
+                                <td>{{ equipment.dateAdded|date('d/m/Y') }}</td>
+                                <td class="actions">
+                                    <a href="{{ path('equipment_view', {id: equipment.id}) }}" class="btn-icon" title="Voir">👁️</a>
+                                    <a href="{{ path('equipment_edit', {id: equipment.id}) }}" class="btn-icon" title="Modifier">✏️</a>
+                                    <a href="{{ path('movement_transfer', {equipment: equipment.id}) }}" class="btn-icon" title="Transférer">🔄</a>
+                                    <button class="btn-icon btn-danger" onclick="confirmDelete({{ equipment.id }})" title="Supprimer">🗑️</button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                <!-- Pagination -->
+                <div class="pagination-container">
+                    <div class="pagination-info">
+                        Affichage de 1 à 10 sur {{ equipments|length ?? '1,247' }} résultats
+                    </div>
+                    <div class="pagination">
+                        <a href="#" class="pagination-btn disabled">‹ Précédent</a>
+                        <a href="#" class="pagination-btn active">1</a>
+                        <a href="#" class="pagination-btn">2</a>
+                        <a href="#" class="pagination-btn">3</a>
+                        <span class="pagination-dots">...</span>
+                        <a href="#" class="pagination-btn">125</a>
+                        <a href="#" class="pagination-btn">Suivant ›</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Select all functionality
+            const selectAll = document.getElementById('selectAll');
+            const rowSelects = document.querySelectorAll('.row-select');
+            
+            selectAll.addEventListener('change', function() {
+                rowSelects.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+                updateBulkActions();
+            });
+            
+            rowSelects.forEach(checkbox => {
+                checkbox.addEventListener('change', updateBulkActions);
+            });
+            
+            function updateBulkActions() {
+                const selected = document.querySelectorAll('.row-select:checked');
+                const bulkActions = document.getElementById('bulkActions');
+                bulkActions.disabled = selected.length === 0;
+                
+                if (selected.length > 0) {
+                    bulkActions.style.opacity = '1';
+                } else {
+                    bulkActions.style.opacity = '0.5';
+                }
+            }
+            
+            // Auto-submit filters on change
+            const filterSelects = document.querySelectorAll('.filters-form select');
+            filterSelects.forEach(select => {
+                select.addEventListener('change', function() {
+                    this.form.submit();
+                });
+            });
+        });
+        
+        function confirmDelete(equipmentId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer cet équipement ?')) {
+                // Ajax delete request
+                fetch(`{{ path('equipment_delete', {id: '__ID__'}) }}`.replace('__ID__', equipmentId), {
+                    method: 'DELETE',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Erreur lors de la suppression');
+                    }
+                });
+            }
+        }
+        
+        function exportData() {
+            const params = new URLSearchParams(window.location.search);
+            params.set('export', 'excel');
+            window.open(`{{ path('stock') }}?${params.toString()}`);
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,162 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}StockPro - Gestion des Dépôts{% endblock %}
+
+{% block body %}
+    <div class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="dashboard-title">Gestion des Dépôts</h1>
+                        <p class="dashboard-subtitle">Gérez vos dépôts et leurs capacités</p>
+                    </div>
+                    <div class="header-actions">
+                        <a href="{{ path('depot_add') }}" class="btn">🏢 Nouveau Dépôt</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Depots Grid -->
+            <div class="depots-grid">
+                {% for depot in depots ?? [
+                    {id: 1, name: 'Dépôt Central', location: 'Paris, France', capacity: 1000, current: 456, status: 'active', manager: 'Jean Dupont', phone: '+33 1 23 45 67 89'},
+                    {id: 2, name: 'Dépôt Nord', location: 'Lille, France', capacity: 500, current: 234, status: 'active', manager: 'Marie Martin', phone: '+33 3 20 12 34 56'},
+                    {id: 3, name: 'Dépôt Sud', location: 'Marseille, France', capacity: 750, current: 189, status: 'maintenance', manager: 'Pierre Bernard', phone: '+33 4 91 23 45 67'},
+                    {id: 4, name: 'Dépôt Est', location: 'Strasbourg, France', capacity: 600, current: 368, status: 'active', manager: 'Sophie Leroy', phone: '+33 3 88 12 34 56'}
+                ] %}
+                    <div class="depot-card">
+                        <div class="depot-header">
+                            <div class="depot-status status-{{ depot.status }}">
+                                {% if depot.status == 'active' %}
+                                    ✅ Actif
+                                {% elseif depot.status == 'maintenance' %}
+                                    🔧 Maintenance
+                                {% else %}
+                                    ❌ Inactif
+                                {% endif %}
+                            </div>
+                            <div class="depot-actions">
+                                <button class="btn-icon" onclick="viewDepot({{ depot.id }})" title="Voir détails">👁️</button>
+                                <button class="btn-icon" onclick="editDepot({{ depot.id }})" title="Modifier">✏️</button>
+                            </div>
+                        </div>
+                        
+                        <div class="depot-info">
+                            <h3>{{ depot.name }}</h3>
+                            <p class="depot-location">📍 {{ depot.location }}</p>
+                            
+                            <div class="depot-stats">
+                                <div class="depot-capacity">
+                                    <div class="capacity-numbers">
+                                        <span class="current">{{ depot.current }}</span> / <span class="total">{{ depot.capacity }}</span>
+                                    </div>
+                                    <div class="capacity-label">Équipements</div>
+                                    <div class="capacity-bar">
+                                        <div class="capacity-fill" style="width: {{ (depot.current / depot.capacity * 100)|number_format(0) }}%"></div>
+                                    </div>
+                                    <div class="capacity-percentage">{{ (depot.current / depot.capacity * 100)|number_format(1) }}% utilisé</div>
+                                </div>
+                            </div>
+                            
+                            <div class="depot-manager">
+                                <div class="manager-info">
+                                    <strong>👤 {{ depot.manager }}</strong>
+                                    <div class="manager-contact">📞 {{ depot.phone }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="depot-footer">
+                            <a href="{{ path('stock', {depot: depot.id}) }}" class="btn btn-secondary btn-sm">
+                                📦 Voir Stock
+                            </a>
+                            <a href="{{ path('movement_add', {depot: depot.id}) }}" class="btn btn-sm">
+                                ➕ Nouveau Mouvement
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="depot-summary">
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <div class="summary-icon">🏢</div>
+                        <div class="summary-info">
+                            <div class="summary-number">{{ depots|length ?? '4' }}</div>
+                            <div class="summary-label">Dépôts Total</div>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card">
+                        <div class="summary-icon">📦</div>
+                        <div class="summary-info">
+                            <div class="summary-number">1,247</div>
+                            <div class="summary-label">Équipements Total</div>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card">
+                        <div class="summary-icon">📊</div>
+                        <div class="summary-info">
+                            <div class="summary-number">68%</div>
+                            <div class="summary-label">Taux d'occupation</div>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card">
+                        <div class="summary-icon">🔄</div>
+                        <div class="summary-info">
+                            <div class="summary-number">23</div>
+                            <div class="summary-label">Transferts en cours</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for depot details -->
+    <div id="depotModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Détails du Dépôt</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Content loaded dynamically -->
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        function viewDepot(depotId) {
+            // Load depot details in modal
+            fetch(`{{ path('depot_details', {id: '__ID__'}) }}`.replace('__ID__', depotId))
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('modalBody').innerHTML = html;
+                    document.getElementById('depotModal').classList.remove('hidden');
+                });
+        }
+        
+        function editDepot(depotId) {
+            window.location.href = `{{ path('depot_edit', {id: '__ID__'}) }}`.replace('__ID__', depotId);
+        }
+        
+        function closeModal() {
+            document.getElementById('depotModal').classList.add('hidden');
+        }
+        
+        // Close modal on outside click
+        document.getElementById('depotModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+{% endblock %}

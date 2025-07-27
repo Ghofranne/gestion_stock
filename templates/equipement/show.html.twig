@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Equipement{% endblock %}
+
+{% block body %}
+    <h1>Equipement</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ equipement.id }}</td>
+            </tr>
+            <tr>
+                <th>TypeEquipement</th>
+                <td>{{ equipement.typeEquipement }}</td>
+            </tr>
+            <tr>
+                <th>Sn</th>
+                <td>{{ equipement.sn }}</td>
+            </tr>
+            <tr>
+                <th>Model</th>
+                <td>{{ equipement.model }}</td>
+            </tr>
+            <tr>
+                <th>Imei</th>
+                <td>{{ equipement.imei }}</td>
+            </tr>
+            <tr>
+                <th>NumAppel</th>
+                <td>{{ equipement.numAppel }}</td>
+            </tr>
+            <tr>
+                <th>Operateur</th>
+                <td>{{ equipement.operateur }}</td>
+            </tr>
+            <tr>
+                <th>ReferenceCarte</th>
+                <td>{{ equipement.referenceCarte }}</td>
+            </tr>
+            <tr>
+                <th>Fournisseur</th>
+                <td>{{ equipement.fournisseur }}</td>
+            </tr>
+            <tr>
+                <th>Etat</th>
+                <td>{{ equipement.etat }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_equipement_index') }}">back to list</a>
+
+    <a href="{{ path('app_equipement_edit', {'id': equipement.id}) }}">edit</a>
+
+    {{ include('equipement/_delete_form.html.twig') }}
+{% endblock %}

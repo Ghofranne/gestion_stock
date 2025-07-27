@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New MouvementStock{% endblock %}
+
+{% block body %}
+    <h1>Create new MouvementStock</h1>
+
+    {{ include('mouvement_stock/_form.html.twig') }}
+
+    <a href="{{ path('app_mouvement_stock_index') }}">back to list</a>
+{% endblock %}

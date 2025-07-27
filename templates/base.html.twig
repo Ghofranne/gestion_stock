@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}StockPro - Gestion de Stock Multi-Dépôts{% endblock %}</title>
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">SP</div>
+                <div class="logo-text">StockPro</div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="{{ path('home') }}" class="{{ app.request.get('_route') == 'home' ? 'active' : '' }}">ACCUEIL</a></li>
+                    <li><a href="{{ path('dashboard') }}" class="{{ app.request.get('_route') == 'dashboard' ? 'active' : '' }}">DASHBOARD</a></li>
+                    <li><a href="{{ path('stock') }}" class="{{ app.request.get('_route') == 'stock' ? 'active' : '' }}">STOCK</a></li>
+                    <li><a href="{{ path('app_depot_index') }}" class="{{ app.request.get('_route') == 'depots' ? 'active' : '' }}">DÉPÔTS</a></li>
+                    <li><a href="{{ path('home') }}" class="{{ app.request.get('_route') == 'reports' ? 'active' : '' }}">RAPPORTS</a></li> 
+                    {% if app.user %}
+                        <li><a href="{{ path('logout') }}">DÉCONNEXION</a></li>
+                    {% else %}
+                        <li><a href="{{ path('app_login') }}">CONNEXION</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+            <div class="lang-switch">
+                <a href="{{ path(app.request.get('_route'), app.request.get('_route_params')|merge({'_locale': 'fr'})) }}" class="{{ app.request.locale == 'fr' ? 'active' : '' }}">FR</a>
+                <a href="{{ path(app.request.get('_route'), app.request.get('_route_params')|merge({'_locale': 'en'})) }}" class="{{ app.request.locale == 'en' ? 'active' : '' }}">EN</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        {% block body %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="logo">
+                <div class="logo-icon">SP</div>
+                <div class="logo-text">StockPro</div>
+            </div>
+            <p style="margin-top: 20px;">© {{ "now"|date("Y") }} StockPro. Tous droits réservés. Solution de gestion de stock multi-dépôts.</p>
+        </div>
+    </footer>
+
+    <script src="{{ asset('assets/js/main.js') }}"></script>
+    {% block javascripts %}{% endblock %}
+</body>
+</html>

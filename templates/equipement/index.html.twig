@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Equipement index{% endblock %}
+
+{% block body %}
+    <h1>Equipement index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>TypeEquipement</th>
+                <th>Sn</th>
+                <th>Model</th>
+                <th>Imei</th>
+                <th>NumAppel</th>
+                <th>Operateur</th>
+                <th>ReferenceCarte</th>
+                <th>Fournisseur</th>
+                <th>Etat</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for equipement in equipements %}
+            <tr>
+                <td>{{ equipement.id }}</td>
+                <td>{{ equipement.typeEquipement }}</td>
+                <td>{{ equipement.sn }}</td>
+                <td>{{ equipement.model }}</td>
+                <td>{{ equipement.imei }}</td>
+                <td>{{ equipement.numAppel }}</td>
+                <td>{{ equipement.operateur }}</td>
+                <td>{{ equipement.referenceCarte }}</td>
+                <td>{{ equipement.fournisseur }}</td>
+                <td>{{ equipement.etat }}</td>
+                <td>
+                    <a href="{{ path('app_equipement_show', {'id': equipement.id}) }}">show</a>
+                    <a href="{{ path('app_equipement_edit', {'id': equipement.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="11">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_equipement_new') }}">Create new</a>
+{% endblock %}

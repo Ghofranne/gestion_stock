@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter un dépôt{% endblock %}
+
+{% block body %}
+    <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding-top: 100px;">
+        <div style="width: 100%; max-width: 600px;" class="card shadow p-4 rounded">
+            <h1 class="mb-4 text-center text-primary">🗃️ Nouveau Dépôt</h1>
+
+            {{ include('depot/_form.html.twig') }}
+
+            <div class="mt-4 text-center">
+                <a href="{{ path('app_depot_index') }}" class="btn btn-secondary">
+                    ⬅️ Retour à la liste
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
