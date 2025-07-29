@@ -48,8 +48,8 @@ class AppCustomAuthenticator extends AbstractLoginFormAuthenticator
             return new RedirectResponse($targetPath);
         }
 
-        // Redirige vers le dashboard après connexion
-        return new RedirectResponse($this->urlGenerator->generate('dashboard'));
+        // Redirige vers la page menu après authentification
+        return new RedirectResponse($this->urlGenerator->generate('app_menu'));
     }
 
     protected function getLoginUrl(Request $request): string

@@ -9,12 +9,16 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends AbstractController
 {
+    #[Route(path: '/menu', name: 'app_menu')]
+    public function menu(): Response
+    {
+        return $this->render('menu.html.twig');
+    }
     #[Route(path: '/login', name: 'app_login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        // Si l'utilisateur est déjà connecté, on le redirige vers le dashboard
         if ($this->getUser()) {
-            return $this->redirectToRoute('dashboard');
+            return $this->redirectToRoute('app_menu');
         }
 
         // get the login error if there is one
@@ -23,6 +27,7 @@ class SecurityController extends AbstractController
         $lastUsername = $authenticationUtils->getLastUsername();
 
         return $this->render('security/login.html.twig', ['last_username' => $lastUsername, 'error' => $error]);
+    
     }
 
     #[Route(path: '/logout', name: 'app_logout')]

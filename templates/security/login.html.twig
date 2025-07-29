@@ -1,10 +1,10 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion</title>
-    <style>
+
+
+{% block title %}Log in!{% endblock %}
+
+
+{% block body %}
+<style>
         * {
             margin: 0;
             padding: 0;
@@ -265,81 +265,26 @@
             100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
     </style>
-</head>
-<body>
-    <div class="login-container">
-        <div class="header">
-            <h1>Connexion</h1>
-            <p>Accédez à votre espace personnel</p>
+<form method="post">
+    {% if error %}
+        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}
+
+    {% if app.user %}
+        <div class="mb-3">
+            You are logged in as {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}">Logout</a>
         </div>
+    {% endif %}
 
-        <!-- Error message simulation -->
-        <div class="alert" style="display: none;" id="error-message">
-            <strong>Erreur :</strong> Identifiants invalides
-        </div>
+    <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+    <label for="inputEmail">Email</label>
+    <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="form-control" autocomplete="email" required autofocus>
+    <label for="inputPassword">Password</label>
+    <input type="password" name="password" id="inputPassword" class="form-control" autocomplete="current-password" required>
+    <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
 
-        <!-- User info simulation -->
-        <div class="user-info" style="display: none;" id="user-info">
-            Vous êtes connecté en tant que <strong>user@example.com</strong>
-            <a href="#" class="logout-link">Se déconnecter</a>
-        </div>
-
-        <form id="login-form">
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-
-            <div class="form-group">
-                <label for="password">Mot de passe</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-
-            <button type="submit" class="submit-btn" id="submit-btn">
-                Se connecter
-            </button>
-        </form>
-
-        <div class="forgot-password">
-            <a href="#">Mot de passe oublié ?</a>
-        </div>
-    </div>
-
-    <script>
-        // Animation for form submission
-        document.getElementById('login-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const submitBtn = document.getElementById('submit-btn');
-            submitBtn.classList.add('loading');
-            submitBtn.innerHTML = '';
-            
-            // Simulate loading
-            setTimeout(() => {
-                submitBtn.classList.remove('loading');
-                submitBtn.innerHTML = 'Se connecter';
-                
-                // Show demo error or success
-                const errorDiv = document.getElementById('error-message');
-                errorDiv.style.display = 'block';
-                
-                setTimeout(() => {
-                    errorDiv.style.display = 'none';
-                }, 3000);
-            }, 2000);
-        });
-
-        // Add floating animation to inputs on focus
-        const inputs = document.querySelectorAll('input');
-        inputs.forEach(input => {
-            input.addEventListener('focus', function() {
-                this.parentElement.style.transform = 'scale(1.02)';
-            });
-            
-            input.addEventListener('blur', function() {
-                this.parentElement.style.transform = 'scale(1)';
-            });
-        });
-    </script>
-</body>
-</html>
+    <button class="btn btn-lg btn-primary" type="submit">
+        Sign in
+    </button>
+</form>
+{% endblock %}
