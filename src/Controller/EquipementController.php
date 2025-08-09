@@ -65,6 +65,7 @@ final class EquipementController extends AbstractController
         return $this->render('equipement/edit.html.twig', [
             'equipement' => $equipement,
             'form' => $form,
+            'equipement_type' => $equipement->getTypeEquipement(),
         ]);
     }
 

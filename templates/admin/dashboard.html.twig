@@ -1,0 +1,472 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Tableau de bord - StockPro{% endblock %}
+
+{% block body %}
+<div class="admin-content">
+    <div class="page-header">
+        <h1>📊 Tableau de bord</h1>
+        <p>Vue d'ensemble de votre système de gestion de stock</p>
+    </div>
+
+    <!-- Statistiques générales -->
+    <div class="stats-grid">
+        <div class="stat-card primary">
+            <div class="stat-icon">🏢</div>
+            <div class="stat-content">
+                <div class="stat-number">{{ stats.total_societes }}</div>
+                <div class="stat-label">Sociétés Total</div>
+            </div>
+        </div>
+        
+        <div class="stat-card success">
+            <div class="stat-icon">🏬</div>
+            <div class="stat-content">
+                <div class="stat-number">{{ stats.total_depots }}</div>
+                <div class="stat-label">Dépôts Total</div>
+            </div>
+        </div>
+        
+        <div class="stat-card info">
+            <div class="stat-icon">🛠️</div>
+            <div class="stat-content">
+                <div class="stat-number">{{ stats.total_equipements }}</div>
+                <div class="stat-label">Équipements Total</div>
+            </div>
+        </div>
+        
+        <div class="stat-card warning">
+            <div class="stat-icon">📦</div>
+            <div class="stat-content">
+                <div class="stat-number">{{ stats.total_mouvements }}</div>
+                <div class="stat-label">Mouvements Total</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-grid">
+        <!-- Répartition des équipements -->
+        <div class="panel">
+            <div class="panel-header">
+                <h2>📊 Répartition des équipements</h2>
+            </div>
+            <div class="panel-body">
+                {% if equipements_by_type is not empty %}
+                    <div class="distribution">
+                        {% for type, count in equipements_by_type %}
+                            <div class="distribution-item">
+                                <div class="distribution-name">
+                                    {% if type == 'SIM' %}📱 {{ type }}
+                                    {% elseif type == 'TPE' %}💳 {{ type }}
+                                    {% else %}🆔 {{ type }}{% endif %}
+                                </div>
+                                <div class="distribution-count">
+                                    <span class="count-number">{{ count }}</span>
+                                    <span class="count-label">équipements</span>
+                                </div>
+                                <div class="distribution-bar">
+                                    <div class="distribution-progress" style="width: {{ count > 0 ? ((count / 10) * 100)|round : 0 }}%"></div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <p>Aucun équipement trouvé</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Top 5 Sociétés -->
+        <div class="panel">
+            <div class="panel-header">
+                <h2>🏆 Top 5 Sociétés</h2>
+            </div>
+            <div class="panel-body">
+                {% if societes_stats is not empty %}
+                    <div class="ranking-list">
+                        {% for data in societes_stats %}
+                            <div class="ranking-item">
+                                <div class="rank-badge">{{ loop.index }}</div>
+                                <div class="depot-info">
+                                    <div class="depot-name">{{ data.societe.nom }}</div>
+                                    <div class="depot-location">{{ data.nb_depots }} dépôts • {{ data.nb_mouvements }} mouvements</div>
+                                </div>
+                                <div class="depot-stats">
+                                    <div class="stat-item">
+                                        <span class="stat-value">{{ data.nb_depots }}</span>
+                                        <span class="stat-unit">dépôts</span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <p>Aucune société trouvée</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Mouvements récents -->
+    <div class="panel full-width">
+        <div class="panel-header">
+            <h2>📦 Mouvements récents</h2>
+        </div>
+        <div class="panel-body">
+            {% if recent_movements is not empty %}
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Équipement</th>
+                                <th>Dépôt Source</th>
+                                <th>Dépôt Destination</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for movement in recent_movements %}
+                                <tr>
+                                    <td>{{ movement.date|date('d/m/Y') }}</td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if movement.typeMouvement == 'entree' %}badge-success
+                                            {% elseif movement.typeMouvement == 'sortie' %}badge-danger
+                                            {% elseif movement.typeMouvement == 'transfert' %}badge-info
+                                            {% else %}badge-stock{% endif %}">
+                                            {{ movement.typeMouvement|title }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if movement.equipement %}
+                                            {{ movement.equipement.typeEquipement }}
+                                            {% if movement.equipement.imei %} - {{ movement.equipement.imei }}
+                                            {% elseif movement.equipement.sn %} - {{ movement.equipement.sn }}
+                                            {% endif %}
+                                        {% else %}
+                                            <em>Non spécifié</em>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ movement.depotSource ? movement.depotSource.nom : '-' }}</td>
+                                    <td>{{ movement.depotDestination ? movement.depotDestination.nom : '-' }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <p>Aucun mouvement trouvé</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+/* Styles identiques à la page dépôts */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border-left: 5px solid;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.stat-card.primary {
+    border-left-color: #4299e1;
+    background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%);
+}
+
+.stat-card.success {
+    border-left-color: #48bb78;
+    background: linear-gradient(135deg, #e8f5e8 0%, #ffffff 100%);
+}
+
+.stat-card.info {
+    border-left-color: #38b2ac;
+    background: linear-gradient(135deg, #e0f7fa 0%, #ffffff 100%);
+}
+
+.stat-card.warning {
+    border-left-color: #ed8936;
+    background: linear-gradient(135deg, #fff8e1 0%, #ffffff 100%);
+}
+
+.stat-card .stat-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.1));
+}
+
+.stat-card .stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.stat-card .stat-label {
+    color: #718096;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.panel {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.panel:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.panel.full-width {
+    grid-column: 1 / -1;
+}
+
+.panel-header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 1.5rem 2rem;
+    border-bottom: none;
+}
+
+.panel-header h2 {
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+.panel-body {
+    padding: 2rem;
+}
+
+.ranking-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.ranking-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.ranking-item:hover {
+    background: #e2e8f0;
+    transform: translateX(5px);
+}
+
+.rank-badge {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #48bb78, #38a169);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.depot-info {
+    flex: 1;
+}
+
+.depot-name {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.25rem;
+}
+
+.depot-location {
+    color: #718096;
+    font-size: 0.9rem;
+}
+
+.depot-stats {
+    display: flex;
+    gap: 1rem;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-value {
+    display: block;
+    font-weight: 700;
+    color: #2d3748;
+    font-size: 1.1rem;
+}
+
+.stat-unit {
+    font-size: 0.8rem;
+    color: #718096;
+}
+
+.distribution {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.distribution-item {
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 10px;
+}
+
+.distribution-name {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+}
+
+.distribution-count {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.count-number {
+    font-weight: 700;
+    color: #4299e1;
+    font-size: 1.2rem;
+}
+
+.count-label {
+    color: #718096;
+    font-size: 0.9rem;
+}
+
+.distribution-bar {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.distribution-progress {
+    height: 100%;
+    background: linear-gradient(135deg, #4299e1, #3182ce);
+    transition: width 0.3s ease;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.data-table th {
+    background: #f8fafc;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.badge-stock {
+    background: #bee3f8;
+    color: #2b6cb0;
+}
+
+.badge-success {
+    background: #c6f6d5;
+    color: #22543d;
+}
+
+.badge-danger {
+    background: #fed7d7;
+    color: #742a2a;
+}
+
+.badge-info {
+    background: #bee3f8;
+    color: #2b6cb0;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #718096;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .ranking-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .depot-stats {
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}

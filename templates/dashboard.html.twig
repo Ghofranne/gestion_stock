@@ -1,607 +1,656 @@
-{% extends 'base.html.twig' %}
-
-{% block title %}StockPro - Dashboard{% endblock %}
-
-{% block stylesheets %}
-    {{ parent() }}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration - StockPro</title>
     <style>
-        /* Dashboard Styles */
-        .dashboard {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: calc(100vh - 80px);
-            padding: 2rem 0;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8fafc;
+            color: #2d3748;
         }
 
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-
-        .dashboard-header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        .dashboard-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: white;
-            margin-bottom: 0.5rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .dashboard-subtitle {
-            font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.9);
+            max-width: 100vw;
             margin: 0;
-        }
-
-        /* Grid Layout */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 3rem;
-        }
-
-        .dashboard-content {
-            display: grid;
-            gap: 2rem;
-        }
-
-        .dashboard-row {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 2rem;
-        }
-
-        .dashboard-col-8,
-        .dashboard-col-4 {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        /* Cards */
-        .dashboard-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .dashboard-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        .dashboard-card h3 {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 1.5rem;
-        }
-
-        /* Utility classes */
-        .flex {
-            display: flex;
-        }
-
-        .justify-between {
-            justify-content: space-between;
-        }
-
-        .items-center {
-            align-items: center;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .mt-20 {
-            margin-top: 2rem;
-        }
-
-        /* Statistics */
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #333;
-            margin: 0.5rem 0;
-        }
-
-        .dashboard-icon {
-            font-size: 3rem;
-            opacity: 0.8;
-        }
-
-        .text-success {
-            color: #4CAF50;
-            font-weight: 600;
-        }
-
-        .text-info {
-            color: #2196F3;
-            font-weight: 600;
-        }
-
-        .text-warning {
-            color: #FF9800;
-            font-weight: 600;
-        }
-
-        .stat-number.text-warning {
-            color: #FF9800;
-        }
-
-        /* Table */
-        .table-container {
-            overflow-x: auto;
-            margin: 1rem 0;
-        }
-
-        .table {
-            width: 100%;
-            border-collapse: collapse;
             background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .table th {
-            background: linear-gradient(45deg, #4CAF50, #45a049);
-            color: white;
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-        }
-
-        .table td {
-            padding: 1rem;
-            border-bottom: 1px solid #eee;
-        }
-
-        .table tr:hover {
-            background: rgba(76, 175, 80, 0.05);
-        }
-
-        .table tr:last-child td {
-            border-bottom: none;
-        }
-
-        /* Badges */
-        .badge {
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: white;
-        }
-
-        .badge-success {
-            background: linear-gradient(45deg, #4CAF50, #45a049);
-        }
-
-        .badge-warning {
-            background: linear-gradient(45deg, #FF9800, #F57C00);
-        }
-
-        .badge-danger {
-            background: linear-gradient(45deg, #F44336, #D32F2F);
-        }
-
-        /* Status */
-        .status {
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-
-        .status-completed {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        /* Buttons */
-        .btn {
-            padding: 0.8rem 2rem;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            display: inline-block;
-            cursor: pointer;
-        }
-
-        .btn-secondary {
-            background: linear-gradient(45deg, #6c757d, #5a6268);
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(108, 117, 125, 0.3);
-            color: white;
-            text-decoration: none;
-        }
-
-        /* Quick Actions */
-        .quick-actions {
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
             display: flex;
             flex-direction: column;
-            gap: 1rem;
         }
 
-        .quick-action-btn {
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .user-menu {
             display: flex;
             align-items: center;
             gap: 1rem;
-            padding: 1rem;
-            background: linear-gradient(45deg, #4CAF50, #45a049);
-            color: white;
-            text-decoration: none;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            font-weight: 600;
         }
 
-        .quick-action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
-            color: white;
-            text-decoration: none;
-        }
 
-        .quick-action-icon {
-            font-size: 1.5rem;
+
+        .user-avatar {
             width: 40px;
             height: 40px;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255,255,255,0.2);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: pointer;
         }
 
-        /* Depot Stats */
-        .depot-stats {
+        /* Navigation */
+        .nav-container {
+            display: flex;
+            flex: 1;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #2d3748;
+            color: white;
+            padding: 1rem 0;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            z-index: 1000;
         }
 
-        .depot-stat-item {
-            padding: 1rem;
-            background: rgba(76, 175, 80, 0.1);
-            border-radius: 12px;
-            border-left: 4px solid #4CAF50;
+        .sidebar-disconnect {
+            margin-top: auto;
+            padding: 1rem 0;
+            border-top: 1px solid #4a5568;
         }
 
-        .depot-name {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 0.5rem;
+        .disconnect-btn {
+            color: #e53e3e !important;
+            text-decoration: none;
         }
 
-        .depot-count {
-            color: #666;
-            font-size: 0.9rem;
-            margin-bottom: 0.8rem;
+        .disconnect-btn:hover {
+            background: rgba(229, 62, 62, 0.1) !important;
+            color: #fc8181 !important;
         }
 
-        .depot-bar {
-            width: 100%;
-            height: 8px;
-            background: rgba(76, 175, 80, 0.2);
-            border-radius: 4px;
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .nav-item {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: #4a5568;
+            border-left-color: #667eea;
+        }
+
+        .nav-item.active {
+            background: #667eea;
+            border-left-color: #764ba2;
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            font-size: 1.2rem;
+        }
+
+        .nav-text {
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar.collapsed .nav-text {
+            opacity: 0;
+            width: 0;
             overflow: hidden;
         }
 
-        .depot-progress {
-            height: 100%;
-            background: linear-gradient(45deg, #4CAF50, #45a049);
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            background: #f8fafc;
+            position: relative;
+            overflow-y: auto;
+            margin-left: 250px;
+            min-height: 100vh;
+        }
+
+        .toggle-sidebar {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.5rem;
             border-radius: 4px;
-            transition: width 0.3s ease;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+
+        .breadcrumb {
+            color: #718096;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+
+        /* Grid System */
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .grid-4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+        .grid-2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            border-color: #667eea;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .card h3 {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .card p {
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .card-icon {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 2rem;
+            opacity: 0.3;
+        }
+
+        .content-area {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .content-area h3 {
+            color: #2d3748;
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+            font-weight: 600;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #f0f0f0;
         }
 
         /* Responsive */
         @media (max-width: 768px) {
-            .container {
-                padding: 0 1rem;
-            }
-
-            .dashboard-title {
-                font-size: 2rem;
-            }
-
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .dashboard-row {
-                grid-template-columns: 1fr;
-            }
-
-            .dashboard-card {
-                padding: 1.5rem;
-            }
-
-            .table {
-                font-size: 0.9rem;
-            }
-
-            .table th,
-            .table td {
-                padding: 0.5rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .dashboard {
-                padding: 1rem 0;
-            }
-
-            .dashboard-header {
-                margin-bottom: 2rem;
-            }
-
-            .dashboard-title {
-                font-size: 1.8rem;
-            }
-
-            .dashboard-subtitle {
-                font-size: 1rem;
-            }
-
-            .stat-number {
-                font-size: 2rem;
-            }
-
-            .dashboard-icon {
-                font-size: 2rem;
-            }
-
-            .quick-actions {
-                gap: 0.8rem;
-            }
-
-            .quick-action-btn {
-                padding: 0.8rem;
+            .nav-container {
                 flex-direction: column;
-                text-align: center;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                display: none;
+            }
+            
+            .sidebar.show {
+                display: block;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .grid-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .grid-2 {
+                grid-template-columns: 1fr;
             }
         }
     </style>
-{% endblock %}
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">StockPro Manager</div>
+            <div class="user-menu">
+                <span>Administrateur</span>
+                <div class="user-avatar">👤</div>
+            </div>
+        </header>
 
-{% block body %}
-    <div class="dashboard">
-        <div class="container">
-            <div class="dashboard-header">
-                <h1 class="dashboard-title">📊 Dashboard - Vue d'ensemble</h1>
-                <p class="dashboard-subtitle">Bienvenue {{ app.user ? app.user.username : 'Utilisateur' }}, voici un aperçu de votre stock multi-dépôts</p>
-            </div>
-            
-            <!-- Quick Stats -->
-            <div class="dashboard-grid">
-                <div class="dashboard-card">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h3>Total Équipements</h3>
-                            <div class="stat-number" data-stat="totalEquipments">{{ totalEquipments ?? '1,247' }}</div>
-                            <p class="text-success">+12% ce mois</p>
-                        </div>
-                        <div class="dashboard-icon">🛠️</div>
-                    </div>
+        <div class="nav-container">
+            <!-- Sidebar Navigation -->
+            <nav class="sidebar" id="sidebar">
+                <div class="nav-item active">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Tableau de bord</span>
+                </div>
+                <div class="nav-item" onclick="window.location.href='{{ path('app_admin_societes') }}'">
+                    <span class="nav-icon">🏢</span>
+                    <span class="nav-text">Sociétés</span>
+                </div>
+                <div class="nav-item" onclick="window.location.href='{{ path('app_depot_index') }}'">
+                    <span class="nav-icon">🏬</span>
+                    <span class="nav-text">Dépôts</span>
+                </div>
+                <div class="nav-item" onclick="window.location.href='{{ path('app_equipement_index') }}'">
+                    <span class="nav-icon">🛠️</span>
+                    <span class="nav-text">Équipements</span>
+                </div>
+                <div class="nav-item" onclick="window.location.href='{{ path('app_mouvement_stock_index') }}'">
+                    <span class="nav-icon">🔄</span>
+                    <span class="nav-text">Mouvements</span>
+                </div>
+                <div class="nav-item">
+                    <span class="nav-icon">📈</span>
+                    <span class="nav-text">Rapports</span>
+                </div>
+                <div class="nav-item">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-text">Paramètres</span>
                 </div>
                 
-                <div class="dashboard-card">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h3>Dépôts Actifs</h3>
-                            <div class="stat-number" data-stat="totalDepots">{{ totalDepots ?? '15' }}</div>
-                            <p class="text-info">Tous opérationnels</p>
-                        </div>
-                        <div class="dashboard-icon">🏢</div>
-                    </div>
+                <!-- Bouton de déconnexion en bas -->
+                <div class="sidebar-disconnect">
+                    <a href="{{ path('app_logout') }}" class="nav-item disconnect-btn">
+                        <span class="nav-icon">🚪</span>
+                        <span class="nav-text">Déconnexion</span>
+                    </a>
+                </div>
+            </nav>
+
+            <!-- Main Content Area -->
+            <main class="main-content">
+                <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
+
+                <div class="page-header">
+                    <h1 class="page-title">Tableau de bord</h1>
+                    <p class="page-subtitle">Vue d'ensemble de votre système StockPro</p>
                 </div>
                 
-                <div class="dashboard-card">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h3>Mouvements Aujourd'hui</h3>
-                            <div class="stat-number" data-stat="todayMovements">{{ todayMovements ?? '89' }}</div>
-                            <p class="text-warning">23 en attente</p>
-                        </div>
-                        <div class="dashboard-icon">📊</div>
-                    </div>
-                </div>
+                <div class="breadcrumb">Accueil > Administration > Tableau de bord</div>
                 
-                <div class="dashboard-card">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h3>Alertes Stock</h3>
-                            <div class="stat-number text-warning" data-stat="stockAlerts">{{ stockAlerts ?? '5' }}</div>
-                            <p class="text-warning">Niveaux critiques</p>
-                        </div>
-                        <div class="dashboard-icon">⚠️</div>
+                <!-- Statistiques principales -->
+                <div class="grid grid-4">
+                    <div class="card">
+                        <h3>{{ stats.total_societes }}</h3>
+                        <p>Sociétés</p>
+                        <div class="card-icon">🏢</div>
+                    </div>
+                    <div class="card">
+                        <h3>{{ stats.total_depots }}</h3>
+                        <p>Dépôts</p>
+                        <div class="card-icon">🏬</div>
+                    </div>
+                    <div class="card">
+                        <h3>{{ stats.total_equipements }}</h3>
+                        <p>Équipements</p>
+                        <div class="card-icon">🛠️</div>
+                    </div>
+                    <div class="card">
+                        <h3>{{ stats.total_mouvements }}</h3>
+                        <p>Mouvements</p>
+                        <div class="card-icon">📦</div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Recent Activities & Quick Actions -->
-            <div class="dashboard-content">
-                <div class="dashboard-row">
-                    <div class="dashboard-col-8">
-                        <div class="dashboard-card">
-                            <h3>📈 Mouvements Récents</h3>
-                            <div class="table-container">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Date</th>
-                                            <th>Type</th>
-                                            <th>Équipement</th>
-                                            <th>Dépôt</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>{{ "now"|date("d/m/Y H:i") }}</td>
-                                            <td><span class="badge badge-success">Entrée</span></td>
-                                            <td>TPE-001234</td>
-                                            <td>Dépôt Central</td>
-                                            <td><span class="status status-completed">Terminé</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td>{{ "now"|date_modify("-2 hours")|date("d/m/Y H:i") }}</td>
-                                            <td><span class="badge badge-warning">Transfer</span></td>
-                                            <td>SIM-789012</td>
-                                            <td>Dépôt Nord → Sud</td>
-                                            <td><span class="status status-pending">En cours</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td>{{ "now"|date_modify("-4 hours")|date("d/m/Y H:i") }}</td>
-                                            <td><span class="badge badge-danger">Sortie</span></td>
-                                            <td>CARTE-345678</td>
-                                            <td>Dépôt Est</td>
-                                            <td><span class="status status-completed">Terminé</span></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="text-center mt-20">
-                                <a href="{{ path('stock') }}" class="btn btn-secondary">Voir tous les mouvements</a>
-                            </div>
-                        </div>
+
+                <!-- Contenu détaillé -->
+                <div class="grid grid-2">
+                    <div class="content-area">
+                        <h3>Répartition des équipements</h3>
+                        {% if equipements_by_type is not empty %}
+                            {% for type, count in equipements_by_type %}
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0.5rem; background: #f8fafc; border-radius: 6px;">
+                                    <span>
+                                        {% if type == 'SIM' %}📱 {{ type }}
+                                        {% elseif type == 'TPE' %}💳 {{ type }}
+                                        {% else %}🆔 {{ type }}{% endif %}
+                                    </span>
+                                    <strong style="color: #667eea;">{{ count }}</strong>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p style="text-align: center; color: #718096; font-style: italic;">Aucun équipement trouvé</p>
+                        {% endif %}
                     </div>
-                    
-                    <div class="dashboard-col-4">
-                        <div class="dashboard-card">
-                            <h3>⚡ Actions Rapides</h3>
-                            <div class="quick-actions">
-                                <a href="{{ path('app_equipement_index') }}" class="quick-action-btn">
-                                    <div class="quick-action-icon">➕</div>
-                                    <span>Ajouter Équipement</span>
-                                </a>
-                                
-                                <a href="{{ path('app_mouvement_stock_index') }}" class="quick-action-btn">
-                                    <div class="quick-action-icon">🔄</div>
-                                    <span>Nouveau Transfer</span>
-                                </a>
-                                
-                                <a href="{{ path('app_depot_index') }}" class="quick-action-btn">
-                                    <div class="quick-action-icon">🏢</div>
-                                    <span>Gérer Dépôts</span>
-                                </a>
-                                
-                                <a href="{{ path('home') }}" class="quick-action-btn">
-                                    <div class="quick-action-icon">📈</div>
-                                    <span>Générer Rapport</span>
-                                </a>
-                            </div>
-                        </div>
-                        
-                        <div class="dashboard-card">
-                            <h3>📊 Stock par Dépôt</h3>
-                            <div class="depot-stats">
-                                <div class="depot-stat-item">
-                                    <div class="depot-name">Dépôt Central</div>
-                                    <div class="depot-count">456 équipements</div>
-                                    <div class="depot-bar">
-                                        <div class="depot-progress" style="width: 85%;"></div>
+
+                    <div class="content-area">
+                        <h3>Top 5 Sociétés</h3>
+                        {% if societes_stats is not empty %}
+                            {% for data in societes_stats %}
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 1rem; background: #f8fafc; border-radius: 8px; border-left: 4px solid #667eea;">
+                                    <div>
+                                        <strong style="color: #2d3748;">{{ data.societe.nom }}</strong><br>
+                                        <small style="color: #718096;">{{ data.nb_depots }} dépôts • {{ data.nb_mouvements }} mouvements</small>
+                                    </div>
+                                    <div style="width: 30px; height: 30px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                                        {{ loop.index }}
                                     </div>
                                 </div>
-                                
-                                <div class="depot-stat-item">
-                                    <div class="depot-name">Dépôt Nord</div>
-                                    <div class="depot-count">234 équipements</div>
-                                    <div class="depot-bar">
-                                        <div class="depot-progress" style="width: 65%;"></div>
-                                    </div>
-                                </div>
-                                
-                                <div class="depot-stat-item">
-                                    <div class="depot-name">Dépôt Sud</div>
-                                    <div class="depot-count">189 équipements</div>
-                                    <div class="depot-bar">
-                                        <div class="depot-progress" style="width: 45%;"></div>
-                                    </div>
-                                </div>
-                                
-                                <div class="depot-stat-item">
-                                    <div class="depot-name">Dépôt Est</div>
-                                    <div class="depot-count">368 équipements</div>
-                                    <div class="depot-bar">
-                                        <div class="depot-progress" style="width: 75%;"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                            {% endfor %}
+                        {% else %}
+                            <p style="text-align: center; color: #718096; font-style: italic;">Aucune société trouvée</p>
+                        {% endif %}
                     </div>
                 </div>
-            </div>
+
+                <!-- Mouvements récents -->
+                <div class="content-area">
+                    <h3>Mouvements récents</h3>
+                    {% if recent_movements is not empty %}
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 2fr 1.5fr 1.5fr; gap: 1rem; padding: 1rem; background: #f8fafc; border-radius: 8px; font-weight: bold; color: #4a5568;">
+                                <div>Date</div>
+                                <div>Type</div>
+                                <div>Équipement</div>
+                                <div>Dépôt Source</div>
+                                <div>Dépôt Destination</div>
+                            </div>
+                            {% for movement in recent_movements %}
+                                <div style="display: grid; grid-template-columns: 1fr 1fr 2fr 1.5fr 1.5fr; gap: 1rem; padding: 1rem; background: white; border-radius: 8px; border: 1px solid #e2e8f0; align-items: center;">
+                                    <div>{{ movement.date|date('d/m/Y') }}</div>
+                                    <div>
+                                        <span style="padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;
+                                            {% if movement.typeMouvement == 'entree' %}background: #d4edda; color: #155724;
+                                            {% elseif movement.typeMouvement == 'sortie' %}background: #f8d7da; color: #721c24;
+                                            {% elseif movement.typeMouvement == 'transfert' %}background: #d1ecf1; color: #0c5460;
+                                            {% else %}background: #fff3cd; color: #856404;{% endif %}">
+                                            {{ movement.typeMouvement|title }}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        {% if movement.equipement %}
+                                            {{ movement.equipement.typeEquipement }}
+                                            {% if movement.equipement.imei %} - {{ movement.equipement.imei }}
+                                            {% elseif movement.equipement.sn %} - {{ movement.equipement.sn }}
+                                            {% endif %}
+                                        {% else %}
+                                            <em>Non spécifié</em>
+                                        {% endif %}
+                                    </div>
+                                    <div>{{ movement.depotSource ? movement.depotSource.nom : '-' }}</div>
+                                    <div>{{ movement.depotDestination ? movement.depotDestination.nom : '-' }}</div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p style="text-align: center; color: #718096; font-style: italic; padding: 2rem;">Aucun mouvement trouvé</p>
+                    {% endif %}
+                </div>
+            </main>
         </div>
     </div>
-{% endblock %}
 
-{% block javascripts %}
-    {{ parent() }}
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Real-time clock update
-            function updateClock() {
-                const now = new Date();
-                const timeElements = document.querySelectorAll('.real-time');
-                timeElements.forEach(el => {
-                    el.textContent = now.toLocaleString('fr-FR');
-                });
-            }
-            
-            // Update every minute
-            setInterval(updateClock, 60000);
-            
-            // Auto-refresh dashboard stats every 5 minutes
-            setInterval(function() {
-                fetch('{{ path('dashboard_refresh') }}')
-                    .then(response => response.json())
-                    .then(data => {
-                        // Update stats without page reload
-                        Object.keys(data).forEach(key => {
-                            const element = document.querySelector(`[data-stat="${key}"]`);
-                            if (element) {
-                                element.textContent = data[key];
-                            }
-                        });
-                    })
-                    .catch(error => console.log('Auto-refresh error:', error));
-            }, 300000);
+        // Sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
 
-            // Add smooth animations on page load
-            const cards = document.querySelectorAll('.dashboard-card');
-            cards.forEach((card, index) => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                setTimeout(() => {
-                    card.style.transition = 'all 0.6s ease';
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, index * 100);
-            });
-        });
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('show');
+        }
+
+        // Add mobile functionality
+        if (window.innerWidth <= 768) {
+            document.querySelector('.toggle-sidebar').addEventListener('click', toggleMobileMenu);
+        }
     </script>
-{% endblock %}
+</body>
+</html>
+               
+
+<style>
+/* Styles supplémentaires pour le dashboard */
+.card {
+    position: relative;
+    overflow: hidden;
+}
+
+.card-icon {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 2rem;
+    opacity: 0.3;
+}
+
+.equipment-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.stat-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.stat-label {
+    flex: 1;
+    font-weight: 500;
+}
+
+.stat-value {
+    font-weight: bold;
+    color: #667eea;
+    min-width: 40px;
+    text-align: right;
+}
+
+.stat-bar {
+    flex: 2;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.stat-fill {
+    height: 100%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    transition: width 0.3s ease;
+}
+
+.societes-ranking {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.ranking-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.ranking-info strong {
+    display: block;
+    color: #2d3748;
+}
+
+.ranking-info small {
+    color: #718096;
+}
+
+.ranking-badge {
+    width: 30px;
+    height: 30px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.movements-table {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.table-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr 2fr 1.5fr 1.5fr;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    font-weight: bold;
+    color: #4a5568;
+}
+
+.table-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 2fr 1.5fr 1.5fr;
+    gap: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    align-items: center;
+}
+
+.movement-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.movement-entree { background: #d4edda; color: #155724; }
+.movement-sortie { background: #f8d7da; color: #721c24; }
+.movement-transfert { background: #d1ecf1; color: #0c5460; }
+.movement-ajustement { background: #fff3cd; color: #856404; }
+.movement-retour { background: #e2e3e5; color: #383d41; }
+
+.no-data {
+    text-align: center;
+    color: #718096;
+    font-style: italic;
+    padding: 2rem;
+}
+
+@media (max-width: 768px) {
+    .table-header, .table-row {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+    
+    .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+// Sidebar toggle
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('collapsed');
+}
+
+// Animation pour les barres de statistiques
+document.addEventListener('DOMContentLoaded', function() {
+    const statFills = document.querySelectorAll('.stat-fill');
+    statFills.forEach(fill => {
+        const width = fill.style.width;
+        fill.style.width = '0%';
+        setTimeout(() => {
+            fill.style.width = width;
+        }, 500);
+    });
+});
+</script>
+

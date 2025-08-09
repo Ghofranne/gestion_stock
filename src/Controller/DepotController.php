@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Depot;
 use App\Form\DepotType;
 use App\Repository\DepotRepository;
+use App\Repository\MouvementStockRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -43,10 +44,68 @@ final class DepotController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_depot_show', methods: ['GET'])]
-    public function show(Depot $depot): Response
+    public function show(Depot $depot, MouvementStockRepository $mouvementRepository): Response
     {
+        // Calculer le stock actuel pour chaque type d'équipement dans ce dépôt
+        $stockParEquipement = [];
+        $equipementsDetails = [];
+        
+        // Récupérer tous les mouvements liés à ce dépôt
+        $mouvementsEntree = $mouvementRepository->findBy(['depotDestination' => $depot]);
+        $mouvementsSortie = $mouvementRepository->findBy(['depotSource' => $depot]);
+        
+        // Calculer les entrées
+        foreach ($mouvementsEntree as $mouvement) {
+            $equipement = $mouvement->getEquipement();
+            if ($equipement) {
+                $equipementId = $equipement->getId();
+                if (!isset($stockParEquipement[$equipementId])) {
+                    $stockParEquipement[$equipementId] = 0;
+                    $equipementsDetails[$equipementId] = $equipement;
+                }
+                // Ajouter la quantité d'entrée
+                $quantite = $mouvement->getQuantite() ?? 1;
+                $stockParEquipement[$equipementId] += $quantite;
+            }
+        }
+        
+        // Soustraire les sorties
+        foreach ($mouvementsSortie as $mouvement) {
+            $equipement = $mouvement->getEquipement();
+            if ($equipement) {
+                $equipementId = $equipement->getId();
+                if (isset($stockParEquipement[$equipementId])) {
+                    // Soustraire la quantité de sortie
+                    $quantite = $mouvement->getQuantite() ?? 1;
+                    $stockParEquipement[$equipementId] -= $quantite;
+                    
+                    // Supprimer si le stock devient négatif ou nul
+                    if ($stockParEquipement[$equipementId] <= 0) {
+                        unset($stockParEquipement[$equipementId]);
+                        unset($equipementsDetails[$equipementId]);
+                    }
+                }
+            }
+        }
+        
+        // Préparer les données pour l'affichage
+        $equipementsAvecQuantite = [];
+        $totalQuantite = 0;
+        
+        foreach ($stockParEquipement as $equipementId => $quantite) {
+            if ($quantite > 0) {
+                $equipementsAvecQuantite[] = [
+                    'equipement' => $equipementsDetails[$equipementId],
+                    'quantite' => $quantite
+                ];
+                $totalQuantite += $quantite;
+            }
+        }
+        
         return $this->render('depot/show.html.twig', [
             'depot' => $depot,
+            'equipements_data' => $equipementsAvecQuantite,
+            'total_equipements' => $totalQuantite
         ]);
     }
 

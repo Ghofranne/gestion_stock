@@ -1,11 +1,127 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New MouvementStock{% endblock %}
+{% block title %}Nouveau Mouvement - StockPro{% endblock %}
 
 {% block body %}
-    <h1>Create new MouvementStock</h1>
+    <div class="form-container">
+        <div class="form-header">
+            <div class="header-content">
+                <h1 class="form-title">
+                    
+                    Nouveau Mouvement de Stock
+                </h1>
+                
+            </div>
+            <a href="{{ path('app_mouvement_stock_index') }}" class="btn-back">
+                <span class="btn-icon">←</span>
+                Retour à la liste
+            </a>
+        </div>
 
-    {{ include('mouvement_stock/_form.html.twig') }}
+        <div class="form-card">
+            <div class="form-content">
+                {{ include('mouvement_stock/_form.html.twig', {'button_label': 'Créer le mouvement'}) }}
+            </div>
+        </div>
+    </div>
 
-    <a href="{{ path('app_mouvement_stock_index') }}">back to list</a>
+    <style>
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            gap: 2rem;
+        }
+
+        .header-content {
+            flex: 1;
+        }
+
+        .form-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .title-icon {
+            font-size: 1.75rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .form-subtitle {
+            color: #6b7280;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: #f3f4f6;
+            color: #374151;
+            text-decoration: none;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: 1px solid #e5e7eb;
+        }
+
+        .btn-back:hover {
+            background: #e5e7eb;
+            color: #1f2937;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-icon {
+            font-size: 1.1rem;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+
+        .form-content {
+            padding: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 1rem;
+            }
+
+            .form-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            .form-title {
+                font-size: 1.5rem;
+            }
+
+            .form-content {
+                padding: 1.5rem;
+            }
+        }
+    </style>
 {% endblock %}

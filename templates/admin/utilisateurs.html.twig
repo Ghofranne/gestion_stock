@@ -1,0 +1,371 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Administration - Gestion des Utilisateurs{% endblock %}
+
+{% block body %}
+<div class="admin-content">
+    <div class="page-header">
+        <h1>👥 Gestion des Utilisateurs</h1>
+        <p>Administration des comptes utilisateurs et des permissions</p>
+    </div>
+
+    <!-- Messages Flash -->
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            ✅ {{ message }}
+        </div>
+    {% endfor %}
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-error">
+            ❌ {{ message }}
+        </div>
+    {% endfor %}
+
+    <!-- Statistiques des utilisateurs -->
+    <div class="stats-grid">
+        <div class="stat-card primary">
+            <div class="stat-icon">👥</div>
+            <div class="stat-content">
+                <div class="stat-number">{{ stats.total_users }}</div>
+                <div class="stat-label">Total Utilisateurs</div>
+            </div>
+        </div>
+        
+        <div class="stat-card danger">
+            <div class="stat-icon">👑</div>
+            <div class="stat-content">
+                <div class="stat-number">{{ stats.admins }}</div>
+                <div class="stat-label">Administrateurs</div>
+            </div>
+        </div>
+        
+        <div class="stat-card warning">
+            <div class="stat-icon">👨‍💼</div>
+            <div class="stat-content">
+                <div class="stat-number">{{ stats.managers }}</div>
+                <div class="stat-label">Gestionnaires</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions rapides -->
+    <div class="actions-bar">
+        <a href="{{ path('app_admin_utilisateur_nouveau') }}" class="btn btn-primary">
+            ➕ Ajouter un utilisateur
+        </a>
+    </div>
+
+    <!-- Liste des utilisateurs -->
+    <div class="panel full-width">
+        <div class="panel-header">
+            <h2>📋 Liste des Utilisateurs</h2>
+        </div>
+        <div class="panel-body">
+            {% if users|length > 0 %}
+                <div class="table-responsive">
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Email</th>
+                                <th>Rôles</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                                <tr>
+                                    <td>
+                                        <span class="user-id">#{{ user.id }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="user-info">
+                                            <span class="user-email">{{ user.email }}</span>
+                                            {% if user == app.user %}
+                                                <span class="current-user-badge">Vous</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="user-roles">
+                                            {% for role in user.roles %}
+                                                {% if role == 'ROLE_ADMIN' %}
+                                                    <span class="role-badge admin">👑 Admin</span>
+                                                {% elseif role == 'ROLE_MANAGER' %}
+                                                    <span class="role-badge manager">👨‍💼 Manager</span>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge active">🟢 Actif</span>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a href="{{ path('app_admin_utilisateur_modifier', {id: user.id}) }}" 
+                                               class="btn btn-sm btn-secondary" title="Modifier">
+                                                ✏️ Modifier
+                                            </a>
+                                            {% if user != app.user %}
+                                                <form method="POST" action="{{ path('app_admin_utilisateur_supprimer', {id: user.id}) }}" 
+                                                      style="display: inline;" 
+                                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')">
+                                                    <button type="submit" class="btn btn-sm btn-danger" title="Supprimer">
+                                                        🗑️ Supprimer
+                                                    </button>
+                                                </form>
+                                            {% else %}
+                                                <span class="btn btn-sm btn-disabled" title="Vous ne pouvez pas supprimer votre propre compte">
+                                                    🚫 Supprimer
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">👥</div>
+                    <h3>Aucun utilisateur trouvé</h3>
+                    <p>Commencez par ajouter votre premier utilisateur.</p>
+                    <a href="{{ path('app_admin_utilisateur_nouveau') }}" class="btn btn-primary">
+                        ➕ Ajouter un utilisateur
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+/* Styles pour la gestion des utilisateurs */
+.admin-content { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+.page-header { margin-bottom: 2rem; }
+.page-header h1 { margin: 0 0 0.5rem 0; color: #2d3748; font-size: 2.5rem; }
+.page-header p { color: #718096; font-size: 1.1rem; margin: 0; }
+
+.alert {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid;
+}
+.alert-success {
+    background-color: #f0fff4;
+    border-color: #9ae6b4;
+    color: #22543d;
+}
+.alert-error {
+    background-color: #fed7d7;
+    border-color: #feb2b2;
+    color: #c53030;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.stat-icon {
+    font-size: 2rem;
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+}
+.stat-card.primary .stat-icon { background: #e6f3ff; }
+.stat-card.danger .stat-icon { background: #fed7d7; }
+.stat-card.warning .stat-icon { background: #feebc8; }
+.stat-card.success .stat-icon { background: #c6f6d5; }
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2d3748;
+    line-height: 1;
+}
+.stat-label {
+    color: #718096;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.actions-bar {
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.panel {
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+.panel-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #e2e8f0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 0.75rem 0.75rem 0 0;
+}
+.panel-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+.panel-body {
+    padding: 2rem;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.users-table th,
+.users-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+.users-table th {
+    background-color: #f8fafc;
+    font-weight: 600;
+    color: #2d3748;
+}
+.users-table tr:hover {
+    background-color: #f8fafc;
+}
+
+.user-id {
+    font-family: monospace;
+    color: #718096;
+    font-size: 0.875rem;
+}
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.user-email {
+    font-weight: 500;
+    color: #2d3748;
+}
+.current-user-badge {
+    background: #667eea;
+    color: white;
+    padding: 0.125rem 0.5rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.user-roles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+.role-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.role-badge.admin { background: #fed7d7; color: #c53030; }
+.role-badge.manager { background: #feebc8; color: #dd6b20; }
+.role-badge.user { background: #c6f6d5; color: #38a169; }
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.status-badge.active { background: #c6f6d5; color: #38a169; }
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+}
+.btn-primary {
+    background: #667eea;
+    color: white;
+}
+.btn-primary:hover {
+    background: #5a67d8;
+}
+.btn-secondary {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+.btn-secondary:hover {
+    background: #cbd5e0;
+}
+.btn-danger {
+    background: #f56565;
+    color: white;
+}
+.btn-danger:hover {
+    background: #e53e3e;
+}
+.btn-disabled {
+    background: #f7fafc;
+    color: #a0aec0;
+    cursor: not-allowed;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+}
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+.empty-state h3 {
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+}
+.empty-state p {
+    color: #718096;
+    margin-bottom: 2rem;
+}
+</style>
+
+{% endblock %}

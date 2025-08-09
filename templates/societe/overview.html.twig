@@ -1,0 +1,438 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Vue d'ensemble - Sociétés{% endblock %}
+
+{% block body %}
+<div class="overview-container">
+    <div class="overview-header">
+        <h1>Vue d'ensemble des Sociétés</h1>
+        <p>Aperçu complet de chaque société avec ses dépôts, mouvements et équipements</p>
+        <div class="header-actions">
+            <a href="{{ path('app_societe_index') }}" class="btn btn-outline">📋 Liste des sociétés</a>
+            <a href="{{ path('app_societe_new') }}" class="btn btn-primary">➕ Nouvelle société</a>
+        </div>
+    </div>
+
+    {% if societes_data is empty %}
+        <div class="empty-state">
+            <div class="empty-icon">🏢</div>
+            <h3>Aucune société trouvée</h3>
+            <p>Commencez par créer une société pour voir les données</p>
+            <a href="{{ path('app_societe_new') }}" class="btn btn-primary">➕ Créer une société</a>
+        </div>
+    {% else %}
+        {% for data in societes_data %}
+            <div class="societe-card">
+                <!-- En-tête de la société -->
+                <div class="societe-header">
+                    <div class="societe-info">
+                        <h2>🏢 {{ data.societe.nom }}</h2>
+                        <div class="societe-details">
+                            <span>📍 {{ data.societe.adress }}</span>
+                            <span>✉️ {{ data.societe.email }}</span>
+                            <span>📞 {{ data.societe.telephone }}</span>
+                        </div>
+                    </div>
+                    <div class="societe-stats">
+                        <div class="stat-item">
+                            <div class="stat-number">{{ data.stats.nb_depots }}</div>
+                            <div class="stat-label">Dépôts</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">{{ data.stats.nb_mouvements }}</div>
+                            <div class="stat-label">Mouvements</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">{{ data.stats.nb_equipements }}</div>
+                            <div class="stat-label">Équipements</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="societe-content">
+                    <div class="content-grid">
+                        <!-- Dépôts -->
+                        <div class="content-section">
+                            <h3>🏬 Dépôts ({{ data.depots|length }})</h3>
+                            {% if data.depots is empty %}
+                                <p class="no-data">Aucun dépôt</p>
+                            {% else %}
+                                <div class="items-list">
+                                    {% for depot in data.depots %}
+                                        <div class="item">
+                                            <div class="item-icon">🏬</div>
+                                            <div class="item-info">
+                                                <div class="item-name">{{ depot.nom }}</div>
+                                                <div class="item-detail">{{ depot.adresse }}</div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Mouvements récents -->
+                        <div class="content-section">
+                            <h3>📦 Mouvements récents ({{ data.mouvements|length }})</h3>
+                            {% if data.mouvements is empty %}
+                                <p class="no-data">Aucun mouvement</p>
+                            {% else %}
+                                <div class="items-list">
+                                    {% for mouvement in data.mouvements|slice(0, 5) %}
+                                        <div class="item">
+                                            <div class="item-icon movement-{{ mouvement.typeMouvement }}">
+                                                {% if mouvement.typeMouvement == 'entree' %}⬇️
+                                                {% elseif mouvement.typeMouvement == 'sortie' %}⬆️
+                                                {% elseif mouvement.typeMouvement == 'transfert' %}🔄
+                                                {% else %}✏️{% endif %}
+                                            </div>
+                                            <div class="item-info">
+                                                <div class="item-name">{{ mouvement.typeMouvement|title }}</div>
+                                                <div class="item-detail">{{ mouvement.date|date('d/m/Y') }}</div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                    {% if data.mouvements|length > 5 %}
+                                        <div class="item">
+                                            <div class="item-more">... et {{ data.mouvements|length - 5 }} autres</div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Équipements -->
+                        <div class="content-section">
+                            <h3>🛠️ Équipements ({{ data.equipements|length }})</h3>
+                            {% if data.equipements is empty %}
+                                <p class="no-data">Aucun équipement</p>
+                            {% else %}
+                                <div class="items-list">
+                                    {% for equipement in data.equipements|slice(0, 5) %}
+                                        <div class="item">
+                                            <div class="item-icon equipment-{{ equipement.typeEquipement|lower }}">
+                                                {% if equipement.typeEquipement == 'SIM' %}📱
+                                                {% elseif equipement.typeEquipement == 'TPE' %}💳
+                                                {% else %}🆔{% endif %}
+                                            </div>
+                                            <div class="item-info">
+                                                <div class="item-name">{{ equipement.typeEquipement }}</div>
+                                                <div class="item-detail">
+                                                    {% if equipement.imei %}IMEI: {{ equipement.imei }}
+                                                    {% elseif equipement.sn %}SN: {{ equipement.sn }}
+                                                    {% elseif equipement.referenceCarte %}Ref: {{ equipement.referenceCarte }}
+                                                    {% else %}ID: {{ equipement.id }}{% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                    {% if data.equipements|length > 5 %}
+                                        <div class="item">
+                                            <div class="item-more">... et {{ data.equipements|length - 5 }} autres</div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="societe-actions">
+                        <a href="{{ path('app_societe_show', {'id': data.societe.id}) }}" class="btn btn-outline">👁️ Voir détails</a>
+                        <a href="{{ path('app_societe_edit', {'id': data.societe.id}) }}" class="btn btn-primary">✏️ Modifier</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<style>
+.overview-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 20px;
+}
+
+.overview-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.1);
+}
+
+.overview-header h1 {
+    color: #333;
+    margin-bottom: 0.5rem;
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.overview-header p {
+    color: #666;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.1);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    color: #666;
+    margin-bottom: 2rem;
+}
+
+.societe-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.1);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.societe-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 45px rgba(102, 126, 234, 0.2);
+}
+
+.societe-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.societe-info h2 {
+    margin: 0 0 1rem 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+.societe-details {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    opacity: 0.9;
+}
+
+.societe-stats {
+    display: flex;
+    gap: 2rem;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-top: 0.25rem;
+}
+
+.societe-content {
+    padding: 2rem;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.content-section h3 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.no-data {
+    color: #999;
+    font-style: italic;
+    padding: 1rem 0;
+}
+
+.items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: #f8f9ff;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.item:hover {
+    background: #f0f2ff;
+    transform: translateX(5px);
+}
+
+.item-icon {
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.movement-entree { background: rgba(34, 197, 94, 0.1); }
+.movement-sortie { background: rgba(239, 68, 68, 0.1); }
+.movement-transfert { background: rgba(59, 130, 246, 0.1); }
+.movement-autre { background: rgba(245, 158, 11, 0.1); }
+
+.equipment-sim { background: rgba(99, 102, 241, 0.1); }
+.equipment-tpe { background: rgba(34, 197, 94, 0.1); }
+.equipment-carte { background: rgba(59, 130, 246, 0.1); }
+
+.item-info {
+    flex: 1;
+}
+
+.item-name {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+.item-detail {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.item-more {
+    color: #999;
+    font-style: italic;
+    padding: 0.5rem 0;
+}
+
+.societe-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    padding-top: 1rem;
+    border-top: 1px solid #f0f0f0;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.btn-outline {
+    background: transparent;
+    color: #667eea;
+    border: 2px solid #667eea;
+}
+
+.btn-outline:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .overview-container {
+        padding: 1rem 10px;
+    }
+    
+    .overview-header {
+        padding: 1.5rem;
+    }
+    
+    .overview-header h1 {
+        font-size: 2rem;
+    }
+    
+    .header-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .societe-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .societe-stats {
+        justify-content: center;
+    }
+    
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .societe-actions {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}

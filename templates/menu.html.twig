@@ -1,29 +1,55 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menu Principal</title>
-    <style>
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil - Système de Gestion de Stock{% endblock %}
+
+{% block body %}
+    <div class="welcome-card">
+        <h1>Système de Gestion de Stock</h1>
+        
+    </div>
+    <div class="menu-grid">
+        <div class="menu-card">
+            <div class="menu-icon">🏢</div>
+            <h3>Gestion des Sociétés</h3>
+            <p>Gérez les informations des sociétés et leurs paramètres</p>
+            <a href="{{ path('app_societe_index') }}" class="btn btn-outline" style="margin-top:1rem;">Accéder</a>
+        </div>
+        <div class="menu-card">
+            <div class="menu-icon">📊</div>
+            <h3>Vue d'ensemble</h3>
+            <p>Aperçu complet de chaque société avec ses dépôts, mouvements et équipements</p>
+            <a href="{{ path('app_societe_overview') }}" class="btn btn-outline" style="margin-top:1rem;">Consulter</a>
+        </div>
+        <div class="menu-card">
+            <div class="menu-icon">🏬</div>
+            <h3>Gestion des Dépôts</h3>
+            <p>Administrez vos dépôts et leurs emplacements</p>
+            <a href="{{ path('app_depot_index') }}" class="btn btn-outline" style="margin-top:1rem;">Accéder</a>
+        </div>
+        <div class="menu-card">
+            <div class="menu-icon">🛠️</div>
+            <h3>Gestion des Équipements</h3>
+            <p>Suivez et gérez votre inventaire d'équipements</p>
+            <a href="{{ path('app_equipement_index') }}" class="btn btn-outline" style="margin-top:1rem;">Accéder</a>
+        </div>
+        <!-- Ajoute d'autres cards si besoin -->
+         <div class="menu-card">
+            <div class="menu-icon">📦</div>
+            <h3>Gestion des mouvements</h3>
+            <p>Consultez et gérez tous les mouvements de stock</p>
+            <a href="{{ path('app_mouvement_stock_index') }}" class="btn btn-outline" style="margin-top:1rem;">Accéder</a>
+        </div>
+         <div class="menu-card">
+            <div class="menu-icon">🚛</div>
+            <h3>Transfert Stock</h3>
+            <p>Effectuez des transferts entre dépôts</p>
+            <a href="{{ path('app_depot_index') }}" class="btn btn-outline" style="margin-top:1rem;">Accéder</a>
+        </div>
+    </div>
+<style>
+
+
         * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-        .header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 1rem 0;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
         .nav-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -239,238 +265,9 @@
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-            .welcome-card h1 {
-                font-size: 2rem;
-            }
         }
-    </style>
-</head>
-<body>
-    <header class="header">
-        <div class="nav-container">
-            <div class="logo">MonApp</div>
-            <nav>
-                <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
-                <ul class="nav-menu" id="navMenu">
-                    <li class="nav-item">
-                        <a href="#" onclick="showPage('home')" class="active">
-                            🏠 Accueil
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" onclick="showPage('societes')">
-                            🏢 Gestion des Sociétés
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" onclick="showPage('depots')">
-                            🏪 Gestion des Dépôts
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" onclick="showPage('equipements')">
-                            🔧 Gestion des Équipements
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" onclick="showPage('mouvements')">
-                            📦 Mouvements de Stock
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" onclick="showPage('transferts')">
-                            🚛 Transfert Stock
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" onclick="showPage('profil')">
-                            👤 Profil
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-            <div class="user-section">
-                <div class="user-info">
-                    <div class="user-name">Ghofran Hachana</div>
-                    <div class="user-role">Administrateur</div>
-                </div>
-                <div class="user-avatar">GH</div>
-            </div>
-        </div>
-    </header>
-    <main class="main-content">
-        <!-- Page Accueil -->
-        <div id="home" class="page-content active">
-            <div class="welcome-card">
-                <h1>Système de Gestion de Stock</h1>
-                <p>Gérez efficacement vos sociétés, dépôts, équipements et mouvements de stock depuis cette interface centralisée.</p>
-            </div>
-            <div class="menu-grid">
-                <div class="menu-card" onclick="showPage('societes')">
-                    <div class="menu-icon">🏢</div>
-                    <h3>Gestion des Sociétés</h3>
-                    <p>Gérez les informations des sociétés et leurs paramètres</p>
-                </div>
-                <div class="menu-card" onclick="showPage('depots')">
-                    <div class="menu-icon">🏪</div>
-                    <h3>Gestion des Dépôts</h3>
-                    <p>Administrez vos dépôts et leurs emplacements</p>
-                </div>
-                <div class="menu-card" onclick="showPage('equipements')">
-                    <div class="menu-icon">🔧</div>
-                    <h3>Gestion des Équipements</h3>
-                    <p>Suivez et gérez votre inventaire d'équipements</p>
-                </div>
-                <div class="menu-card" onclick="showPage('mouvements')">
-                    <div class="menu-icon">📦</div>
-                    <h3>Mouvements de Stock</h3>
-                    <p>Consultez et gérez tous les mouvements de stock</p>
-                </div>
-                <div class="menu-card" onclick="showPage('transferts')">
-                    <div class="menu-icon">🚛</div>
-                    <h3>Transfert Stock</h3>
-                    <p>Effectuez des transferts entre dépôts</p>
-                </div>
-                <div class="menu-card" onclick="showPage('profil')">
-                    <div class="menu-icon">👤</div>
-                    <h3>Profil</h3>
-                    <p>Gérez vos informations personnelles et préférences</p>
-                </div>
-            </div>
-        </div>
-        <!-- Page Gestion des Sociétés -->
-        <div id="societes" class="page-content">
-            <div class="welcome-card">
-                <h1>Gestion des Sociétés</h1>
-                <p>Gérez les informations de vos sociétés et leurs paramètres</p>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number">8</div>
-                    <div class="stat-label">Sociétés actives</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">3</div>
-                    <div class="stat-label">Nouvelles sociétés</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">15</div>
-                    <div class="stat-label">Contrats en cours</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">100%</div>
-                    <div class="stat-label">Conformité</div>
-                </div>
-            </div>
-        </div>
-        <!-- Page Gestion des Dépôts -->
-        <div id="depots" class="page-content">
-            <div class="welcome-card">
-                <h1>Gestion des Dépôts</h1>
-                <p>Administrez vos dépôts et leurs emplacements de stockage</p>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number">12</div>
-                    <div class="stat-label">Dépôts actifs</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">85%</div>
-                    <div class="stat-label">Taux d'occupation</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">24</div>
-                    <div class="stat-label">Zones de stockage</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">2</div>
-                    <div class="stat-label">En maintenance</div>
-                </div>
-            </div>
-        </div>
-        <!-- Page Gestion des Équipements -->
-        <div id="equipements" class="page-content">
-            <div class="welcome-card">
-                <h1>Gestion des Équipements</h1>
-                <p>Suivez et gérez votre inventaire d'équipements et matériels</p>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number">456</div>
-                    <div class="stat-label">Équipements totaux</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">23</div>
-                    <div class="stat-label">En maintenance</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">389</div>
-                    <div class="stat-label">Opérationnels</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">95%</div>
-                    <div class="stat-label">Disponibilité</div>
-                </div>
-            </div>
-        </div>
-        <!-- Page Mouvements de Stock -->
-        <div id="mouvements" class="page-content">
-            <div class="welcome-card">
-                <h1>Mouvements de Stock</h1>
-                <p>Consultez et gérez tous les mouvements de stock en temps réel</p>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number">234</div>
-                    <div class="stat-label">Mouvements aujourd'hui</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">156</div>
-                    <div class="stat-label">Entrées</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">78</div>
-                    <div class="stat-label">Sorties</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">12</div>
-                    <div class="stat-label">En attente</div>
-                </div>
-            </div>
-        </div>
-        <!-- Page Transfert Stock -->
-        <div id="transferts" class="page-content">
-            <div class="welcome-card">
-                <h1>Transfert Stock</h1>
-                <p>Effectuez des transferts d'équipements entre différents dépôts</p>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number">18</div>
-                    <div class="stat-label">Transferts en cours</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">67</div>
-                    <div class="stat-label">Transferts ce mois</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">5</div>
-                    <div class="stat-label">En transit</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">98%</div>
-                    <div class="stat-label">Taux de réussite</div>
-                </div>
-            </div>
-        </div>
-        <!-- Page Profil -->
-        <div id="profil" class="page-content">
-            <div class="welcome-card">
-                <h1>Mon Profil</h1>
-                <p>Gérez vos informations personnelles et préférences du compte</p>
-            </div>
-        </div>
-    </main>
+        </style>
+     
     <script>
         // Navigation entre les pages
         function showPage(pageId) {
@@ -511,5 +308,4 @@
             });
         });
     </script>
-</body>
-</html>
+ {% endblock body %}

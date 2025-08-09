@@ -1,4 +1,338 @@
 {{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+    <div class="form-fields">
+        <div class="field-row">
+            <div class="field-group">
+                {{ form_label(form.type_mouvement, 'Type de mouvement') }}
+                {{ form_widget(form.type_mouvement) }}
+                {{ form_errors(form.type_mouvement) }}
+            </div>
+            <div class="field-group">
+                {{ form_label(form.date, 'Date du mouvement') }}
+                {{ form_widget(form.date) }}
+                {{ form_errors(form.date) }}
+            </div>
+        </div>
+
+        <div class="field-group full-width">
+            {{ form_label(form.equipement, 'Équipement') }}
+            {{ form_widget(form.equipement) }}
+            {{ form_errors(form.equipement) }}
+        </div>
+
+        <div class="field-row">
+            <div class="field-group" id="depot-source-group">
+                {{ form_label(form.depotSource, 'Dépôt source') }}
+                {{ form_widget(form.depotSource) }}
+                {{ form_errors(form.depotSource) }}
+            </div>
+            <div class="field-group" id="depot-destination-group">
+                {{ form_label(form.depotDestination, 'Dépôt destination') }}
+                {{ form_widget(form.depotDestination) }}
+                {{ form_errors(form.depotDestination) }}
+            </div>
+        </div>
+
+        {% if form.commentaire is defined %}
+        <div class="field-group full-width">
+            {{ form_label(form.commentaire, 'Commentaire (optionnel)') }}
+            {{ form_widget(form.commentaire, {'attr': {'rows': '3', 'placeholder': 'Ajoutez un commentaire sur ce mouvement...'}}) }}
+            {{ form_errors(form.commentaire) }}
+        </div>
+        {% endif %}
+        
+        <div class="field-group quantity-field">
+            {{ form_label(form.quantite, 'Quantité') }}
+            {{ form_widget(form.quantite) }}
+            {{ form_errors(form.quantite) }}
+        </div>
+    </div>
+
+    <button type="submit" class="btn">
+        {{ button_label|default('Enregistrer le mouvement') }}
+    </button>
 {{ form_end(form) }}
+
+<style>
+    .form-fields {
+        display: flex;
+        flex-direction: column;
+        gap: 1.4rem;
+        align-items: center;
+        width: 100%;
+    }
+
+    .field-row {
+        display: flex;
+        gap: 1rem;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .field-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        max-width: 320px;
+    }
+
+    .field-group.full-width {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    form label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.4rem;
+        align-self: flex-start;
+        font-size: 1.08rem;
+    }
+
+    form input[type="text"],
+    form input[type="email"],
+    form input[type="number"],
+    form input[type="date"],
+    form input[type="datetime-local"],
+    form input,
+    form select,
+    form textarea {
+        width: 100%;
+        max-width: 320px;
+        min-width: 220px;
+        box-sizing: border-box;
+        padding: 0.9rem 1.2rem;
+        border-radius: 10px;
+        border: 1.5px solid #d1d5db;
+        background: #f6f7fb;
+        font-size: 1.08rem;
+        margin-bottom: 0.2rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        box-shadow: 0 1px 4px rgba(102, 126, 234, 0.06);
+    }
+
+    .field-group.full-width input,
+    .field-group.full-width select,
+    .field-group.full-width textarea {
+        max-width: 100%;
+        min-width: 100%;
+    }
+
+    form input:focus,
+    form select:focus,
+    form textarea:focus {
+        border-color: #764ba2;
+        outline: none;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.17);
+    }
+
+    form select {
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1rem;
+        padding-right: 3rem;
+    }
+
+    form textarea {
+        resize: vertical;
+        min-height: 80px;
+        font-family: inherit;
+    }
+
+    .quantity-field {
+        background: linear-gradient(135deg, #48bb78, #38a169);
+        padding: 20px;
+        border-radius: 12px;
+        margin-top: 20px;
+        border: 2px solid #e2e8f0;
+    }
+    
+    .quantity-field label {
+        color: white;
+        font-weight: 600;
+        font-size: 16px;
+        margin-bottom: 8px;
+        display: block;
+    }
+    
+    .quantity-field input {
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 18px;
+        font-weight: 600;
+        text-align: center;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+    
+    .quantity-field input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+
+    .btn {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    .btn:hover {
+        background: linear-gradient(135deg, #764ba2, #667eea);
+        transform: translateY(-1px);
+    }
+
+    .btn:active {
+        transform: translateY(0);
+    }
+
+    /* Error styling */
+    .form-error {
+        color: #dc2626;
+        font-size: 0.9rem;
+        margin-top: 0.25rem;
+        align-self: flex-start;
+    }
+
+    @media (max-width: 768px) {
+        .field-row {
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .field-group {
+            max-width: 100%;
+            width: 100%;
+        }
+
+        form input,
+        form select,
+        form textarea {
+            max-width: 100%;
+            min-width: 100%;
+        }
+
+        .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const typeMouvementSelect = document.querySelector('#mouvement_stock_type_mouvement');
+    const depotSourceGroup = document.getElementById('depot-source-group');
+    const depotDestinationGroup = document.getElementById('depot-destination-group');
+    const depotSourceSelect = document.querySelector('#mouvement_stock_depotSource');
+    const depotDestinationSelect = document.querySelector('#mouvement_stock_depotDestination');
+    
+    // Configuration des champs requis selon le type de mouvement
+    const mouvementConfig = {
+        'entree': {
+            depotSource: { required: false, visible: false },
+            depotDestination: { required: true, visible: true }
+        },
+        'sortie': {
+            depotSource: { required: true, visible: true },
+            depotDestination: { required: false, visible: false }
+        },
+        'transfert': {
+            depotSource: { required: true, visible: true },
+            depotDestination: { required: true, visible: true }
+        },
+        'ajustement': {
+            depotSource: { required: false, visible: false },
+            depotDestination: { required: true, visible: true }
+        },
+        'retour': {
+            depotSource: { required: false, visible: false },
+            depotDestination: { required: true, visible: true }
+        }
+    };
+    
+    function updateFormFields() {
+        const selectedType = typeMouvementSelect.value;
+        const config = mouvementConfig[selectedType];
+        
+        if (!config) {
+            // Si aucun type sélectionné, afficher tous les champs
+            depotSourceGroup.style.display = 'block';
+            depotDestinationGroup.style.display = 'block';
+            depotSourceSelect.required = false;
+            depotDestinationSelect.required = false;
+            return;
+        }
+        
+        // Gérer le dépôt source
+        if (config.depotSource.visible) {
+            depotSourceGroup.style.display = 'block';
+            depotSourceSelect.required = config.depotSource.required;
+            if (config.depotSource.required) {
+                depotSourceGroup.classList.add('required');
+            } else {
+                depotSourceGroup.classList.remove('required');
+            }
+        } else {
+            depotSourceGroup.style.display = 'none';
+            depotSourceSelect.required = false;
+            depotSourceSelect.value = ''; // Vider la sélection
+            depotSourceGroup.classList.remove('required');
+        }
+        
+        // Gérer le dépôt destination
+        if (config.depotDestination.visible) {
+            depotDestinationGroup.style.display = 'block';
+            depotDestinationSelect.required = config.depotDestination.required;
+            if (config.depotDestination.required) {
+                depotDestinationGroup.classList.add('required');
+            } else {
+                depotDestinationGroup.classList.remove('required');
+            }
+        } else {
+            depotDestinationGroup.style.display = 'none';
+            depotDestinationSelect.required = false;
+            depotDestinationSelect.value = ''; // Vider la sélection
+            depotDestinationGroup.classList.remove('required');
+        }
+        
+        // Mettre à jour les labels pour indiquer les champs obligatoires
+        updateLabels();
+    }
+    
+    function updateLabels() {
+        const sourceLabel = depotSourceGroup.querySelector('label');
+        const destinationLabel = depotDestinationGroup.querySelector('label');
+        
+        // Supprimer les anciens indicateurs
+        sourceLabel.innerHTML = sourceLabel.innerHTML.replace(' *', '');
+        destinationLabel.innerHTML = destinationLabel.innerHTML.replace(' *', '');
+        
+        // Ajouter les nouveaux indicateurs
+        if (depotSourceSelect.required) {
+            sourceLabel.innerHTML += ' <span style="color: red;">*</span>';
+        }
+        if (depotDestinationSelect.required) {
+            destinationLabel.innerHTML += ' <span style="color: red;">*</span>';
+        }
+    }
+    
+    // Écouter les changements du type de mouvement
+    typeMouvementSelect.addEventListener('change', updateFormFields);
+    
+    // Initialiser l'état du formulaire au chargement
+    updateFormFields();
+});
+</script>

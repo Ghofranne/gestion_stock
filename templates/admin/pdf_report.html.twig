@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Rapport de Gestion de Stock - {{ date|date('d/m/Y') }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #007bff;
+            margin: 0;
+        }
+        .header p {
+            margin: 5px 0;
+            color: #666;
+        }
+        .summary {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Rapport de Gestion de Stock</h1>
+        <p>Généré le {{ date|date('d/m/Y à H:i') }}</p>
+        <p>Système de Gestion d'Équipements</p>
+    </div>
+
+    <div class="summary">
+        <h2>📈 Résumé</h2>
+        <p><strong>Nombre total d'enregistrements :</strong> {{ data|length }}</p>
+        <p><strong>Période couverte :</strong> Données les plus récentes</p>
+    </div>
+
+    <h2>📋 Détail des Données</h2>
+    {% if data|length > 0 %}
+        <table>
+            <thead>
+                <tr>
+                    {% for key in data[0]|keys %}
+                        <th>{{ key }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in data %}
+                    <tr>
+                        {% for value in row %}
+                            <td>{{ value }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p><em>Aucune donnée disponible pour ce rapport.</em></p>
+    {% endif %}
+
+    <div class="footer">
+        <p>Ce rapport a été généré automatiquement par le système de gestion de stock.</p>
+        <p>Pour toute question, veuillez contacter l'administrateur système.</p>
+    </div>
+</body>
+</html>

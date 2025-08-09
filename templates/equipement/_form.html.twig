@@ -1,4 +1,174 @@
 {{ form_start(form) }}
-    {{ form_widget(form) }}
+    <div class="form-fields">
+        {{ form_row(form.typeEquipement) }}
+        {# Tous les champs sont présents, masqués/affichés dynamiquement par JS #}
+        <div class="js-dynamic-field js-sim-field">{{ form_row(form.imei) }}</div>
+        <div class="js-dynamic-field js-sim-field">{{ form_row(form.numAppel) }}</div>
+        <div class="js-dynamic-field js-sim-field">{{ form_row(form.operateur) }}</div>
+        <div class="js-dynamic-field js-tpe-field">{{ form_row(form.sn) }}</div>
+        <div class="js-dynamic-field js-tpe-field">{{ form_row(form.model) }}</div>
+        <div class="js-dynamic-field js-carte-field">{{ form_row(form.referenceCarte) }}</div>
+        <div class="js-dynamic-field js-fournisseur-field">{{ form_row(form.fournisseur) }}</div>
+        {{ form_row(form.etat) }}
+    </div>
     <button class="btn">{{ button_label|default('Save') }}</button>
+    <style>
+        .form-fields {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            width: 100%;
+            align-items: center;
+        }
+        .form-fields > div, .form-fields > label, .form-fields > .form-group {
+            width: 100%;
+            max-width: 360px;
+        }
+        .form-fields label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.4rem;
+            font-size: 1.08rem;
+            display: block;
+        }
+        .form-fields input, .form-fields select, .form-fields textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 0.9rem 1.2rem;
+            border-radius: 10px;
+            border: 1.5px solid #d1d5db;
+            background: #f6f7fb;
+            font-size: 1.08rem;
+            margin-bottom: 0.2rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 1px 4px rgba(102, 126, 234, 0.06);
+        }
+        .form-fields input:focus, .form-fields select:focus, .form-fields textarea:focus {
+            border-color: #764ba2;
+            outline: none;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.17);
+        }
+        @media (max-width: 600px) {
+            .form-fields > div, .form-fields > label, .form-fields > .form-group {
+                max-width: 98vw;
+            }
+        }
+    </style>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Trouver le select du type d'équipement
+            const typeSelect = document.querySelector('select');
+            if (!typeSelect) return;
+            
+            function updateFields() {
+                const type = typeSelect.value;
+                console.log('Type sélectionné :', type);
+                
+                // Tous les champs
+                const fields = {
+                    sim: document.querySelectorAll('.js-sim-field'),
+                    tpe: document.querySelectorAll('.js-tpe-field'),
+                    carte: document.querySelectorAll('.js-carte-field'),
+                    fournisseur: document.querySelectorAll('.js-fournisseur-field')
+                };
+                
+                console.log('Champs trouvés:', {
+                    sim: fields.sim.length,
+                    tpe: fields.tpe.length,
+                    carte: fields.carte.length,
+                    fournisseur: fields.fournisseur.length
+                });
+                
+                // Masquer tous les champs spécifiques
+                fields.sim.forEach(f => {
+                    f.style.display = 'none';
+                    // Désactiver les champs requis cachés
+                    const inputs = f.querySelectorAll('input, select, textarea');
+                    inputs.forEach(input => input.disabled = true);
+                });
+                fields.tpe.forEach(f => {
+                    f.style.display = 'none';
+                    const inputs = f.querySelectorAll('input, select, textarea');
+                    inputs.forEach(input => input.disabled = true);
+                });
+                fields.carte.forEach(f => {
+                    f.style.display = 'none';
+                    const inputs = f.querySelectorAll('input, select, textarea');
+                    inputs.forEach(input => input.disabled = true);
+                });
+                fields.fournisseur.forEach(f => {
+                    f.style.display = 'none';
+                    const inputs = f.querySelectorAll('input, select, textarea');
+                    inputs.forEach(input => input.disabled = true);
+                });
+                
+                // Afficher selon le type
+                switch(type) {
+                    case 'SIM':
+                        // SIM : IMEI, numéro d'appel, opérateur, état
+                        fields.sim.forEach(f => {
+                            f.style.display = 'block';
+                            const inputs = f.querySelectorAll('input, select, textarea');
+                            inputs.forEach(input => input.disabled = false);
+                        });
+                        console.log('Affichage SIM : IMEI, numéro d\'appel, opérateur, état');
+                        break;
+                    case 'TPE':
+                        // TPE : SN, modèle, fournisseur, état
+                        fields.tpe.forEach(f => {
+                            f.style.display = 'block';
+                            const inputs = f.querySelectorAll('input, select, textarea');
+                            inputs.forEach(input => input.disabled = false);
+                        });
+                        fields.fournisseur.forEach(f => {
+                            f.style.display = 'block';
+                            const inputs = f.querySelectorAll('input, select, textarea');
+                            inputs.forEach(input => {
+                                input.disabled = false;
+                                input.style.display = 'block';
+                                input.style.visibility = 'visible';
+                                console.log('Fournisseur activé:', input.name, 'disabled:', input.disabled, 'visible:', f.style.display);
+                            });
+                        });
+                        
+                        // Vérification retardée pour contrer les scripts conflictuels
+                        setTimeout(() => {
+                            fields.fournisseur.forEach(f => {
+                                f.style.display = 'block';
+                                const inputs = f.querySelectorAll('input, select, textarea');
+                                inputs.forEach(input => {
+                                    if (input.disabled) {
+                                        input.disabled = false;
+                                        console.log('Fournisseur réactivé après conflit:', input.name);
+                                    }
+                                });
+                            });
+                        }, 100);
+                        
+                        console.log('Affichage TPE : SN, modèle, fournisseur, état');
+                        break;
+                    case 'Carte':
+                        // Carte : référence carte, état
+                        fields.carte.forEach(f => {
+                            f.style.display = 'block';
+                            const inputs = f.querySelectorAll('input, select, textarea');
+                            inputs.forEach(input => input.disabled = false);
+                        });
+                        console.log('Affichage Carte : référence carte, état');
+                        break;
+                    default:
+                        // Par défaut : aucun champ spécifique
+                        console.log('Type non reconnu, aucun champ spécifique affiché');
+                        break;
+                }
+            }
+            
+            // Initialiser
+            updateFields();
+            
+            // Écouter les changements
+            typeSelect.addEventListener('change', updateFields);
+        });
+    </script>
 {{ form_end(form) }}

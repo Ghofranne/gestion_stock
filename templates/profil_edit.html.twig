@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier mon profil - StockPro{% endblock %}
+
+{% block stylesheets %}
+<style>
+.form-card {
+  max-width: 700px;
+  margin: 0 auto;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+.form-row { margin-bottom: 1rem; }
+.form-label { display: block; font-weight: 600; color: #4a5568; margin-bottom: 0.5rem; }
+.form-input {
+  width: 100%; padding: 0.75rem 1rem; border: 1px solid #e2e8f0; border-radius: 10px;
+  outline: none; transition: box-shadow .2s ease, border-color .2s ease;
+}
+.form-input:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,.2); }
+.form-actions { display: flex; gap: .75rem; }
+.btn { display: inline-block; padding: .75rem 1.25rem; border-radius: 10px; text-decoration: none; font-weight: 600; border: none; cursor: pointer; }
+.btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
+.btn-secondary { background: #e2e8f0; color: #2d3748; }
+.btn:hover { transform: translateY(-1px); box-shadow: 0 8px 25px rgba(102,126,234,.2); }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="form-card">
+  <h1 style="margin-bottom:1rem; color:#2d3748;">Modifier mes informations</h1>
+  {% for label, messages in app.flashes %}
+    {% for message in messages %}
+      <div class="flash-{{ label }}">{{ message }}</div>
+    {% endfor %}
+  {% endfor %}
+  <form method="post">
+    <div class="form-row" style="display:flex; gap:1rem;">
+      <div style="flex:1;">
+        <label class="form-label" for="prenom">Prénom</label>
+        <input id="prenom" name="prenom" type="text" class="form-input" value="{{ user.prenom }}">
+      </div>
+      <div style="flex:1;">
+        <label class="form-label" for="nom">Nom</label>
+        <input id="nom" name="nom" type="text" class="form-input" value="{{ user.nom }}">
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="form-label" for="email">Email</label>
+      <input id="email" name="email" type="email" required class="form-input" value="{{ user.email }}">
+    </div>
+    <div class="form-row" style="display:flex; gap:1rem;">
+      <div style="flex:1;">
+        <label class="form-label" for="telephone">Téléphone</label>
+        <input id="telephone" name="telephone" type="text" class="form-input" value="{{ user.telephone }}">
+      </div>
+      <div style="flex:1;">
+        <label class="form-label" for="poste">Poste</label>
+        <input id="poste" name="poste" type="text" class="form-input" value="{{ user.poste }}">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Enregistrer</button>
+      <a class="btn btn-secondary" href="{{ path('app_profil') }}">Annuler</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,37 +1,474 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}MouvementStock index{% endblock %}
+{% block title %}Mouvements de Stock{% endblock %}
 
 {% block body %}
-    <h1>MouvementStock index</h1>
+    <div class="index-container">
+        <div class="header-section">
+            <h1 class="page-title">📦 Mouvements de Stock</h1>
+            
+            <a href="{{ path('app_mouvement_stock_new') }}" class="btn-primary">
+                <span class="btn-icon">➕</span>
+                Nouveau mouvement
+            </a>
+        </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Type_mouvement</th>
-                <th>Date</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for mouvement_stock in mouvement_stocks %}
-            <tr>
-                <td>{{ mouvement_stock.id }}</td>
-                <td>{{ mouvement_stock.typeMouvement }}</td>
-                <td>{{ mouvement_stock.date ? mouvement_stock.date|date('Y-m-d H:i:s') : '' }}</td>
-                <td>
-                    <a href="{{ path('app_mouvement_stock_show', {'id': mouvement_stock.id}) }}">show</a>
-                    <a href="{{ path('app_mouvement_stock_edit', {'id': mouvement_stock.id}) }}">edit</a>
-                </td>
-            </tr>
+        {% if mouvement_stocks|length > 0 %}
+            
+
+            <div class="table-container">
+                <div class="table-header">
+                    <h3>Liste des mouvements</h3>
+                    <div class="search-box">
+                        <input type="text" placeholder="Rechercher..." class="search-input">
+                        <span class="search-icon">🔍</span>
+                    </div>
+                </div>
+                
+                <div class="modern-table">
+                    <div class="table-header-row">
+                        <div class="table-cell header">ID</div>
+                        <div class="table-cell header">Type de mouvement</div>
+                        <div class="table-cell header">Date</div>
+                        <div class="table-cell header">Équipement</div>
+                        <div class="table-cell header">Actions</div>
+                    </div>
+                    
+                    {% for mouvement_stock in mouvement_stocks %}
+                        <div class="table-row" data-search="{{ mouvement_stock.typeMouvement|lower }} {{ mouvement_stock.date|date('Y-m-d') }}">
+                            <div class="table-cell">
+                                <span class="id-badge">#{{ mouvement_stock.id }}</span>
+                            </div>
+                            <div class="table-cell">
+                                <span class="movement-type {{ mouvement_stock.typeMouvement|lower }}">
+                                    {% if mouvement_stock.typeMouvement == 'Entrée' %}
+                                        📥 Entrée
+                                    {% elseif mouvement_stock.typeMouvement == 'Sortie' %}
+                                        📤 Sortie
+                                    {% else %}
+                                        🔄 {{ mouvement_stock.typeMouvement }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="table-cell">
+                                <div class="date-info">
+                                    <div class="date-main">{{ mouvement_stock.date ? mouvement_stock.date|date('d/m/Y') : 'N/A' }}</div>
+                                    
+                                </div>
+                            </div>
+                            <div class="table-cell">
+                                {% if mouvement_stock.equipement %}
+                                    <div class="equipment-info">
+                                        <span class="equipment-type">{{ mouvement_stock.equipement.typeEquipement }}</span>
+                                        <span class="equipment-detail">
+                                            {% if mouvement_stock.equipement.typeEquipement == 'SIM' %}
+                                                {{ mouvement_stock.equipement.imei|slice(0, 8) }}...
+                                            {% elseif mouvement_stock.equipement.typeEquipement == 'TPE' %}
+                                                {{ mouvement_stock.equipement.sn }}
+                                            {% else %}
+                                                {{ mouvement_stock.equipement.referenceCarte }}
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                {% else %}
+                                    <span class="no-equipment">Aucun équipement</span>
+                                {% endif %}
+                            </div>
+                            <div class="table-cell">
+                                <div class="action-buttons">
+                                    <a href="{{ path('app_mouvement_stock_show', {'id': mouvement_stock.id}) }}" class="btn-action view" title="Voir détails">
+                                        👁️
+                                    </a>
+                                    <a href="{{ path('app_mouvement_stock_edit', {'id': mouvement_stock.id}) }}" class="btn-action edit" title="Modifier">
+                                        ✏️
+                                    </a>
+                                    <form method="post" action="{{ path('app_mouvement_stock_delete', {'id': mouvement_stock.id}) }}" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce mouvement ? Cette action est irréversible.');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ mouvement_stock.id) }}">
+                                        <button type="submit" class="btn-action delete" title="Supprimer">
+                                            🗑️
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
         {% else %}
-            <tr>
-                <td colspan="4">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+            <div class="empty-state">
+                <div class="empty-icon">📦</div>
+                <h3>Aucun mouvement enregistré</h3>
+                <p>Commencez par créer votre premier mouvement de stock</p>
+                <a href="{{ path('app_mouvement_stock_new') }}" class="btn-primary">
+                    <span class="btn-icon">➕</span>
+                    Créer un mouvement
+                </a>
+            </div>
+        {% endif %}
+    </div>
 
-    <a href="{{ path('app_mouvement_stock_new') }}">Create new</a>
+    <style>
+        .index-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 3rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .page-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-icon {
+            font-size: 1.2rem;
+        }
+
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.1);
+            overflow: hidden;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .table-header h3 {
+            color: #374151;
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-input {
+            padding: 0.75rem 1rem 0.75rem 3rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            width: 250px;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+
+        .modern-table {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .table-header-row {
+            display: grid;
+            grid-template-columns: 80px 1fr 150px 200px 120px;
+            gap: 1rem;
+            padding: 1.5rem 2rem;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 80px 1fr 150px 200px 120px;
+            gap: 1rem;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #f3f4f6;
+            transition: background-color 0.2s ease;
+        }
+
+        .table-row:hover {
+            background: #f9fafb;
+        }
+
+        .table-cell {
+            display: flex;
+            align-items: center;
+            font-size: 0.95rem;
+        }
+
+        .table-cell.header {
+            font-weight: 600;
+            color: #374151;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .id-badge {
+            background: #e5e7eb;
+            color: #374151;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .movement-type {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .movement-type.entrée {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .movement-type.sortie {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .date-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .date-main {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .date-time {
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        .equipment-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .equipment-type {
+            background: #ddd6fe;
+            color: #5b21b6;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            width: fit-content;
+        }
+
+        .equipment-detail {
+            font-size: 0.85rem;
+            color: #6b7280;
+            font-family: monospace;
+        }
+
+        .no-equipment {
+            color: #9ca3af;
+            font-style: italic;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-action {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+        }
+
+        .btn-action.view {
+            background: #e0f2fe;
+            color: #0277bd;
+        }
+
+        .btn-action.view:hover {
+            background: #b3e5fc;
+        }
+
+        .btn-action.edit {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .btn-action.edit:hover {
+            background: #ffe0b2;
+        }
+
+        .btn-action.delete {
+            background: #ffebee;
+            color: #d32f2f;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-action.delete:hover {
+            background: #ffcdd2;
+            transform: scale(1.05);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.1);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: #6b7280;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .table-header-row,
+            .table-row {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .table-cell {
+                justify-content: space-between;
+                padding: 0.5rem 0;
+            }
+
+            .table-cell.header {
+                display: none;
+            }
+
+            .table-cell:before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #6b7280;
+            }
+
+            .search-input {
+                width: 200px;
+            }
+        }
+    </style>
+
+    <script>
+        // Fonction de recherche
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.querySelector('.search-input');
+            const tableRows = document.querySelectorAll('.table-row');
+
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase();
+                    
+                    tableRows.forEach(row => {
+                        const searchData = row.getAttribute('data-search') || '';
+                        if (searchData.includes(searchTerm)) {
+                            row.style.display = 'grid';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                });
+            }
+        });
+    </script>
 {% endblock %}

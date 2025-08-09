@@ -1,30 +1,490 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}MouvementStock{% endblock %}
+{% block title %}Détail Mouvement - StockPro{% endblock %}
 
 {% block body %}
-    <h1>MouvementStock</h1>
+    <div class="detail-container">
+        <div class="detail-header">
+            <div class="header-content">
+                <h1 class="detail-title">
+                    <span class="title-icon">📋</span>
+                    Détail du Mouvement
+                </h1>
+                
+            </div>
+            <div class="header-actions">
+                <a href="{{ path('app_mouvement_stock_edit', {'id': mouvement_stock.id}) }}" class="btn-primary">
+                    <span class="btn-icon">✏️</span>
+                    Modifier
+                </a>
+                <a href="{{ path('app_mouvement_stock_index') }}" class="btn-back">
+                    <span class="btn-icon">←</span>
+                    Retour à la liste
+                </a>
+            </div>
+        </div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ mouvement_stock.id }}</td>
-            </tr>
-            <tr>
-                <th>Type_mouvement</th>
-                <td>{{ mouvement_stock.typeMouvement }}</td>
-            </tr>
-            <tr>
-                <th>Date</th>
-                <td>{{ mouvement_stock.date ? mouvement_stock.date|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-        </tbody>
-    </table>
+        <div class="detail-content">
+            <div class="info-cards">
+                <div class="info-card main-info">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <span class="card-icon">📦</span>
+                            Informations du Mouvement
+                        </h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="info-grid">
+                            
+                            <div class="info-item">
+                                <label class="info-label">Type de mouvement</label>
+                                <span class="movement-badge movement-{{ mouvement_stock.typeMouvement|lower }}">
+                                    {% if mouvement_stock.typeMouvement == 'Entrée' %}
+                                        📥 {{ mouvement_stock.typeMouvement }}
+                                    {% else %}
+                                        📤 {{ mouvement_stock.typeMouvement }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <label class="info-label">Date du mouvement</label>
+                                <span class="info-value">
+                                    {% if mouvement_stock.date %}
+                                        🗓️ {{ mouvement_stock.date|date('d/m/Y ') }}
+                                    {% else %}
+                                        <em>Non renseignée</em>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-    <a href="{{ path('app_mouvement_stock_index') }}">back to list</a>
+                {% if mouvement_stock.equipement %}
+                <div class="info-card equipment-info">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <span class="card-icon">🔧</span>
+                            Équipement Associé
+                        </h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="equipment-details">
+                            <div class="equipment-type">
+                                <span class="type-badge">{{ mouvement_stock.equipement.typeEquipement }}</span>
+                            </div>
+                            <div class="equipment-info-grid">
+                                {% if mouvement_stock.equipement.imei %}
+                                <div class="equipment-item">
+                                    <label>IMEI</label>
+                                    <span>{{ mouvement_stock.equipement.imei }}</span>
+                                </div>
+                                {% endif %}
+                                {% if mouvement_stock.equipement.sn %}
+                                <div class="equipment-item">
+                                    <label>Numéro de série</label>
+                                    <span>{{ mouvement_stock.equipement.sn }}</span>
+                                </div>
+                                {% endif %}
+                                {% if mouvement_stock.equipement.numAppel %}
+                                <div class="equipment-item">
+                                    <label>Numéro d'appel</label>
+                                    <span>{{ mouvement_stock.equipement.numAppel }}</span>
+                                </div>
+                                {% endif %}
+                                {% if mouvement_stock.equipement.model %}
+                                <div class="equipment-item">
+                                    <label>Modèle</label>
+                                    <span>{{ mouvement_stock.equipement.model }}</span>
+                                </div>
+                                {% endif %}
+                                {% if mouvement_stock.equipement.operateur %}
+                                <div class="equipment-item">
+                                    <label>Opérateur</label>
+                                    <span>{{ mouvement_stock.equipement.operateur }}</span>
+                                </div>
+                                {% endif %}
+                                {% if mouvement_stock.equipement.fournisseur and mouvement_stock.equipement.typeEquipement == 'TPE' %}
+                                <div class="equipment-item">
+                                    <label>Fournisseur</label>
+                                    <span>{{ mouvement_stock.equipement.fournisseur }}</span>
+                                </div>
+                                {% endif %}
+                                <div class="equipment-item">
+                                    <label>État</label>
+                                    <span class="state-badge state-{{ mouvement_stock.equipement.etat|lower }}">{{ mouvement_stock.equipement.etat }}</span>
+                                </div>
+                            </div>
+                            <div class="equipment-actions">
+                                <a href="{{ path('app_equipement_show', {'id': mouvement_stock.equipement.id}) }}" class="btn-equipment">
+                                    <span class="btn-icon">👁️</span>
+                                    Voir l'équipement
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
 
-    <a href="{{ path('app_mouvement_stock_edit', {'id': mouvement_stock.id}) }}">edit</a>
+                {% if mouvement_stock.commentaire %}
+                <div class="info-card comment-info">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <span class="card-icon">💬</span>
+                            Commentaire
+                        </h3>
+                    </div>
+                    <div class="card-content">
+                        <p class="comment-text">{{ mouvement_stock.commentaire }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
 
-    {{ include('mouvement_stock/_delete_form.html.twig') }}
+        
+            <div class="danger-content">
+                {{ include('mouvement_stock/_delete_form.html.twig') }}
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .detail-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            gap: 2rem;
+        }
+
+        .header-content {
+            flex: 1;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .detail-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .title-icon {
+            font-size: 1.75rem;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .detail-subtitle {
+            color: #6b7280;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .btn-primary, .btn-back, .btn-equipment {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            text-decoration: none;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: 1px solid #e5e7eb;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border-color: #10b981;
+        }
+
+        .btn-back {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-equipment {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-back:hover {
+            background: #e5e7eb;
+            color: #1f2937;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-equipment:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-icon {
+            font-size: 1.1rem;
+        }
+
+        .detail-content {
+            margin-bottom: 2rem;
+        }
+
+        .info-cards {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-icon {
+            font-size: 1.25rem;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #6b7280;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            color: #1f2937;
+            font-weight: 500;
+        }
+
+        .movement-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .movement-entrée {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .movement-sortie {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .equipment-details {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .equipment-type {
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .type-badge {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .equipment-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .equipment-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .equipment-item label {
+            font-weight: 600;
+            color: #6b7280;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .equipment-item span {
+            color: #1f2937;
+            font-weight: 500;
+        }
+
+        .state-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .state-neuf {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .state-occasion {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .state-défaillant {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .equipment-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .comment-text {
+            color: #4b5563;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin: 0;
+            padding: 1rem;
+            background: #f9fafb;
+            border-radius: 0.5rem;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .danger-zone {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+
+        .danger-header {
+            margin-bottom: 1rem;
+        }
+
+        .danger-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #dc2626;
+            margin: 0 0 0.25rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .danger-icon {
+            font-size: 1.25rem;
+        }
+
+        .danger-subtitle {
+            color: #7f1d1d;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .danger-content {
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        @media (max-width: 768px) {
+            .detail-container {
+                padding: 1rem;
+            }
+
+            .detail-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            .header-actions {
+                flex-direction: column;
+            }
+
+            .detail-title {
+                font-size: 1.5rem;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .equipment-info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-content {
+                padding: 1rem;
+            }
+        }
+    </style>
 {% endblock %}

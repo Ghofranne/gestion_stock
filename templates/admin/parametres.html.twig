@@ -1,0 +1,484 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Administration - Paramètres{% endblock %}
+
+{% block body %}
+<div class="admin-content">
+    <div class="page-header">
+        <h1>⚙️ Paramètres Système</h1>
+        <p>Configuration et gestion des paramètres de l'application</p>
+    </div>
+
+    <!-- Messages Flash -->
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            ✅ {{ message }}
+        </div>
+    {% endfor %}
+
+    <form method="POST" action="{{ path('app_admin_parametres_update') }}">
+        <!-- Gestion des Utilisateurs -->
+        <div class="panel full-width">
+            <div class="panel-header">
+                <h2>👥 Gestion des Utilisateurs</h2>
+            </div>
+            <div class="panel-body">
+                
+                <!-- Rôles et Permissions -->
+                <div class="settings-section">
+                    <h3>🔐 Rôles et Permissions</h3>
+                    <div class="roles-grid">
+                        {% for role_key, role_name in parametres.roles %}
+                            <div class="role-card">
+                                <div class="role-header">
+                                    <h4>{{ role_name }}</h4>
+                                    <span class="role-badge {{ role_key|lower|replace({'role_': ''}) }}">{{ role_key }}</span>
+                                </div>
+                                <div class="permissions-list">
+                                    {% if parametres.permissions[role_key] is defined %}
+                                        {% for permission in parametres.permissions[role_key] %}
+                                            <div class="permission-item">
+                                                <span class="permission-icon">✓</span>
+                                                <span class="permission-text">{{ permission|replace({'_': ' '})|title }}</span>
+                                            </div>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Configuration des Sessions -->
+                <div class="settings-section">
+                    <h3>⏱️ Configuration des Sessions</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="session_duree">Durée maximale de session (minutes)</label>
+                            <input type="number" id="session_duree" name="session[duree_max]" 
+                                   value="{{ (parametres.session.duree_max / 60)|round }}" min="15" max="480">
+                            <small class="help-text">Durée avant déconnexion automatique (15-480 minutes)</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="session_inactivite">Délai d'inactivité (minutes)</label>
+                            <input type="number" id="session_inactivite" name="session[inactivite_max]" 
+                                   value="{{ (parametres.session.inactivite_max / 60)|round }}" min="5" max="120">
+                            <small class="help-text">Délai avant déconnexion pour inactivité (5-120 minutes)</small>
+                        </div>
+                        
+                        <div class="form-group checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="session[remember_me]" 
+                                       {% if parametres.session.remember_me %}checked{% endif %}>
+                                <span class="checkbox-custom"></span>
+                                Autoriser "Se souvenir de moi"
+                            </label>
+                            <small class="help-text">Permet aux utilisateurs de rester connectés plus longtemps</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Politique des Mots de Passe -->
+                <div class="settings-section">
+                    <h3>🔒 Politique des Mots de Passe</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="password_length">Longueur minimale</label>
+                            <input type="number" id="password_length" name="password_policy[longueur_min]" 
+                                   value="{{ parametres.password_policy.longueur_min }}" min="6" max="32">
+                            <small class="help-text">Nombre minimum de caractères requis</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password_history">Historique des mots de passe</label>
+                            <input type="number" id="password_history" name="password_policy[historique]" 
+                                   value="{{ parametres.password_policy.historique }}" min="0" max="10">
+                            <small class="help-text">Nombre de mots de passe précédents à retenir</small>
+                        </div>
+                    </div>
+                    
+                    <div class="password-requirements">
+                        <h4>Exigences de complexité</h4>
+                        <div class="requirements-grid">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="password_policy[majuscules]" 
+                                       {% if parametres.password_policy.majuscules %}checked{% endif %}>
+                                <span class="checkbox-custom"></span>
+                                Au moins une majuscule (A-Z)
+                            </label>
+                            
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="password_policy[minuscules]" 
+                                       {% if parametres.password_policy.minuscules %}checked{% endif %}>
+                                <span class="checkbox-custom"></span>
+                                Au moins une minuscule (a-z)
+                            </label>
+                            
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="password_policy[chiffres]" 
+                                       {% if parametres.password_policy.chiffres %}checked{% endif %}>
+                                <span class="checkbox-custom"></span>
+                                Au moins un chiffre (0-9)
+                            </label>
+                            
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="password_policy[caracteres_speciaux]" 
+                                       {% if parametres.password_policy.caracteres_speciaux %}checked{% endif %}>
+                                <span class="checkbox-custom"></span>
+                                Au moins un caractère spécial (!@#$%^&*)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Authentification à Deux Facteurs -->
+                <div class="settings-section">
+                    <h3>🔐 Authentification à Deux Facteurs (2FA)</h3>
+                    <div class="two-factor-config">
+                        <div class="form-group checkbox-group">
+                            <label class="checkbox-label main-toggle">
+                                <input type="checkbox" name="two_factor[active]" id="two_factor_toggle"
+                                       {% if parametres.two_factor.active %}checked{% endif %}>
+                                <span class="checkbox-custom"></span>
+                                Activer l'authentification à deux facteurs
+                            </label>
+                            <small class="help-text">Renforce la sécurité en demandant un second facteur d'authentification</small>
+                        </div>
+                        
+                        <div class="two-factor-options" id="two_factor_options" 
+                             style="{% if not parametres.two_factor.active %}display: none;{% endif %}">
+                            
+                            <div class="form-group">
+                                <label for="two_factor_method">Méthode par défaut</label>
+                                <select id="two_factor_method" name="two_factor[methode_defaut]">
+                                    {% for method in parametres.two_factor.methodes %}
+                                        <option value="{{ method }}" 
+                                                {% if method == parametres.two_factor.methode_defaut %}selected{% endif %}>
+                                            {% if method == 'email' %}📧 Email
+                                            {% elseif method == 'sms' %}📱 SMS
+                                            {% elseif method == 'app' %}📲 Application mobile
+                                            {% endif %}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="backup_codes">Codes de sauvegarde</label>
+                                <input type="number" id="backup_codes" name="two_factor[codes_backup]" 
+                                       value="{{ parametres.two_factor.codes_backup }}" min="5" max="20">
+                                <small class="help-text">Nombre de codes de sauvegarde à générer par utilisateur</small>
+                            </div>
+                            
+                            <div class="two-factor-methods">
+                                <h4>Méthodes disponibles</h4>
+                                <div class="methods-grid">
+                                    {% for method in parametres.two_factor.methodes %}
+                                        <div class="method-card">
+                                            <div class="method-icon">
+                                                {% if method == 'email' %}📧
+                                                {% elseif method == 'sms' %}📱
+                                                {% elseif method == 'app' %}📲
+                                                {% endif %}
+                                            </div>
+                                            <div class="method-info">
+                                                <h5>
+                                                    {% if method == 'email' %}Email
+                                                    {% elseif method == 'sms' %}SMS
+                                                    {% elseif method == 'app' %}Application
+                                                    {% endif %}
+                                                </h5>
+                                                <p>
+                                                    {% if method == 'email' %}Code envoyé par email
+                                                    {% elseif method == 'sms' %}Code envoyé par SMS
+                                                    {% elseif method == 'app' %}Code généré par app
+                                                    {% endif %}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Boutons d'action -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        💾 Enregistrer les paramètres
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="window.location.reload()">
+                        🔄 Annuler les modifications
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+/* Styles pour la page des paramètres */
+.admin-content { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+.page-header { margin-bottom: 2rem; }
+.page-header h1 { margin: 0 0 0.5rem 0; color: #2d3748; font-size: 2.5rem; }
+.page-header p { color: #718096; font-size: 1.1rem; margin: 0; }
+
+.alert {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid;
+}
+.alert-success {
+    background-color: #f0fff4;
+    border-color: #9ae6b4;
+    color: #22543d;
+}
+
+.panel {
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+.panel-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #e2e8f0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 0.75rem 0.75rem 0 0;
+}
+.panel-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+.panel-body {
+    padding: 2rem;
+}
+
+.settings-section {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+.settings-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+.settings-section h3 {
+    color: #2d3748;
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+/* Rôles et permissions */
+.roles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+.role-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+}
+.role-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+.role-header h4 {
+    margin: 0;
+    color: #2d3748;
+}
+.role-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.role-badge.admin { background: #fed7d7; color: #c53030; }
+.role-badge.manager { background: #feebc8; color: #dd6b20; }
+.role-badge.user { background: #c6f6d5; color: #38a169; }
+
+.permissions-list {
+    display: grid;
+    gap: 0.5rem;
+}
+.permission-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.permission-icon {
+    color: #38a169;
+    font-weight: bold;
+}
+.permission-text {
+    color: #4a5568;
+    font-size: 0.9rem;
+}
+
+/* Formulaires */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+.form-group label {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+}
+.form-group input, .form-group select {
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+}
+.form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+.help-text {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* Checkboxes personnalisées */
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    margin-bottom: 0.75rem;
+}
+.checkbox-label input[type="checkbox"] {
+    display: none;
+}
+.checkbox-custom {
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid #d1d5db;
+    border-radius: 0.25rem;
+    position: relative;
+    transition: all 0.2s;
+}
+.checkbox-label input[type="checkbox"]:checked + .checkbox-custom {
+    background: #667eea;
+    border-color: #667eea;
+}
+.checkbox-label input[type="checkbox"]:checked + .checkbox-custom::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-weight: bold;
+    font-size: 0.875rem;
+}
+
+/* Authentification 2FA */
+.two-factor-config {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e2e8f0;
+}
+.main-toggle {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+.two-factor-options {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+.methods-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+.method-card {
+    background: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.method-icon {
+    font-size: 1.5rem;
+}
+.method-info h5 {
+    margin: 0 0 0.25rem 0;
+    color: #2d3748;
+}
+.method-info p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+/* Boutons d'action */
+.form-actions {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    gap: 1rem;
+}
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-primary {
+    background: #667eea;
+    color: white;
+}
+.btn-primary:hover {
+    background: #5a67d8;
+}
+.btn-secondary {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+.btn-secondary:hover {
+    background: #cbd5e0;
+}
+</style>
+
+<script>
+// Toggle 2FA options
+document.getElementById('two_factor_toggle').addEventListener('change', function() {
+    const options = document.getElementById('two_factor_options');
+    if (this.checked) {
+        options.style.display = 'block';
+    } else {
+        options.style.display = 'none';
+    }
+});
+</script>
+
+{% endblock %}

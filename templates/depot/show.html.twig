@@ -1,30 +1,357 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Depot{% endblock %}
+{% block title %}{{ depot.nom }} - Dépôt{% endblock %}
 
 {% block body %}
-    <h1>Depot</h1>
+<div class="depot-details">
+    <!-- En-tête du dépôt -->
+    <div class="depot-header">
+        <div class="depot-info">
+            <h1>🏦 {{ depot.nom }}</h1>
+            <div class="depot-meta">
+                <div class="meta-item">
+                    <span class="icon">📍</span>
+                    <span>{{ depot.adresse }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="icon">🏢</span>
+                    <span>{{ depot.societe.nom }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="depot-stats">
+            <div class="stat-card">
+                <div class="stat-number">{{ total_equipements }}</div>
+                <div class="stat-label">Équipements</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ equipements_data|length }}</div>
+                <div class="stat-label">Types</div>
+            </div>
+        </div>
+    </div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ depot.id }}</td>
-            </tr>
-            <tr>
-                <th>Nom</th>
-                <td>{{ depot.nom }}</td>
-            </tr>
-            <tr>
-                <th>Adresse</th>
-                <td>{{ depot.adresse }}</td>
-            </tr>
-        </tbody>
-    </table>
+    <!-- Équipements du dépôt -->
+    <div class="equipements-section">
+        <h2>🔧 Équipements en Stock</h2>
+        
+        {% if equipements_data is empty %}
+            <div class="empty-state">
+                <p>📦 Aucun équipement en stock dans ce dépôt.</p>
+                <a href="{{ path('app_mouvement_stock_new') }}" class="btn btn-primary">Ajouter des équipements</a>
+            </div>
+        {% else %}
+            <div class="equipements-grid">
+                {% for equipement_data in equipements_data %}
+                    <div class="equipement-card">
+                        <div class="equipement-header">
+                            <div class="equipement-icon">
+                                {% if equipement_data.equipement.typeEquipement == 'SIM' %}
+                                    📱
+                                {% elseif equipement_data.equipement.typeEquipement == 'TPE' %}
+                                    💳
+                                {% elseif equipement_data.equipement.typeEquipement == 'Carte' %}
+                                    💾
+                                {% else %}
+                                    🔧
+                                {% endif %}
+                            </div>
+                            <div class="equipement-info">
+                                <h3>{{ equipement_data.equipement.typeEquipement }}</h3>
+                                <div class="equipement-details">
+                                    {% if equipement_data.equipement.imei %}
+                                        <small>IMEI: {{ equipement_data.equipement.imei }}</small>
+                                    {% elseif equipement_data.equipement.sn %}
+                                        <small>SN: {{ equipement_data.equipement.sn }}</small>
+                                    {% elseif equipement_data.equipement.referenceCarte %}
+                                        <small>Réf: {{ equipement_data.equipement.referenceCarte }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="quantity-badge-large">
+                                {{ equipement_data.quantite }}
+                            </div>
+                        </div>
+                        
+                        <div class="equipement-body">
+                            <div class="equipement-status status-{{ equipement_data.equipement.etat|lower }}">
+                                {{ equipement_data.equipement.etat }}
+                            </div>
+                            
+                            {% if equipement_data.equipement.model %}
+                                <div class="equipement-model">
+                                    <strong>Modèle:</strong> {{ equipement_data.equipement.model }}
+                                </div>
+                            {% endif %}
+                            
+                            {% if equipement_data.equipement.operateur %}
+                                <div class="equipement-operator">
+                                    <strong>Opérateur:</strong> {{ equipement_data.equipement.operateur }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
 
-    <a href="{{ path('app_depot_index') }}">back to list</a>
+    <!-- Actions -->
+    <div class="actions-section">
+        <a href="{{ path('app_depot_index') }}" class="btn btn-secondary">
+            ← Retour à la liste
+        </a>
+        <a href="{{ path('app_depot_edit', {'id': depot.id}) }}" class="btn btn-primary">
+            ✏️ Modifier
+        </a>
+        <a href="{{ path('app_mouvement_stock_new') }}" class="btn btn-success">
+            + Ajouter des équipements
+        </a>
+    </div>
+</div>
 
-    <a href="{{ path('app_depot_edit', {'id': depot.id}) }}">edit</a>
+<style>
+.depot-details {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
 
-    {{ include('depot/_delete_form.html.twig') }}
+.depot-header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+.depot-info h1 {
+    margin: 0 0 1rem 0;
+    font-size: 2.5rem;
+}
+
+.depot-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.meta-item .icon {
+    width: 20px;
+}
+
+.depot-stats {
+    display: flex;
+    gap: 1rem;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 1.5rem;
+    border-radius: 10px;
+    text-align: center;
+    min-width: 100px;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.equipements-section h2 {
+    margin-bottom: 1.5rem;
+    color: #2d3748;
+    font-size: 1.8rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    background: #f8fafc;
+    border-radius: 10px;
+    color: #718096;
+}
+
+.equipements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.equipement-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    border: 1px solid #e2e8f0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.equipement-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.equipement-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.equipement-icon {
+    font-size: 2.5rem;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+    border-radius: 12px;
+}
+
+.equipement-info {
+    flex: 1;
+}
+
+.equipement-info h3 {
+    margin: 0 0 0.5rem 0;
+    color: #2d3748;
+    font-size: 1.3rem;
+}
+
+.equipement-details {
+    color: #718096;
+    font-size: 0.9rem;
+}
+
+.quantity-badge-large {
+    background: linear-gradient(135deg, #48bb78, #38a169);
+    color: white;
+    padding: 0.8rem 1.2rem;
+    border-radius: 25px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    min-width: 50px;
+    text-align: center;
+}
+
+.equipement-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.equipement-status {
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    text-align: center;
+    width: fit-content;
+}
+
+.status-actif {
+    background: #c6f6d5;
+    color: #22543d;
+}
+
+.status-inactif {
+    background: #fed7d7;
+    color: #742a2a;
+}
+
+.status-maintenance {
+    background: #feebc8;
+    color: #7b341e;
+}
+
+.equipement-model,
+.equipement-operator {
+    color: #4a5568;
+    font-size: 0.9rem;
+}
+
+.actions-section {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.btn-secondary {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #48bb78, #38a169);
+    color: white;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+@media (max-width: 768px) {
+    .depot-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .depot-stats {
+        justify-content: center;
+    }
+    
+    .equipements-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .actions-section {
+        justify-content: center;
+    }
+    
+    .equipement-header {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+</style>
 {% endblock %}

@@ -1,0 +1,396 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Administration - Rapports{% endblock %}
+
+{% block body %}
+<div class="admin-content">
+    <div class="page-header">
+        <h1>📈 Rapports & Analyses</h1>
+        <p>Rapports détaillés et analyses de performance du système</p>
+    </div>
+
+    <!-- Statistiques générales -->
+    <div class="stats-grid">
+        <div class="stat-card primary">
+            <div class="stat-icon">📊</div>
+            <div class="stat-content">
+                <div class="stat-number">{{ stats.total_mouvements }}</div>
+                <div class="stat-label">Total Mouvements</div>
+            </div>
+        </div>
+        
+        <div class="stat-card success">
+            <div class="stat-icon">📅</div>
+            <div class="stat-content">
+                <div class="stat-number">{{ stats.mouvements_cette_annee }}</div>
+                <div class="stat-label">Cette Année</div>
+            </div>
+        </div>
+        
+        <div class="stat-card info">
+            <div class="stat-icon">📆</div>
+            <div class="stat-content">
+                <div class="stat-number">{{ stats.mouvements_ce_mois }}</div>
+                <div class="stat-label">Ce Mois</div>
+            </div>
+        </div>
+        
+        <div class="stat-card warning">
+            <div class="stat-icon">📋</div>
+            <div class="stat-content">
+                <div class="stat-number">{{ stats.mouvements_cette_semaine }}</div>
+                <div class="stat-label">Cette Semaine</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Métriques de performance -->
+    <div class="metrics-section">
+        <div class="metric-card">
+            <h3>📈 Moyennes d'Activité</h3>
+            <div class="metric-grid">
+                <div class="metric-item">
+                    <div class="metric-value">{{ stats.moyenne_par_jour }}</div>
+                    <div class="metric-label">Mouvements/Jour</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-value">{{ stats.moyenne_par_mois }}</div>
+                    <div class="metric-label">Mouvements/Mois</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-value">{{ stats.moyenne_par_societe }}</div>
+                    <div class="metric-label">Mouvements/Société</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-value">{{ stats.moyenne_par_depot }}</div>
+                    <div class="metric-label">Mouvements/Dépôt</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <h3>🎯 Indicateurs Clés</h3>
+            <div class="kpi-grid">
+                <div class="kpi-item">
+                    <div class="kpi-icon">🏢</div>
+                    <div class="kpi-content">
+                        <div class="kpi-value">{{ stats.total_societes }}</div>
+                        <div class="kpi-label">Sociétés Actives</div>
+                    </div>
+                </div>
+                <div class="kpi-item">
+                    <div class="kpi-icon">🏪</div>
+                    <div class="kpi-content">
+                        <div class="kpi-value">{{ stats.total_depots }}</div>
+                        <div class="kpi-label">Dépôts Gérés</div>
+                    </div>
+                </div>
+                <div class="kpi-item">
+                    <div class="kpi-icon">🛠️</div>
+                    <div class="kpi-content">
+                        <div class="kpi-value">{{ stats.total_equipements }}</div>
+                        <div class="kpi-label">Équipements Suivis</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analyses des types de mouvements -->
+    <div class="content-grid">
+        <div class="panel">
+            <div class="panel-header">
+                <h2>🔄 Analyse des Types de Mouvements</h2>
+            </div>
+            <div class="panel-body">
+                {% if types_analyse is empty %}
+                    <div class="empty-state">
+                        <p>Aucune donnée disponible</p>
+                    </div>
+                {% else %}
+                    <div class="types-analysis">
+                        {% for type, data in types_analyse %}
+                            <div class="type-analysis-item">
+                                <div class="type-header">
+                                    <div class="type-name">
+                                        {% if type == 'entree' %}
+                                            ⬇️ Entrées
+                                        {% elseif type == 'sortie' %}
+                                            ⬆️ Sorties
+                                        {% elseif type == 'transfert' %}
+                                            🔄 Transferts
+                                        {% elseif type == 'ajustement' %}
+                                            ⚖️ Ajustements
+                                        {% elseif type == 'retour' %}
+                                            ↩️ Retours
+                                        {% else %}
+                                            ❓ {{ type|title }}
+                                        {% endif %}
+                                    </div>
+                                    <div class="type-total">{{ data.count }} total</div>
+                                </div>
+                                <div class="type-breakdown">
+                                    <div class="breakdown-item">
+                                        <span class="breakdown-label">Cette semaine:</span>
+                                        <span class="breakdown-value">{{ data.cette_semaine }}</span>
+                                    </div>
+                                    <div class="breakdown-item">
+                                        <span class="breakdown-label">Ce mois:</span>
+                                        <span class="breakdown-value">{{ data.ce_mois }}</span>
+                                    </div>
+                                </div>
+                                <div class="type-progress">
+                                    <div class="progress-bar" style="width: {{ (data.count / stats.total_mouvements * 100)|round }}%"></div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Top Sociétés -->
+        <div class="panel">
+            <div class="panel-header">
+                <h2>🏆 Top 5 Sociétés les Plus Actives</h2>
+            </div>
+            <div class="panel-body">
+                {% if top_societes is empty %}
+                    <div class="empty-state">
+                        <p>Aucune donnée disponible</p>
+                    </div>
+                {% else %}
+                    <div class="ranking-list">
+                        {% for item in top_societes %}
+                            <div class="ranking-item">
+                                <div class="ranking-position">{{ loop.index }}</div>
+                                <div class="ranking-content">
+                                    <div class="ranking-name">🏢 {{ item.societe.nom }}</div>
+                                    <div class="ranking-details">
+                                        <span class="detail-item">{{ item.nb_mouvements }} mouvements</span>
+                                        <span class="detail-item">{{ item.nb_depots }} dépôts</span>
+                                    </div>
+                                </div>
+                                <div class="ranking-score">{{ item.nb_mouvements }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Dépôts et Équipements -->
+    <div class="content-grid">
+        <div class="panel">
+            <div class="panel-header">
+                <h2>🏪 Top 5 Dépôts les Plus Actifs</h2>
+            </div>
+            <div class="panel-body">
+                {% if top_depots is empty %}
+                    <div class="empty-state">
+                        <p>Aucune donnée disponible</p>
+                    </div>
+                {% else %}
+                    <div class="ranking-list">
+                        {% for item in top_depots %}
+                            <div class="ranking-item">
+                                <div class="ranking-position">{{ loop.index }}</div>
+                                <div class="ranking-content">
+                                    <div class="ranking-name">🏪 {{ item.depot.nom }}</div>
+                                    <div class="ranking-details">
+                                        <span class="detail-item">{{ item.nb_mouvements }} mouvements</span>
+                                        <span class="detail-item">Stock: {{ item.stock_actuel }}</span>
+                                    </div>
+                                </div>
+                                <div class="ranking-score">{{ item.nb_mouvements }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <h2>🛠️ Top 5 Équipements les Plus Mobiles</h2>
+            </div>
+            <div class="panel-body">
+                {% if top_equipements is empty %}
+                    <div class="empty-state">
+                        <p>Aucune donnée disponible</p>
+                    </div>
+                {% else %}
+                    <div class="ranking-list">
+                        {% for item in top_equipements %}
+                            <div class="ranking-item">
+                                <div class="ranking-position">{{ loop.index }}</div>
+                                <div class="ranking-content">
+                                    <div class="ranking-name">🛠️ {{ item.equipement.model ?? 'Modèle non spécifié' }}</div>
+                                    <div class="ranking-details">
+                                        <span class="detail-item">{{ item.nb_mouvements }} mouvements</span>
+                                        {% if item.depot_actuel %}
+                                            <span class="detail-item">📍 {{ item.depot_actuel.nom }}</span>
+                                        {% else %}
+                                            <span class="detail-item">📍 Non localisé</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="ranking-score">{{ item.nb_mouvements }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions d'export -->
+    <div class="panel full-width">
+        <div class="panel-header">
+            <h2>📊 Actions et Exports</h2>
+        </div>
+        <div class="panel-body">
+            <div class="export-actions">
+                <div class="export-section">
+                    <h3>📊 Rapports Standards</h3>
+                    <div class="export-buttons">
+                        <a href="{{ path('app_admin_export_report', {type: 'monthly'}) }}" class="btn btn-primary">
+                            📅 Rapport Mensuel
+                        </a>
+                        <a href="{{ path('app_admin_export_report', {type: 'yearly'}) }}" class="btn btn-primary">
+                            📆 Rapport Annuel
+                        </a>
+                        <a href="{{ path('app_admin_export_report', {type: 'activity'}) }}" class="btn btn-primary">
+                            🔄 Rapport d'Activité
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="export-section">
+                    <h3>📈 Analyses Avancées</h3>
+                    <div class="export-buttons">
+                        <a href="{{ path('app_admin_export_report', {type: 'performance'}) }}" class="btn btn-info">
+                            🎯 Analyse de Performance
+                        </a>
+                        <a href="{{ path('app_admin_export_report', {type: 'trends'}) }}" class="btn btn-info">
+                            📊 Analyse des Tendances
+                        </a>
+                        <a href="{{ path('app_admin_export_report', {type: 'audit'}) }}" class="btn btn-info">
+                            🔍 Audit Trail
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="export-section">
+                    <h3>💾 Formats d'Export</h3>
+                    <div class="export-buttons">
+                        <a href="{{ path('app_admin_export_format', {format: 'pdf'}) }}" class="btn btn-success">
+                            📄 Export PDF
+                        </a>
+                        <a href="{{ path('app_admin_export_format', {format: 'excel'}) }}" class="btn btn-success">
+                            📊 Export Excel
+                        </a>
+                        <a href="{{ path('app_admin_export_format', {format: 'csv'}) }}" class="btn btn-success">
+                            📋 Export CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Styles identiques aux autres pages admin */
+.admin-content { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+.page-header { margin-bottom: 2rem; }
+.page-header h1 { margin: 0 0 0.5rem 0; color: #2d3748; font-size: 2.5rem; }
+.page-header p { color: #718096; font-size: 1.1rem; margin: 0; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+.stat-card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 1.5rem; transition: transform 0.2s ease; }
+.stat-card:hover { transform: translateY(-2px); }
+.stat-card.primary { border-left: 5px solid #667eea; }
+.stat-card.success { border-left: 5px solid #48bb78; }
+.stat-card.info { border-left: 5px solid #4299e1; }
+.stat-card.warning { border-left: 5px solid #ed8936; }
+.stat-icon { font-size: 2.5rem; opacity: 0.8; }
+.stat-content { flex: 1; }
+.stat-number { font-size: 2rem; font-weight: 700; color: #2d3748; margin-bottom: 0.25rem; }
+.stat-label { color: #718096; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* Métriques */
+.metrics-section { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; margin-bottom: 3rem; }
+.metric-card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+.metric-card h3 { margin: 0 0 1.5rem 0; color: #2d3748; font-size: 1.3rem; }
+.metric-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+.metric-item { text-align: center; padding: 1rem; background: #f7fafc; border-radius: 10px; }
+.metric-value { font-size: 1.8rem; font-weight: 700; color: #667eea; margin-bottom: 0.5rem; }
+.metric-label { color: #718096; font-size: 0.9rem; }
+.kpi-grid { display: flex; flex-direction: column; gap: 1rem; }
+.kpi-item { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #f7fafc; border-radius: 10px; }
+.kpi-icon { font-size: 2rem; }
+.kpi-content { flex: 1; }
+.kpi-value { font-size: 1.5rem; font-weight: 700; color: #2d3748; }
+.kpi-label { color: #718096; font-size: 0.9rem; }
+
+/* Grilles de contenu */
+.content-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; margin-bottom: 2rem; }
+.panel { background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); overflow: hidden; }
+.panel-header { padding: 1.5rem; border-bottom: 1px solid #e2e8f0; }
+.panel-header h2 { margin: 0; color: #2d3748; font-size: 1.3rem; }
+.panel-body { padding: 1.5rem; }
+.full-width { grid-column: 1 / -1; }
+
+/* Analyse des types */
+.types-analysis { display: flex; flex-direction: column; gap: 1.5rem; }
+.type-analysis-item { border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem; }
+.type-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.type-name { font-weight: 600; color: #2d3748; }
+.type-total { color: #667eea; font-weight: 600; }
+.type-breakdown { display: flex; gap: 1rem; margin-bottom: 1rem; }
+.breakdown-item { display: flex; justify-content: space-between; gap: 0.5rem; }
+.breakdown-label { color: #718096; font-size: 0.9rem; }
+.breakdown-value { color: #2d3748; font-weight: 500; }
+.type-progress { height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+.progress-bar { height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); transition: width 0.3s ease; }
+
+/* Classements */
+.ranking-list { display: flex; flex-direction: column; gap: 1rem; }
+.ranking-item { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #f7fafc; border-radius: 10px; }
+.ranking-position { width: 30px; height: 30px; background: #667eea; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+.ranking-content { flex: 1; }
+.ranking-name { font-weight: 600; color: #2d3748; margin-bottom: 0.25rem; }
+.ranking-details { display: flex; gap: 1rem; }
+.detail-item { color: #718096; font-size: 0.9rem; }
+.ranking-score { color: #667eea; font-weight: 700; font-size: 1.2rem; }
+
+/* Actions d'export */
+.export-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+.export-section h3 { margin: 0 0 1rem 0; color: #2d3748; font-size: 1.1rem; }
+.export-buttons { display: flex; flex-wrap: wrap; gap: 1rem; }
+.btn { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; text-decoration: none; display: inline-block; transition: all 0.2s ease; }
+.btn-primary { background: #667eea; color: white; }
+.btn-primary:hover { background: #5a67d8; }
+.btn-info { background: #4299e1; color: white; }
+.btn-info:hover { background: #3182ce; }
+.btn-success { background: #48bb78; color: white; }
+.btn-success:hover { background: #38a169; }
+
+.empty-state { text-align: center; padding: 3rem; color: #718096; }
+@media (max-width: 768px) { .content-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: 1fr; } .metrics-section { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+function exportReport(type) {
+    alert('Export du rapport ' + type + ' - Fonctionnalité à implémenter');
+    // Ici vous pouvez ajouter la logique d'export
+}
+
+function exportFormat(format) {
+    alert('Export au format ' + format + ' - Fonctionnalité à implémenter');
+    // Ici vous pouvez ajouter la logique d'export par format
+}
+</script>
+
+{% endblock %}

@@ -18,7 +18,9 @@ class DepotType extends AbstractType
             ->add('adresse')
             ->add('societe', EntityType::class, [
                 'class' => societe::class,
-                'choice_label' => 'id',
+                'choice_label' => 'nom',
+                'placeholder' => 'Sélectionnez une société',
+                'required' => false,
             ])
         ;
     }

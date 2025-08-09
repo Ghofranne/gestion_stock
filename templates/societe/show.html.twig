@@ -1,38 +1,389 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Societe{% endblock %}
+{% block title %}{{ societe.nom }} - Détails{% endblock %}
 
 {% block body %}
-    <h1>Societe</h1>
+<div class="societe-details">
+    <!-- En-tête de la société -->
+    <div class="societe-header">
+        <div class="societe-info">
+            <h1>🏢 {{ societe.nom }}</h1>
+            <div class="societe-meta">
+                <div class="meta-item">
+                    <span class="icon">📍</span>
+                    <span>{{ societe.adress }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="icon">✉️</span>
+                    <span>{{ societe.email }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="icon">📞</span>
+                    <span>{{ societe.telephone }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="societe-stats">
+            <div class="stat-card">
+                <div class="stat-number">{{ total_depots }}</div>
+                <div class="stat-label">Dépôts</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ total_equipements }}</div>
+                <div class="stat-label">Équipements</div>
+            </div>
+        </div>
+    </div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ societe.id }}</td>
-            </tr>
-            <tr>
-                <th>Nom</th>
-                <td>{{ societe.nom }}</td>
-            </tr>
-            <tr>
-                <th>Adress</th>
-                <td>{{ societe.adress }}</td>
-            </tr>
-            <tr>
-                <th>Email</th>
-                <td>{{ societe.email }}</td>
-            </tr>
-            <tr>
-                <th>Telephone</th>
-                <td>{{ societe.telephone }}</td>
-            </tr>
-        </tbody>
-    </table>
+    <!-- Dépôts et équipements -->
+    <div class="depots-section">
+        <h2>🏦 Dépôts et Équipements</h2>
+        
+        {% if depots_data is empty %}
+            <div class="empty-state">
+                <p>📦 Aucun dépôt enregistré pour cette société.</p>
+                <a href="{{ path('app_depot_new') }}" class="btn btn-primary">Créer un dépôt</a>
+            </div>
+        {% else %}
+            <div class="depots-grid">
+                {% for depot_data in depots_data %}
+                    <div class="depot-card">
+                        <div class="depot-header">
+                            <h3>🏦 {{ depot_data.depot.nom }}</h3>
+                            <span class="equipement-count">{{ depot_data.nb_equipements }} équipements</span>
+                        </div>
+                        
+                        <div class="depot-info">
+                            <p><strong>Adresse:</strong> {{ depot_data.depot.adresse }}</p>
+                        </div>
+                        
+                        <div class="equipements-section">
+                            <h4>🔧 Équipements</h4>
+                            {% if depot_data.equipements is empty %}
+                                <p class="no-equipements">Aucun équipement dans ce dépôt</p>
+                            {% else %}
+                                <div class="equipements-list">
+                                    {% for equipement_data in depot_data.equipements %}
+                                        <div class="equipement-item">
+                                            <div class="equipement-icon">
+                                                {% if equipement_data.equipement.typeEquipement == 'SIM' %}
+                                                    📱
+                                                {% elseif equipement_data.equipement.typeEquipement == 'TPE' %}
+                                                    💳
+                                                {% elseif equipement_data.equipement.typeEquipement == 'Carte' %}
+                                                    💾
+                                                {% else %}
+                                                    🔧
+                                                {% endif %}
+                                            </div>
+                                            <div class="equipement-details">
+                                                <div class="equipement-type">{{ equipement_data.equipement.typeEquipement }}</div>
+                                                <div class="equipement-info">
+                                                    {% if equipement_data.equipement.imei %}
+                                                        <small>IMEI: {{ equipement_data.equipement.imei }}</small>
+                                                    {% elseif equipement_data.equipement.sn %}
+                                                        <small>SN: {{ equipement_data.equipement.sn }}</small>
+                                                    {% elseif equipement_data.equipement.referenceCarte %}
+                                                        <small>Réf: {{ equipement_data.equipement.referenceCarte }}</small>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="equipement-quantity">
+                                                <span class="quantity-badge">{{ equipement_data.quantite }}</span>
+                                            </div>
+                                            <div class="equipement-status status-{{ equipement_data.equipement.etat|lower }}">
+                                                {{ equipement_data.equipement.etat }}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
 
-    <a href="{{ path('app_societe_index') }}">back to list</a>
+    <!-- Actions -->
+    <div class="actions-section">
+        <a href="{{ path('app_societe_index') }}" class="btn btn-secondary">
+            ← Retour à la liste
+        </a>
+        <a href="{{ path('app_societe_edit', {'id': societe.id}) }}" class="btn btn-primary">
+            ✏️ Modifier
+        </a>
+        <a href="{{ path('app_depot_new') }}" class="btn btn-success">
+            + Ajouter un dépôt
+        </a>
+    </div>
+</div>
 
-    <a href="{{ path('app_societe_edit', {'id': societe.id}) }}">edit</a>
+<style>
+.societe-details {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
 
-    {{ include('societe/_delete_form.html.twig') }}
+.societe-header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+.societe-info h1 {
+    margin: 0 0 1rem 0;
+    font-size: 2.5rem;
+}
+
+.societe-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.meta-item .icon {
+    width: 20px;
+}
+
+.societe-stats {
+    display: flex;
+    gap: 1rem;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 1.5rem;
+    border-radius: 10px;
+    text-align: center;
+    min-width: 100px;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.depots-section h2 {
+    margin-bottom: 1.5rem;
+    color: #2d3748;
+    font-size: 1.8rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    background: #f8fafc;
+    border-radius: 10px;
+    color: #718096;
+}
+
+.depots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+}
+
+.depot-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    border: 1px solid #e2e8f0;
+}
+
+.depot-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.depot-header h3 {
+    margin: 0;
+    color: #2d3748;
+    font-size: 1.3rem;
+}
+
+.equipement-count {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.depot-info {
+    margin-bottom: 1.5rem;
+    color: #4a5568;
+}
+
+.equipements-section h4 {
+    margin-bottom: 1rem;
+    color: #2d3748;
+    font-size: 1.1rem;
+}
+
+.no-equipements {
+    color: #a0aec0;
+    font-style: italic;
+    text-align: center;
+    padding: 1rem;
+}
+
+.equipements-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.equipement-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.equipement-icon {
+    font-size: 1.5rem;
+    width: 30px;
+    text-align: center;
+}
+
+.equipement-details {
+    flex: 1;
+}
+
+.equipement-type {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.equipement-info {
+    color: #718096;
+    font-size: 0.85rem;
+}
+
+.equipement-quantity {
+    display: flex;
+    align-items: center;
+}
+
+.quantity-badge {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    min-width: 30px;
+    text-align: center;
+}
+
+.equipement-status {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.status-actif {
+    background: #c6f6d5;
+    color: #22543d;
+}
+
+.status-inactif {
+    background: #fed7d7;
+    color: #742a2a;
+}
+
+.status-maintenance {
+    background: #feebc8;
+    color: #7b341e;
+}
+
+.actions-section {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.btn-secondary {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #48bb78, #38a169);
+    color: white;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+@media (max-width: 768px) {
+    .societe-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .societe-stats {
+        justify-content: center;
+    }
+    
+    .depots-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .actions-section {
+        justify-content: center;
+    }
+}
+</style>
 {% endblock %}

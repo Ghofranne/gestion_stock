@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Administration - StockPro{% endblock %}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8fafc;
+            color: #2d3748;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1001;
+            height: 80px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* Navigation */
+        .nav-container {
+            display: flex;
+            flex: 1;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #2d3748;
+            color: white;
+            padding: 1rem 0;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 80px;
+            left: 0;
+            height: calc(100vh - 80px);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: #4a5568;
+            border-left-color: #667eea;
+        }
+
+        .nav-item.active {
+            background: #667eea;
+            border-left-color: #764ba2;
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            font-size: 1.2rem;
+        }
+
+        .nav-text {
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-disconnect {
+            margin-top: auto;
+            padding: 1rem 0;
+            border-top: 1px solid #4a5568;
+        }
+
+        .disconnect-btn {
+            color: #e53e3e !important;
+            text-decoration: none;
+        }
+
+        .disconnect-btn:hover {
+            background: rgba(229, 62, 62, 0.1) !important;
+            color: #fc8181 !important;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            background: #f8fafc;
+            position: relative;
+            overflow-y: auto;
+            margin-left: 250px;
+            margin-top: 80px;
+            min-height: calc(100vh - 80px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                margin-top: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">StockPro Manager</div>
+            <div class="user-menu">
+                <span>Administrateur</span>
+                <div class="user-avatar">👤</div>
+            </div>
+        </header>
+
+        <div class="nav-container">
+            <!-- Sidebar Navigation -->
+            <nav class="sidebar" id="sidebar">
+                <div class="nav-item {% if app.request.get('_route') == 'app_admin_dashboard' %}active{% endif %}" onclick="window.location.href='{{ path('app_admin_dashboard') }}'">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Tableau de bord</span>
+                </div>
+                <div class="nav-item {% if app.request.get('_route') == 'app_admin_societes' %}active{% endif %}" onclick="window.location.href='{{ path('app_admin_societes') }}'">
+                    <span class="nav-icon">🏢</span>
+                    <span class="nav-text">Sociétés</span>
+                </div>
+                <div class="nav-item {% if app.request.get('_route') == 'app_admin_depots' %}active{% endif %}" onclick="window.location.href='{{ path('app_admin_depots') }}'">
+                    <span class="nav-icon">🏬</span>
+                    <span class="nav-text">Dépôts</span>
+                </div>
+                <div class="nav-item {% if app.request.get('_route') == 'app_admin_equipements' %}active{% endif %}" onclick="window.location.href='{{ path('app_admin_equipements') }}'">
+                    <span class="nav-icon">🛠️</span>
+                    <span class="nav-text">Équipements</span>
+                </div>
+                <div class="nav-item {% if app.request.get('_route') == 'app_admin_mouvements' %}active{% endif %}" onclick="window.location.href='{{ path('app_admin_mouvements') }}'">
+                    <span class="nav-icon">🔄</span>
+                    <span class="nav-text">Mouvements</span>
+                </div>
+                <div class="nav-item {% if app.request.get('_route') == 'app_admin_rapports' %}active{% endif %}" onclick="window.location.href='{{ path('app_admin_rapports') }}'">
+                    <span class="nav-icon">📈</span>
+                    <span class="nav-text">Rapports</span>
+                </div>
+                <div class="nav-item {% if app.request.get('_route') starts with 'app_admin_utilisateur' %}active{% endif %}" onclick="window.location.href='{{ path('app_admin_utilisateurs') }}'">
+                    <span class="nav-icon">👥</span>
+                    <span class="nav-text">Utilisateurs</span>
+                </div>
+                <div class="nav-item {% if app.request.get('_route') == 'app_admin_parametres' %}active{% endif %}" onclick="window.location.href='{{ path('app_admin_parametres') }}'">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-text">Paramètres</span>
+                </div>
+
+                <div class="sidebar-disconnect">
+                    <div class="nav-item disconnect-btn" onclick="window.location.href='{{ path('app_logout') }}'">
+                        <span class="nav-icon">🚪</span>
+                        <span class="nav-text">Déconnexion</span>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main Content Area -->
+            <main class="main-content">
+                {% block body %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

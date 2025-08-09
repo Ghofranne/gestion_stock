@@ -1,0 +1,446 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}
+    {% if mode == 'create' %}
+        Administration - Nouvel Utilisateur
+    {% else %}
+        Administration - Modifier Utilisateur
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+<div class="admin-content">
+    <div class="page-header">
+        <h1>
+            {% if mode == 'create' %}
+                ➕ Nouvel Utilisateur
+            {% else %}
+                ✏️ Modifier Utilisateur
+            {% endif %}
+        </h1>
+        <p>
+            {% if mode == 'create' %}
+                Créer un nouveau compte utilisateur
+            {% else %}
+                Modifier les informations de l'utilisateur
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- Messages Flash -->
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            ✅ {{ message }}
+        </div>
+    {% endfor %}
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-error">
+            ❌ {{ message }}
+        </div>
+    {% endfor %}
+
+    <!-- Formulaire utilisateur -->
+    <div class="panel">
+        <div class="panel-header">
+            <h2>
+                {% if mode == 'create' %}
+                    📝 Informations du nouvel utilisateur
+                {% else %}
+                    📝 Informations de l'utilisateur
+                {% endif %}
+            </h2>
+        </div>
+        <div class="panel-body">
+            <form method="POST" class="user-form">
+                <div class="form-grid">
+                    <!-- Email -->
+                    <div class="form-group">
+                        <label for="email" class="required">📧 Adresse email</label>
+                        <input type="email" 
+                               id="email" 
+                               name="email" 
+                               value="{{ user.email ?? '' }}" 
+                               required
+                               placeholder="utilisateur@exemple.com">
+                        <small class="help-text">L'email servira d'identifiant de connexion</small>
+                    </div>
+
+                    <!-- Mot de passe -->
+                    <div class="form-group">
+                        <label for="password" {% if mode == 'create' %}class="required"{% endif %}>
+                            🔒 Mot de passe
+                            {% if mode == 'edit' %}
+                                <span class="optional">(laisser vide pour ne pas modifier)</span>
+                            {% endif %}
+                        </label>
+                        <input type="password" 
+                               id="password" 
+                               name="password" 
+                               {% if mode == 'create' %}required{% endif %}
+                               placeholder="{% if mode == 'create' %}Mot de passe{% else %}Nouveau mot de passe (optionnel){% endif %}">
+                        <small class="help-text">
+                            {% if mode == 'create' %}
+                                Minimum 8 caractères recommandés
+                            {% else %}
+                                Laissez vide pour conserver le mot de passe actuel
+                            {% endif %}
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Rôles et permissions -->
+                <div class="roles-section">
+                    <h3>🔐 Rôles et Permissions</h3>
+                    <p class="section-description">Sélectionnez les rôles à attribuer à cet utilisateur</p>
+                    
+                    <div class="roles-grid">
+                        <div class="role-option">
+                            <label class="role-label">
+                                <input type="checkbox" 
+                                       name="roles[]" 
+                                       value="ROLE_ADMIN"
+                                       {% if 'ROLE_ADMIN' in user.roles %}checked{% endif %}>
+                                <div class="role-card admin">
+                                    <div class="role-icon">👑</div>
+                                    <div class="role-info">
+                                        <h4>Administrateur</h4>
+                                        <p>Accès complet au système</p>
+                                        <ul class="role-permissions">
+                                            <li>✓ Gestion des utilisateurs</li>
+                                            <li>✓ Gestion des sociétés</li>
+                                            <li>✓ Gestion des dépôts</li>
+                                            <li>✓ Gestion des équipements</li>
+                                            <li>✓ Rapports avancés</li>
+                                            <li>✓ Paramètres système</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="role-option">
+                            <label class="role-label">
+                                <input type="checkbox" 
+                                       name="roles[]" 
+                                       value="ROLE_MANAGER"
+                                       {% if 'ROLE_MANAGER' in user.roles %}checked{% endif %}>
+                                <div class="role-card manager">
+                                    <div class="role-icon">👨‍💼</div>
+                                    <div class="role-info">
+                                        <h4>Gestionnaire</h4>
+                                        <p>Gestion opérationnelle</p>
+                                        <ul class="role-permissions">
+                                            <li>✓ Gestion des dépôts</li>
+                                            <li>✓ Gestion des équipements</li>
+                                            <li>✓ Gestion des mouvements</li>
+                                            <li>✓ Rapports standards</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="role-option">
+                            <label class="role-label">
+                                <input type="checkbox" 
+                                       name="roles[]" 
+                                       value="ROLE_USER"
+                                       {% if user.roles is empty or 'ROLE_USER' in user.roles %}checked{% endif %}>
+                                <div class="role-card user">
+                                    <div class="role-icon">👤</div>
+                                    <div class="role-info">
+                                        <h4>Utilisateur</h4>
+                                        <p>Accès en consultation</p>
+                                        <ul class="role-permissions">
+                                            <li>✓ Consultation des équipements</li>
+                                            <li>✓ Consultation des mouvements</li>
+                                            <li>✓ Rapports basiques</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Boutons d'action -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        {% if mode == 'create' %}
+                            ➕ Créer l'utilisateur
+                        {% else %}
+                            💾 Enregistrer les modifications
+                        {% endif %}
+                    </button>
+                    <a href="{{ path('app_admin_utilisateurs') }}" class="btn btn-secondary">
+                        ❌ Annuler
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Styles pour le formulaire utilisateur */
+.admin-content { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+.page-header { margin-bottom: 2rem; }
+.page-header h1 { margin: 0 0 0.5rem 0; color: #2d3748; font-size: 2.5rem; }
+.page-header p { color: #718096; font-size: 1.1rem; margin: 0; }
+
+.alert {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid;
+}
+.alert-success {
+    background-color: #f0fff4;
+    border-color: #9ae6b4;
+    color: #22543d;
+}
+.alert-error {
+    background-color: #fed7d7;
+    border-color: #feb2b2;
+    color: #c53030;
+}
+
+.panel {
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+.panel-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #e2e8f0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 0.75rem 0.75rem 0 0;
+}
+.panel-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+.panel-body {
+    padding: 2rem;
+}
+
+.user-form {
+    max-width: 100%;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+.form-group label {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.form-group label.required::after {
+    content: '*';
+    color: #e53e3e;
+    margin-left: 0.25rem;
+}
+.optional {
+    font-weight: 400;
+    color: #718096;
+    font-size: 0.875rem;
+}
+.form-group input {
+    padding: 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+.form-group input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+.help-text {
+    color: #718096;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+.roles-section {
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: #f8fafc;
+    border-radius: 0.75rem;
+    border: 1px solid #e2e8f0;
+}
+.roles-section h3 {
+    color: #2d3748;
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+.section-description {
+    color: #718096;
+    margin-bottom: 2rem;
+}
+
+.roles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.role-option {
+    position: relative;
+}
+.role-label {
+    cursor: pointer;
+    display: block;
+}
+.role-label input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.role-card {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    transition: all 0.2s;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.role-card:hover {
+    border-color: #cbd5e0;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.15);
+}
+.role-label input:checked + .role-card {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+.role-label input:checked + .role-card .role-info h4,
+.role-label input:checked + .role-card .role-info p {
+    color: white;
+}
+.role-label input:checked + .role-card .role-permissions {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.role-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.role-info h4 {
+    margin: 0 0 0.5rem 0;
+    color: #2d3748;
+    font-size: 1.125rem;
+    text-align: center;
+}
+.role-info p {
+    color: #718096;
+    margin-bottom: 1rem;
+    text-align: center;
+    font-size: 0.875rem;
+}
+
+.role-permissions {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1;
+}
+.role-permissions li {
+    padding: 0.25rem 0;
+    font-size: 0.875rem;
+    color: #4a5568;
+}
+
+.role-card.admin { border-left: 4px solid #f56565; }
+.role-card.manager { border-left: 4px solid #ed8936; }
+.role-card.user { border-left: 4px solid #48bb78; }
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.btn-primary {
+    background: #667eea;
+    color: white;
+}
+.btn-primary:hover {
+    background: #5a67d8;
+    transform: translateY(-1px);
+}
+.btn-secondary {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+.btn-secondary:hover {
+    background: #cbd5e0;
+}
+
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    .roles-grid {
+        grid-template-columns: 1fr;
+    }
+    .form-actions {
+        flex-direction: column;
+    }
+}
+</style>
+
+<script>
+// Assurer qu'au moins ROLE_USER est sélectionné
+document.addEventListener('DOMContentLoaded', function() {
+    const roleCheckboxes = document.querySelectorAll('input[name="roles[]"]');
+    const userRoleCheckbox = document.querySelector('input[value="ROLE_USER"]');
+    
+    function ensureUserRole() {
+        const checkedRoles = document.querySelectorAll('input[name="roles[]"]:checked');
+        if (checkedRoles.length === 0) {
+            userRoleCheckbox.checked = true;
+        }
+    }
+    
+    roleCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', ensureUserRole);
+    });
+});
+</script>
+
+{% endblock %}

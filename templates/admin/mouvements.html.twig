@@ -1,0 +1,465 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Administration - Mouvements{% endblock %}
+
+{% block body %}
+<div class="admin-content">
+    <div class="page-header">
+        <h1>📊 Gestion des Mouvements</h1>
+        <p>Statistiques détaillées et analyse des mouvements de stock</p>
+    </div>
+
+    <!-- Statistiques générales -->
+    <div class="stats-grid">
+        <div class="stat-card primary">
+            <div class="stat-icon">📊</div>
+            <div class="stat-content">
+                <div class="stat-number">{{ stats.total_mouvements }}</div>
+                <div class="stat-label">Mouvements Total</div>
+            </div>
+        </div>
+        
+        <div class="stat-card success">
+            <div class="stat-icon">📅</div>
+            <div class="stat-content">
+                <div class="stat-number">{{ stats.mouvements_ce_mois }}</div>
+                <div class="stat-label">Ce Mois</div>
+            </div>
+        </div>
+        
+        <div class="stat-card info">
+            <div class="stat-icon">🕐</div>
+            <div class="stat-content">
+                <div class="stat-number">{{ stats.mouvements_aujourdhui }}</div>
+                <div class="stat-label">Aujourd'hui</div>
+            </div>
+        </div>
+        
+        <div class="stat-card warning">
+            <div class="stat-icon">📈</div>
+            <div class="stat-content">
+                <div class="stat-number">{{ stats.moyenne_par_jour }}</div>
+                <div class="stat-label">Moyenne/Jour</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques circulaires -->
+    <div class="charts-section">
+        <div class="chart-container">
+            <h3>Activité Mensuelle</h3>
+            <div class="circular-chart">
+                <svg viewBox="0 0 36 36" class="circular-chart-svg">
+                    <path class="circle-bg"
+                        d="M18 2.0845
+                           a 15.9155 15.9155 0 0 1 0 31.831
+                           a 15.9155 15.9155 0 0 1 0 -31.831"
+                    />
+                    <path class="circle"
+                        stroke-dasharray="{{ stats.total_mouvements > 0 ? (stats.mouvements_ce_mois / stats.total_mouvements * 100)|round : 0 }}, 100"
+                        d="M18 2.0845
+                           a 15.9155 15.9155 0 0 1 0 31.831
+                           a 15.9155 15.9155 0 0 1 0 -31.831"
+                    />
+                    <text x="18" y="20.35" class="percentage">{{ stats.total_mouvements > 0 ? ((stats.mouvements_ce_mois / stats.total_mouvements * 100)|round) : 0 }}%</text>
+                    <text x="18" y="24" class="label">ce mois</text>
+                </svg>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <h3>Activité Quotidienne</h3>
+            <div class="circular-chart">
+                <svg viewBox="0 0 36 36" class="circular-chart-svg">
+                    <path class="circle-bg"
+                        d="M18 2.0845
+                           a 15.9155 15.9155 0 0 1 0 31.831
+                           a 15.9155 15.9155 0 0 1 0 -31.831"
+                    />
+                    <path class="circle circle-success"
+                        stroke-dasharray="{{ stats.mouvements_ce_mois > 0 ? (stats.mouvements_aujourdhui / stats.mouvements_ce_mois * 100)|round : 0 }}, 100"
+                        d="M18 2.0845
+                           a 15.9155 15.9155 0 0 1 0 31.831
+                           a 15.9155 15.9155 0 0 1 0 -31.831"
+                    />
+                    <text x="18" y="20.35" class="percentage">{{ stats.mouvements_aujourdhui }}</text>
+                    <text x="18" y="24" class="label">aujourd'hui</text>
+                </svg>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <h3>Couverture</h3>
+            <div class="circular-chart">
+                <svg viewBox="0 0 36 36" class="circular-chart-svg">
+                    <path class="circle-bg"
+                        d="M18 2.0845
+                           a 15.9155 15.9155 0 0 1 0 31.831
+                           a 15.9155 15.9155 0 0 1 0 -31.831"
+                    />
+                    <path class="circle circle-info"
+                        stroke-dasharray="{{ stats.total_equipements > 0 ? (stats.total_mouvements / stats.total_equipements / 10 * 100)|round : 0 }}, 100"
+                        d="M18 2.0845
+                           a 15.9155 15.9155 0 0 1 0 31.831
+                           a 15.9155 15.9155 0 0 1 0 -31.831"
+                    />
+                    <text x="18" y="20.35" class="percentage">{{ stats.total_equipements > 0 ? ((stats.total_mouvements / stats.total_equipements)|round) : 0 }}</text>
+                    <text x="18" y="24" class="label">par équip.</text>
+                </svg>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <h3>Efficacité</h3>
+            <div class="circular-chart">
+                <svg viewBox="0 0 36 36" class="circular-chart-svg">
+                    <path class="circle-bg"
+                        d="M18 2.0845
+                           a 15.9155 15.9155 0 0 1 0 31.831
+                           a 15.9155 15.9155 0 0 1 0 -31.831"
+                    />
+                    <path class="circle circle-warning"
+                        stroke-dasharray="{{ stats.moyenne_par_jour > 0 ? (stats.moyenne_par_jour / 20 * 100)|round : 0 }}, 100"
+                        d="M18 2.0845
+                           a 15.9155 15.9155 0 0 1 0 31.831
+                           a 15.9155 15.9155 0 0 1 0 -31.831"
+                    />
+                    <text x="18" y="20.35" class="percentage">{{ stats.moyenne_par_jour }}</text>
+                    <text x="18" y="24" class="label">moy/jour</text>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-grid">
+        <!-- Répartition par type -->
+        <div class="panel">
+            <div class="panel-header">
+                <h2>🔄 Répartition par type</h2>
+            </div>
+            <div class="panel-body">
+                {% if mouvements_par_type is empty %}
+                    <div class="empty-state">
+                        <p>Aucune donnée disponible</p>
+                    </div>
+                {% else %}
+                    <div class="distribution">
+                        {% for type, count in mouvements_par_type %}
+                            <div class="distribution-item">
+                                <div class="distribution-name">
+                                    {% if type == 'entree' %}
+                                        ⬇️ Entrée
+                                    {% elseif type == 'sortie' %}
+                                        ⬆️ Sortie
+                                    {% elseif type == 'transfert' %}
+                                        🔄 Transfert
+                                    {% elseif type == 'ajustement' %}
+                                        ⚖️ Ajustement
+                                    {% elseif type == 'retour' %}
+                                        ↩️ Retour
+                                    {% else %}
+                                        ❓ {{ type }}
+                                    {% endif %}
+                                </div>
+                                <div class="distribution-count">
+                                    <span class="count-number">{{ count }}</span>
+                                    <span class="count-label">mouvement{{ count > 1 ? 's' : '' }}</span>
+                                </div>
+                                <div class="distribution-bar">
+                                    <div class="distribution-progress" style="width: {{ (count / stats.total_mouvements * 100)|round }}%"></div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Répartition par société -->
+        <div class="panel">
+            <div class="panel-header">
+                <h2>🏢 Répartition par société</h2>
+            </div>
+            <div class="panel-body">
+                {% if mouvements_par_societe is empty %}
+                    <div class="empty-state">
+                        <p>Aucune donnée disponible</p>
+                    </div>
+                {% else %}
+                    <div class="distribution">
+                        {% for societe, count in mouvements_par_societe %}
+                            <div class="distribution-item">
+                                <div class="distribution-name">🏢 {{ societe }}</div>
+                                <div class="distribution-count">
+                                    <span class="count-number">{{ count }}</span>
+                                    <span class="count-label">mouvement{{ count > 1 ? 's' : '' }}</span>
+                                </div>
+                                <div class="distribution-bar">
+                                    <div class="distribution-progress" style="width: {{ (count / stats.total_mouvements * 100)|round }}%"></div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Répartition par dépôt et équipement -->
+    <div class="content-grid">
+        <div class="panel">
+            <div class="panel-header">
+                <h2>🏪 Répartition par dépôt</h2>
+            </div>
+            <div class="panel-body">
+                {% if mouvements_par_depot is empty %}
+                    <div class="empty-state">
+                        <p>Aucune donnée disponible</p>
+                    </div>
+                {% else %}
+                    <div class="distribution">
+                        {% for depot, count in mouvements_par_depot %}
+                            <div class="distribution-item">
+                                <div class="distribution-name">🏪 {{ depot }}</div>
+                                <div class="distribution-count">
+                                    <span class="count-number">{{ count }}</span>
+                                    <span class="count-label">mouvement{{ count > 1 ? 's' : '' }}</span>
+                                </div>
+                                <div class="distribution-bar">
+                                    <div class="distribution-progress" style="width: {{ (count / stats.total_mouvements * 100)|round }}%"></div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Répartition par équipement -->
+        <div class="panel">
+            <div class="panel-header">
+                <h2>🛠️ Répartition par équipement</h2>
+            </div>
+            <div class="panel-body">
+                {% if mouvements_par_equipement is empty %}
+                    <div class="empty-state">
+                        <p>Aucune donnée disponible</p>
+                    </div>
+                {% else %}
+                    <div class="distribution">
+                        {% for equipement, count in mouvements_par_equipement %}
+                            <div class="distribution-item">
+                                <div class="distribution-name">🛠️ {{ equipement }}</div>
+                                <div class="distribution-count">
+                                    <span class="count-number">{{ count }}</span>
+                                    <span class="count-label">mouvement{{ count > 1 ? 's' : '' }}</span>
+                                </div>
+                                <div class="distribution-bar">
+                                    <div class="distribution-progress" style="width: {{ (count / stats.total_mouvements * 100)|round }}%"></div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau complet des mouvements -->
+    <div class="panel full-width">
+        <div class="panel-header">
+            <h2>📋 Liste complète des mouvements</h2>
+            <div class="panel-actions">
+                <a href="{{ path('app_mouvement_stock_new') }}" class="btn btn-primary">
+                    + Nouveau mouvement
+                </a>
+            </div>
+        </div>
+        <div class="panel-body">
+            {% if mouvements_data is empty %}
+                <div class="empty-state">
+                    <p>Aucun mouvement trouvé</p>
+                </div>
+            {% else %}
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Équipement</th>
+                                <th>Dépôt Source</th>
+                                <th>Dépôt Destination</th>
+                                <th>Société</th>
+                                <th>Quantité</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in mouvements_data %}
+                                <tr>
+                                    <td>
+                                        <div class="date-info">
+                                            <strong>{{ item.mouvement.date|date('d/m/Y') }}</strong>
+                                            <br><small>{{ item.mouvement.date|date('H:i') }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-type">
+                                            {% if item.type == 'entree' %}
+                                                ⬇️ Entrée
+                                            {% elseif item.type == 'sortie' %}
+                                                ⬆️ Sortie
+                                            {% elseif item.type == 'transfert' %}
+                                                🔄 Transfert
+                                            {% elseif item.type == 'ajustement' %}
+                                                ⚖️ Ajustement
+                                            {% elseif item.type == 'retour' %}
+                                                ↩️ Retour
+                                            {% else %}
+                                                ❓ {{ item.type }}
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if item.equipement %}
+                                            <div class="equipment-info">
+                                                <strong>{{ item.equipement.model ?? 'Modèle non spécifié' }}</strong>
+                                                {% if item.equipement.sn %}
+                                                    <br><small>SN: {{ item.equipement.sn }}</small>
+                                                {% endif %}
+                                            </div>
+                                        {% else %}
+                                            <span class="text-muted">Non spécifié</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if item.depot_source %}
+                                            <span class="badge badge-warning">{{ item.depot_source.nom }}</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if item.depot_destination %}
+                                            <span class="badge badge-success">{{ item.depot_destination.nom }}</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if item.societe %}
+                                            <span class="badge badge-info">{{ item.societe.nom }}</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary">Non assigné</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-movement">{{ item.mouvement.quantite ?? 1 }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a href="{{ path('app_mouvement_stock_show', {'id': item.mouvement.id}) }}" class="btn btn-sm btn-outline">
+                                                👁️ Voir
+                                            </a>
+                                            <a href="{{ path('app_mouvement_stock_edit', {'id': item.mouvement.id}) }}" class="btn btn-sm btn-outline">
+                                                ✏️ Modifier
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+/* Styles identiques aux autres pages admin */
+.admin-content { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+.page-header { margin-bottom: 2rem; }
+.page-header h1 { margin: 0 0 0.5rem 0; color: #2d3748; font-size: 2.5rem; }
+.page-header p { color: #718096; font-size: 1.1rem; margin: 0; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+.stat-card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 1.5rem; transition: transform 0.2s ease; }
+.stat-card:hover { transform: translateY(-2px); }
+.stat-card.primary { border-left: 5px solid #667eea; }
+.stat-card.success { border-left: 5px solid #48bb78; }
+.stat-card.info { border-left: 5px solid #4299e1; }
+.stat-card.warning { border-left: 5px solid #ed8936; }
+.stat-icon { font-size: 2.5rem; opacity: 0.8; }
+.stat-content { flex: 1; }
+.stat-number { font-size: 2rem; font-weight: 700; color: #2d3748; margin-bottom: 0.25rem; }
+.stat-label { color: #718096; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.charts-section { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-bottom: 3rem; }
+.chart-container { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center; }
+.chart-container h3 { margin: 0 0 1.5rem 0; color: #2d3748; font-size: 1.2rem; }
+.circular-chart { width: 120px; height: 120px; margin: 0 auto; }
+.circular-chart-svg { width: 100%; height: 100%; }
+.circle-bg { fill: none; stroke: #e2e8f0; stroke-width: 3.8; }
+.circle { fill: none; stroke: #667eea; stroke-width: 2.8; stroke-linecap: round; animation: progress 1s ease-out forwards; }
+.circle-success { stroke: #48bb78; }
+.circle-info { stroke: #4299e1; }
+.circle-warning { stroke: #ed8936; }
+.percentage { fill: #2d3748; font-family: sans-serif; font-size: 0.5em; text-anchor: middle; font-weight: bold; }
+.label { fill: #718096; font-family: sans-serif; font-size: 0.3em; text-anchor: middle; }
+@keyframes progress { 0% { stroke-dasharray: 0 100; } }
+.content-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; margin-bottom: 2rem; }
+.panel { background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); overflow: hidden; }
+.panel-header { padding: 1.5rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+.panel-header h2 { margin: 0; color: #2d3748; font-size: 1.3rem; }
+.panel-body { padding: 1.5rem; }
+.distribution { display: flex; flex-direction: column; gap: 1rem; }
+.distribution-item { display: flex; align-items: center; gap: 1rem; }
+.distribution-name { flex: 1; font-weight: 500; color: #2d3748; }
+.distribution-count { display: flex; flex-direction: column; align-items: flex-end; min-width: 80px; }
+.count-number { font-weight: 700; color: #4299e1; font-size: 1.2rem; }
+.count-label { color: #718096; font-size: 0.9rem; }
+.distribution-bar { height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
+.distribution-progress { height: 100%; background: linear-gradient(135deg, #4299e1, #3182ce); transition: width 0.3s ease; }
+
+/* Styles pour le tableau des mouvements */
+.full-width { grid-column: 1 / -1; }
+.table-container { overflow-x: auto; margin-top: 1rem; }
+.data-table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.data-table th, .data-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+.data-table th { background: #f7fafc; font-weight: 600; color: #2d3748; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.data-table tr:hover { background: #f7fafc; }
+.data-table tr:last-child td { border-bottom: none; }
+
+/* Badges */
+.badge { display: inline-block; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 500; text-align: center; }
+.badge-primary { background: #e6f3ff; color: #0066cc; }
+.badge-success { background: #e6f7e6; color: #2d7d32; }
+.badge-danger { background: #ffe6e6; color: #d32f2f; }
+.badge-warning { background: #fff3e0; color: #f57c00; }
+.badge-info { background: #e3f2fd; color: #1976d2; }
+.badge-secondary { background: #f5f5f5; color: #757575; }
+.badge-type { background: #f0f4f8; color: #4a5568; }
+.badge-movement { background: #edf2f7; color: #2d3748; font-weight: 600; }
+
+/* Informations */
+.date-info strong { color: #2d3748; }
+.date-info small { color: #718096; }
+.equipment-info strong { color: #2d3748; }
+.equipment-info small { color: #718096; }
+.text-muted { color: #a0aec0; }
+
+/* Boutons d'action */
+.action-buttons { display: flex; gap: 8px; }
+.btn { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.875rem; text-decoration: none; display: inline-block; transition: all 0.2s ease; }
+.btn-sm { padding: 4px 8px; font-size: 0.75rem; }
+.btn-primary { background: #667eea; color: white; }
+.btn-primary:hover { background: #5a67d8; }
+.btn-outline { background: transparent; border: 1px solid #e2e8f0; color: #4a5568; }
+.btn-outline:hover { background: #f7fafc; border-color: #cbd5e0; }
+.panel-actions { display: flex; gap: 1rem; }
+
+.empty-state { text-align: center; padding: 3rem; color: #718096; }
+@media (max-width: 768px) { .content-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: 1fr; } }
+</style>
+
+{% endblock %}

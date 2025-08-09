@@ -3,56 +3,109 @@
 {% block title %}Equipement{% endblock %}
 
 {% block body %}
-    <h1>Equipement</h1>
-
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ equipement.id }}</td>
-            </tr>
-            <tr>
-                <th>TypeEquipement</th>
-                <td>{{ equipement.typeEquipement }}</td>
-            </tr>
-            <tr>
-                <th>Sn</th>
-                <td>{{ equipement.sn }}</td>
-            </tr>
-            <tr>
-                <th>Model</th>
-                <td>{{ equipement.model }}</td>
-            </tr>
-            <tr>
-                <th>Imei</th>
-                <td>{{ equipement.imei }}</td>
-            </tr>
-            <tr>
-                <th>NumAppel</th>
-                <td>{{ equipement.numAppel }}</td>
-            </tr>
-            <tr>
-                <th>Operateur</th>
-                <td>{{ equipement.operateur }}</td>
-            </tr>
-            <tr>
-                <th>ReferenceCarte</th>
-                <td>{{ equipement.referenceCarte }}</td>
-            </tr>
-            <tr>
-                <th>Fournisseur</th>
-                <td>{{ equipement.fournisseur }}</td>
-            </tr>
-            <tr>
-                <th>Etat</th>
-                <td>{{ equipement.etat }}</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_equipement_index') }}">back to list</a>
-
-    <a href="{{ path('app_equipement_edit', {'id': equipement.id}) }}">edit</a>
-
-    {{ include('equipement/_delete_form.html.twig') }}
+    <div class="show-container">
+        <h2 class="show-title">Détail de l'équipement</h2>
+        <div class="show-card">
+            <div class="show-attr">
+                <span class="show-label">Type d'équipement :</span>
+                <span class="show-value">{{ equipement.typeEquipement }}</span>
+            </div>
+            {% if equipement.typeEquipement == 'SIM' %}
+                <div class="show-attr"><span class="show-label">IMEI :</span> <span class="show-value">{{ equipement.imei }}</span></div>
+                <div class="show-attr"><span class="show-label">Num appel :</span> <span class="show-value">{{ equipement.numAppel }}</span></div>
+                <div class="show-attr"><span class="show-label">Opérateur :</span> <span class="show-value">{{ equipement.operateur }}</span></div>
+                <div class="show-attr"><span class="show-label">État :</span> <span class="show-value">{{ equipement.etat }}</span></div>
+            {% elseif equipement.typeEquipement == 'TPE' %}
+                <div class="show-attr"><span class="show-label">SN :</span> <span class="show-value">{{ equipement.sn }}</span></div>
+                <div class="show-attr"><span class="show-label">Modèle :</span> <span class="show-value">{{ equipement.model }}</span></div>
+                <div class="show-attr"><span class="show-label">Fournisseur :</span> <span class="show-value">{{ equipement.fournisseur }}</span></div>
+                <div class="show-attr"><span class="show-label">État :</span> <span class="show-value">{{ equipement.etat }}</span></div>
+            {% elseif equipement.typeEquipement == 'Carte' %}
+                <div class="show-attr"><span class="show-label">Référence carte :</span> <span class="show-value">{{ equipement.referenceCarte }}</span></div>
+                <div class="show-attr"><span class="show-label">État :</span> <span class="show-value">{{ equipement.etat }}</span></div>
+            {% endif %}
+        </div>
+        <div class="show-actions">
+            <a href="{{ path('app_equipement_index') }}" class="btn-back">&#8592; Retour à la liste</a>
+            <a href="{{ path('app_equipement_edit', {'id': equipement.id}) }}" class="btn">Modifier</a>
+            {{ include('equipement/_delete_form.html.twig') }}
+        </div>
+    </div>
+    <style>
+        .show-container {
+            max-width: 420px;
+            margin: 3rem auto 0 auto;
+            padding: 2rem 1.5rem;
+            background: rgba(255,255,255,0.97);
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(102, 126, 234, 0.13);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .show-title {
+            color: #764ba2;
+            font-size: 1.6rem;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.5px;
+        }
+        .show-card {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1.1rem;
+            margin-bottom: 1.7rem;
+        }
+        .show-attr {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f6f7fb;
+            border-radius: 10px;
+            padding: 0.7rem 1.1rem;
+            box-shadow: 0 1px 4px rgba(102, 126, 234, 0.06);
+        }
+        .show-label {
+            font-weight: 600;
+            color: #764ba2;
+        }
+        .show-value {
+            color: #222;
+            font-size: 1.08rem;
+        }
+        .show-actions {
+            display: flex;
+            gap: 1.1rem;
+            width: 100%;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn, .btn-back {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            padding: 0.6rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .btn-back {
+            background: none;
+            color: #764ba2;
+            border: none;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+        .btn-back:hover {
+            color: #667eea;
+            text-decoration: underline;
+        }
+        .btn:hover {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+        }
+    </style>
 {% endblock %}

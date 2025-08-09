@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Système de Gestion de Stock</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8fafc;
+            color: #2d3748;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* Navigation */
+        .nav-container {
+            display: flex;
+            flex: 1;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #2d3748;
+            color: white;
+            padding: 1rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .nav-item {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: #4a5568;
+            border-left-color: #667eea;
+        }
+
+        .nav-item.active {
+            background: #667eea;
+            border-left-color: #764ba2;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link:hover {
+            background: #4a5568;
+            border-left-color: #667eea;
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            background: currentColor;
+            mask-size: contain;
+            flex-shrink: 0;
+        }
+
+        .nav-text {
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar.collapsed .nav-text {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            background: #f8fafc;
+            position: relative;
+            overflow-y: auto;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+
+        .content-area {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            min-height: 400px;
+            position: relative;
+        }
+
+        /* Grid System for Layout */
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .grid-2 { grid-template-columns: 1fr 1fr; }
+        .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+        .grid-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 2px dashed #cbd5e0;
+            text-align: center;
+            color: #718096;
+            transition: all 0.3s ease;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            border-color: #667eea;
+            background: #f7fafc;
+        }
+
+        .wireframe-element {
+            background: #e2e8f0;
+            border-radius: 4px;
+            height: 20px;
+            margin: 0.5rem 0;
+            animation: pulse 2s infinite;
+        }
+
+        .wireframe-element.wide { width: 80%; }
+        .wireframe-element.medium { width: 60%; }
+        .wireframe-element.small { width: 40%; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        /* Toggle Button */
+        .toggle-sidebar {
+            position: absolute;
+            top: 1rem;
+            left: -15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        /* Pages Content */
+        .page-content {
+            display: none;
+        }
+
+        .page-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                display: none;
+            }
+            
+            .sidebar.show {
+                display: block;
+            }
+            
+            .grid-2, .grid-3, .grid-4 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .breadcrumb {
+            background: #e2e8f0;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .form-skeleton {
+            display: grid;
+            gap: 1rem;
+            max-width: 500px;
+        }
+
+        .form-group-skeleton {
+            border: 2px dashed #cbd5e0;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .table-skeleton {
+            border: 2px dashed #cbd5e0;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .table-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background: #f8fafc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">StockPro Manager</div>
+            <div class="user-menu">
+                <span>Gestionnaire</span>
+                <div class="user-avatar">👤</div>
+            </div>
+        </header>
+
+        <div class="nav-container">
+            <!-- Sidebar Navigation -->
+            <nav class="sidebar" id="sidebar">
+                <div class="nav-item active" data-page="dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Tableau de bord</span>
+                </div>
+                <div class="nav-item" data-page="inventory">
+                    <span class="nav-icon">📦</span>
+                    <span class="nav-text">Inventaire</span>
+                </div>
+                <div class="nav-item" data-page="products">
+                    <span class="nav-icon">🏷️</span>
+                    <span class="nav-text">Articles</span>
+                </div>
+                <div class="nav-item" data-page="movements">
+                    <span class="nav-icon">🔄</span>
+                    <span class="nav-text">Mouvements</span>
+                </div>
+                <a href="{{ path('app_admin_societes') }}" class="nav-item nav-link">
+                    <span class="nav-icon">🏢</span>
+                    <span class="nav-text">Sociétés</span>
+                </a>
+                <div class="nav-item" data-page="reports">
+                    <span class="nav-icon">📈</span>
+                    <span class="nav-text">Rapports</span>
+                </div>
+                <div class="nav-item" data-page="settings">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-text">Paramètres</span>
+                </div>
+            </nav>
+
+            <!-- Main Content Area -->
+            <main class="main-content">
+                <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
+
+                <!-- Dashboard Page -->
+                <div class="page-content active" id="dashboard">
+                    <div class="page-header">
+                        <h1 class="page-title">Tableau de bord</h1>
+                        <p class="page-subtitle">Vue d'ensemble de votre stock</p>
+                    </div>
+                    
+                    <div class="breadcrumb">Accueil > Tableau de bord</div>
+                    
+                    <div class="grid grid-4">
+                        <div class="card">
+                            <h3>Stock total</h3>
+                            <p>Valeur inventaire</p>
+                            <div class="wireframe-element wide"></div>
+                            <div class="wireframe-element medium"></div>
+                        </div>
+                        <div class="card">
+                            <h3>Articles</h3>
+                            <p>Références actives</p>
+                            <div class="wireframe-element wide"></div>
+                            <div class="wireframe-element small"></div>
+                        </div>
+                        <div class="card">
+                            <h3>Ruptures</h3>
+                            <p>Articles en alerte</p>
+                            <div class="wireframe-element medium"></div>
+                            <div class="wireframe-element wide"></div>
+                        </div>
+                        <div class="card">
+                            <h3>Mouvements</h3>
+                            <p>Activité journalière</p>
+                            <div class="wireframe-element small"></div>
+                            <div class="wireframe-element medium"></div>
+                        </div>
+                    </div>
+
+                    <div class="content-area">
+                        <h3>Activité récente du stock</h3>
+                        <p>Aperçu des derniers mouvements et alertes</p>
+                        <div class="grid grid-2" style="margin-top: 2rem;">
+                            <div class="card">
+                                <h4>Évolution du stock</h4>
+                                <div class="wireframe-element wide"></div>
+                                <div class="wireframe-element medium"></div>
+                                <div class="wireframe-element wide"></div>
+                            </div>
+                            <div class="card">
+                                <h4>Alertes actives</h4>
+                                <div class="wireframe-element wide"></div>
+                                <div class="wireframe-element medium"></div>
+                                <div class="wireframe-element small"></div>
+                                <div class="wireframe-element wide"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inventory Page -->
+                <div class="page-content" id="inventory">
+                    <div class="page-header">
+                        <h1 class="page-title">Inventaire</h1>
+                        <p class="page-subtitle">État actuel du stock</p>
+                    </div>
+                    
+                    <div class="breadcrumb">Accueil > Inventaire</div>
+                    
+                    <div class="content-area">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                            <h3>Stock disponible</h3>
+                            <button style="background: #667eea; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;">🔍 Rechercher</button>
+                        </div>
+                        
+                        <div class="table-skeleton">
+                            <div class="table-row" style="font-weight: bold; background: #e2e8f0;">
+                                <div style="flex: 1;">Code article</div>
+                                <div style="flex: 2;">Désignation</div>
+                                <div style="flex: 1;">Quantité</div>
+                                <div style="flex: 1;">Emplacement</div>
+                                <div style="flex: 1;">Statut</div>
+                            </div>
+                            <div class="table-row">
+                                <div style="flex: 1;"><div class="wireframe-element medium"></div></div>
+                                <div style="flex: 2;"><div class="wireframe-element wide"></div></div>
+                                <div style="flex: 1;"><div class="wireframe-element small"></div></div>
+                                <div style="flex: 1;"><div class="wireframe-element medium"></div></div>
+                                <div style="flex: 1;"><div class="wireframe-element small"></div></div>
+                            </div>
+                            <div class="table-row">
+                                <div style="flex: 1;"><div class="wireframe-element medium"></div></div>
+                                <div style="flex: 2;"><div class="wireframe-element wide"></div></div>
+                                <div style="flex: 1;"><div class="wireframe-element small"></div></div>
+                                <div style="flex: 1;"><div class="wireframe-element medium"></div></div>
+                                <div style="flex: 1;"><div class="wireframe-element small"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Page -->
+                <div class="page-content" id="products">
+                    <div class="page-header">
+                        <h1 class="page-title">Gestion des articles</h1>
+                        <p class="page-subtitle">Catalogue des produits</p>
+                    </div>
+                    
+                    <div class="breadcrumb">Accueil > Articles</div>
+                    
+                    <div class="grid grid-3">
+                        <div class="card">
+                            <h4>Article A001</h4>
+                            <div class="wireframe-element wide"></div>
+                            <div class="wireframe-element medium"></div>
+                        </div>
+                        <div class="card">
+                            <h4>Article B002</h4>
+                            <div class="wireframe-element wide"></div>
+                            <div class="wireframe-element medium"></div>
+                        </div>
+                        <div class="card">
+                            <h4>Article C003</h4>
+                            <div class="wireframe-element wide"></div>
+                            <div class="wireframe-element medium"></div>
+                        </div>
+                    </div>
+
+                    <div class="content-area">
+                        <h3>Créer un nouvel article</h3>
+                        <div class="form-skeleton">
+                            <div class="form-group-skeleton">
+                                <label>Code article</label>
+                                <div class="wireframe-element medium"></div>
+                            </div>
+                            <div class="form-group-skeleton">
+                                <label>Désignation</label>
+                                <div class="wireframe-element wide"></div>
+                            </div>
+                            <div class="form-group-skeleton">
+                                <label>Catégorie</label>
+                                <div class="wireframe-element medium"></div>
+                            </div>
+                            <div class="form-group-skeleton">
+                                <label>Stock minimum</label>
+                                <div class="wireframe-element small"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Movements Page -->
+                <div class="page-content" id="movements">
+                    <div class="page-header">
+                        <h1 class="page-title">Mouvements de stock</h1>
+                        <p class="page-subtitle">Entrées et sorties</p>
+                    </div>
+                    
+                    <div class="breadcrumb">Accueil > Mouvements</div>
+                    
+                    <div class="content-area">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                            <h3>Historique des mouvements</h3>
+                            <button style="background: #10b981; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;">+ Nouveau mouvement</button>
+                        </div>
+                        
+                        <div class="table-skeleton">
+                            <div class="table-row" style="font-weight: bold; background: #e2e8f0;">
+                                <div style="flex: 1;">Date</div>
+                                <div style="flex: 1;">Type</div>
+                                <div style="flex: 2;">Article</div>
+                                <div style="flex: 1;">Quantité</div>
+                                <div style="flex: 1;">Référence</div>
+                            </div>
+                            <div class="table-row">
+                                <div style="flex: 1;"><div class="wireframe-element medium"></div></div>
+                                <div style="flex: 1;"><div class="wireframe-element small"></div></div>
+                                <div style="flex: 2;"><div class="wireframe-element wide"></div></div>
+                                <div style="flex: 1;"><div class="wireframe-element small"></div></div>
+                                <div style="flex: 1;"><div class="wireframe-element medium"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Suppliers Page -->
+                <div class="page-content" id="suppliers">
+                    <div class="page-header">
+                        <h1 class="page-title">Fournisseurs</h1>
+                        <p class="page-subtitle">Gestion des partenaires</p>
+                    </div>
+                    
+                    <div class="breadcrumb">Accueil > Fournisseurs</div>
+                    
+                    <div class="content-area">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                            <h3>Liste des fournisseurs</h3>
+                            <button style="background: #667eea; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;">+ Ajouter fournisseur</button>
+                        </div>
+                        
+                        <div class="table-skeleton">
+                            <div class="table-row" style="font-weight: bold; background: #e2e8f0;">
+                                <div style="flex: 2;">Nom</div>
+                                <div style="flex: 2;">Contact</div>
+                                <div style="flex: 1;">Téléphone</div>
+                                <div style="flex: 1;">Statut</div>
+                                <div style="flex: 1;">Actions</div>
+                            </div>
+                            <div class="table-row">
+                                <div style="flex: 2;"><div class="wireframe-element wide"></div></div>
+                                <div style="flex: 2;"><div class="wireframe-element wide"></div></div>
+                                <div style="flex: 1;"><div class="wireframe-element medium"></div></div>
+                                <div style="flex: 1;"><div class="wireframe-element small"></div></div>
+                                <div style="flex: 1;"><div class="wireframe-element small"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reports Page -->
+                <div class="page-content" id="reports">
+                    <div class="page-header">
+                        <h1 class="page-title">Rapports</h1>
+                        <p class="page-subtitle">Analyses et statistiques</p>
+                    </div>
+                    
+                    <div class="breadcrumb">Accueil > Rapports</div>
+                    
+                    <div class="grid grid-2">
+                        <div class="card">
+                            <h4>Valorisation stock</h4>
+                            <div class="wireframe-element wide"></div>
+                            <div class="wireframe-element wide"></div>
+                            <div class="wireframe-element medium"></div>
+                        </div>
+                        <div class="card">
+                            <h4>Rotation des stocks</h4>
+                            <div class="wireframe-element medium"></div>
+                            <div class="wireframe-element small"></div>
+                            <div class="wireframe-element wide"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Page -->
+                <div class="page-content" id="settings">
+                    <div class="page-header">
+                        <h1 class="page-title">Paramètres</h1>
+                        <p class="page-subtitle">Configuration du système</p>
+                    </div>
+                    
+                    <div class="breadcrumb">Accueil > Paramètres</div>
+                    
+                    <div class="content-area">
+                        <h3>Configuration générale</h3>
+                        <div class="form-skeleton">
+                            <div class="form-group-skeleton">
+                                <label>Nom de l'entrepôt</label>
+                                <div class="wireframe-element wide"></div>
+                            </div>
+                            <div class="form-group-skeleton">
+                                <label>Devise par défaut</label>
+                                <div class="wireframe-element small"></div>
+                            </div>
+                            <div class="form-group-skeleton">
+                                <label>Seuil d'alerte stock</label>
+                                <div class="wireframe-element small"></div>
+                            </div>
+                            <div class="form-group-skeleton">
+                                <label>Email notifications</label>
+                                <div class="wireframe-element medium"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Navigation functionality
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // Remove active class from all items
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                // Add active class to clicked item
+                this.classList.add('active');
+                
+                // Hide all pages
+                document.querySelectorAll('.page-content').forEach(page => page.classList.remove('active'));
+                // Show selected page
+                const pageId = this.getAttribute('data-page');
+                document.getElementById(pageId).classList.add('active');
+            });
+        });
+
+        // Sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+
+        // Add click handlers to cards
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('click', function() {
+                this.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+            });
+        });
+
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('show');
+        }
+
+        // Add mobile menu button functionality
+        if (window.innerWidth <= 768) {
+            document.querySelector('.toggle-sidebar').addEventListener('click', toggleMobileMenu);
+        }
+    </script>
+</body>
+</html>

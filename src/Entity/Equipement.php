@@ -36,7 +36,7 @@ class Equipement
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $referenceCarte = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $fournisseur = null;
 
     #[ORM\Column(length: 255)]
@@ -147,7 +147,7 @@ class Equipement
         return $this->fournisseur;
     }
 
-    public function setFournisseur(string $fournisseur): static
+    public function setFournisseur(?string $fournisseur): static
     {
         $this->fournisseur = $fournisseur;
 

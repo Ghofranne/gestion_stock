@@ -26,6 +26,8 @@ final class MouvementStockController extends AbstractController
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $mouvementStock = new MouvementStock();
+        // Définir automatiquement la date actuelle
+        $mouvementStock->setDate(new \DateTime());
         $form = $this->createForm(MouvementStockType::class, $mouvementStock);
         $form->handleRequest($request);
 
