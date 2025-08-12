@@ -1,45 +1,45 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Equipement index{% endblock %}
+{% block title %}{{ 'equipement.index.title'|trans([], 'equipement') }}{% endblock %}
 
 {% block body %}
     <div class="list-container">
-        <h2 class="list-title">Liste des équipements</h2>
+        <h2 class="list-title">{{ 'equipement.index.heading'|trans([], 'equipement') }}</h2>
         <div class="cards-wrapper">
             {% for equipement in equipements %}
                 <div class="equip-card">
                     <div class="equip-type">{{ equipement.typeEquipement }}</div>
                     <div class="equip-attrs">
                         {% if equipement.typeEquipement == 'SIM' %}
-                            <div><span class="attr-label">IMEI :</span> {{ equipement.imei }}</div>
-                            <div><span class="attr-label">Num appel :</span> {{ equipement.numAppel }}</div>
-                            <div><span class="attr-label">Opérateur :</span> {{ equipement.operateur }}</div>
+                            <div><span class="attr-label">{{ 'equipement.labels.imei'|trans([], 'equipement') }}</span> {{ equipement.imei }}</div>
+                            <div><span class="attr-label">{{ 'equipement.labels.num_call'|trans([], 'equipement') }}</span> {{ equipement.numAppel }}</div>
+                            <div><span class="attr-label">{{ 'equipement.labels.operator'|trans([], 'equipement') }}</span> {{ equipement.operateur }}</div>
                             
-                            <div><span class="attr-label">État :</span> {{ equipement.etat }}</div>
+                            <div><span class="attr-label">{{ 'equipement.labels.state'|trans([], 'equipement') }}</span> {{ equipement.etat }}</div>
                         {% elseif equipement.typeEquipement == 'TPE' %}
-                            <div><span class="attr-label">SN :</span> {{ equipement.sn }}</div>
-                            <div><span class="attr-label">Modèle :</span> {{ equipement.model }}</div>
-                            <div><span class="attr-label">Fournisseur :</span> {{ equipement.fournisseur }}</div>
-                            <div><span class="attr-label">État :</span> {{ equipement.etat }}</div>
+                            <div><span class="attr-label">{{ 'equipement.labels.sn'|trans([], 'equipement') }}</span> {{ equipement.sn }}</div>
+                            <div><span class="attr-label">{{ 'equipement.labels.model'|trans([], 'equipement') }}</span> {{ equipement.model }}</div>
+                            <div><span class="attr-label">{{ 'equipement.labels.supplier'|trans([], 'equipement') }}</span> {{ equipement.fournisseur }}</div>
+                            <div><span class="attr-label">{{ 'equipement.labels.state'|trans([], 'equipement') }}</span> {{ equipement.etat }}</div>
                         {% elseif equipement.typeEquipement == 'Carte' %}
-                            <div><span class="attr-label">Référence carte :</span> {{ equipement.referenceCarte }}</div>
+                            <div><span class="attr-label">{{ 'equipement.labels.card_ref'|trans([], 'equipement') }}</span> {{ equipement.referenceCarte }}</div>
                             
-                            <div><span class="attr-label">État :</span> {{ equipement.etat }}</div>
+                            <div><span class="attr-label">{{ 'equipement.labels.state'|trans([], 'equipement') }}</span> {{ equipement.etat }}</div>
                         {% endif %}
                     </div>
                     <div class="equip-actions">
-                        <a href="{{ path('app_equipement_edit', {'id': equipement.id}) }}" class="btn-action">Modifier</a>
-                        <form method="post" action="{{ path('app_equipement_delete', {'id': equipement.id}) }}" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet équipement ?');">
+                        <a href="{{ path('app_equipement_edit', {'id': equipement.id}) }}" class="btn-action">{{ 'equipement.actions.edit'|trans([], 'equipement') }}</a>
+                        <form method="post" action="{{ path('app_equipement_delete', {'id': equipement.id}) }}" style="display: inline;" onsubmit="return confirm('{{ 'equipement.index.confirm_delete'|trans([], 'equipement') }}');">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ equipement.id) }}">
-                            <button type="submit" class="btn-action btn-delete">Supprimer</button>
+                            <button type="submit" class="btn-action btn-delete">{{ 'equipement.actions.delete'|trans([], 'equipement') }}</button>
                         </form>
                     </div>
                 </div>
             {% else %}
-                <div style="text-align:center;width:100%;color:#764ba2;font-weight:600;">Aucun équipement trouvé</div>
+                <div style="text-align:center;width:100%;color:#764ba2;font-weight:600;">{{ 'equipement.index.none'|trans([], 'equipement') }}</div>
             {% endfor %}
         </div>
-        <a href="{{ path('app_equipement_new') }}" class="btn-create">+ Ajouter un équipement</a>
+        <a href="{{ path('app_equipement_new') }}" class="btn-create">+ {{ 'equipement.index.add'|trans([], 'equipement') }}</a>
     </div>
     <style>
         .cards-wrapper {

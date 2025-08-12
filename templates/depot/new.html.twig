@@ -1,14 +1,14 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Ajouter un dépôt{% endblock %}
+{% block title %}{{ 'depot.new.title'|trans([], 'depot') }}{% endblock %}
 
 {% block body %}
     <div class="form-container">
-        <h2 class="form-title">Créer un nouveau dépôt</h2>
+        <h2 class="form-title">{{ 'depot.new.heading'|trans([], 'depot') }}</h2>
         <div class="form-card">
             {{ include('depot/_form.html.twig') }}
         </div>
-        <a href="{{ path('app_depot_index') }}" class="btn-back">&#8592; Retour à la liste</a>
+        <a href="{{ path('app_depot_index') }}" class="btn-back">&#8592; {{ 'depot.new.back'|trans([], 'depot') }}</a>
     </div>
     <style>
         .form-container {

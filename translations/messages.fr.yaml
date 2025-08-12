@@ -1,0 +1,66 @@
+menu:
+  home: Accueil
+  companies: Sociétés
+  depots: Dépôts
+  equipments: Équipements
+  movements: Mouvements de Stock
+  profile: Profil
+  logout: Déconnexion
+
+profile:
+  title: Mon Profil - StockPro
+  personal_info: Informations personnelles
+  email: Email
+  phone: Téléphone
+  position: Poste
+  edit_info: Modifier mes informations
+  security: Sécurité
+  password: Mot de passe
+  last_login: Dernière connexion
+  change_password: Changer le mot de passe
+  preferences: Préférences
+  language: Langue
+  date_format: Format de date
+  notifications: Notifications
+  edit_preferences: Modifier les préférences
+  permissions: Permissions et accès
+  role: Rôle
+  companies_accessible: Sociétés accessibles
+  depots_assigned: Dépôts assignés
+  recent_activity: Activité récente
+  equipments_added: Équipements ajoutés
+  movements_created: Mouvements créés
+  last_action: Dernière action
+  quick_actions: Actions rapides
+  export_data: Exporter mes données
+  download_report: Télécharger un rapport
+  logout: Déconnexion
+
+footer:
+  copyright: " %year% StockPro. Tous droits réservés. Solution de gestion de stock multi-dépôts."
+
+dashboard:
+  title: Accueil - Système de Gestion de Stock
+  heading: Système de Gestion de Stock
+  actions:
+    access: Accéder
+    consult: Consulter
+  cards:
+    companies:
+      title: Gestion des Sociétés
+      desc: Gérez les informations des sociétés et leurs paramètres
+    overview:
+      title: Vue d'ensemble
+      desc: Aperçu complet de chaque société avec ses dépôts, mouvements et équipements
+    depots:
+      title: Gestion des Dépôts
+      desc: Administrez vos dépôts et leurs emplacements
+    equipments:
+      title: Gestion des Équipements
+      desc: Suivez et gérez votre inventaire d'équipements
+    movements:
+      title: Gestion des mouvements
+      desc: Consultez et gérez tous les mouvements de stock
+    transfer:
+      title: Transfert Stock
+      desc: Effectuez des transferts entre dépôts

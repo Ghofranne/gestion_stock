@@ -1,14 +1,14 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Equipement{% endblock %}
+{% block title %}{{ 'equipement.edit.title'|trans([], 'equipement') }}{% endblock %}
 
 {% block body %}
     <div class="form-container">
-        <h2 class="form-title">Modifier l'équipement</h2>
+        <h2 class="form-title">{{ 'equipement.edit.heading'|trans([], 'equipement') }}</h2>
         <div class="form-card">
-            {{ include('equipement/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
+            {{ include('equipement/_form.html.twig', {'button_label': ('equipement.edit.update'|trans([], 'equipement'))}) }}
         </div>
-        <a href="{{ path('app_equipement_index') }}" class="btn-back">&#8592; Retour à la liste</a>
+        <a href="{{ path('app_equipement_index') }}" class="btn-back">&#8592; {{ 'equipement.edit.back'|trans([], 'equipement') }}</a>
         <div style="margin-top:1.5rem;">{{ include('equipement/_delete_form.html.twig') }}</div>
     </div>
     <style>

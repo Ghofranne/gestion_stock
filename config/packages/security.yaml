@@ -17,7 +17,7 @@ security:
         main:
             lazy: true
             provider: app_user_provider
-            # custom_authenticator: App\Security\AppCustomAuthenticator
+            # custom authenticators for form login
             logout:
                 path: app_logout
                 # where to redirect after logout
@@ -28,7 +28,8 @@ security:
                 lifetime: 604800
                 path: /
                 always_remember_me: true
-            custom_authenticator: App\Security\AppCustomAuthenticator
+            custom_authenticators:
+                - App\Security\AppCustomAuthenticator
             # Redirection après login
             login_throttling:
                 max_attempts: 5
@@ -45,6 +46,9 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
+        - { path: ^/login$, roles: PUBLIC_ACCESS }
+        - { path: ^/connect/google, roles: PUBLIC_ACCESS }
+        - { path: ^/connect/google/check, roles: PUBLIC_ACCESS }
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
 

@@ -1,0 +1,104 @@
+profile:
+  title: Mon profil
+  user: Utilisateur
+  role_admin: Administrateur
+  role_user: Utilisateur
+
+  personal_info: Informations personnelles
+  email_label: Email
+  phone: Téléphone
+  position: Poste
+  not_provided: Non renseigné
+  edit_info: Modifier les informations
+
+  security: Sécurité
+  password_label: Mot de passe
+  last_login: Dernière connexion
+  first_login: Première connexion
+  change_password: Changer le mot de passe
+
+  preferences_label: Préférences
+  language: Langue
+  lang:
+    fr: Français
+    en: Anglais
+  date_format: Format de date
+  notifications: Notifications
+  notifications_on: Activées
+  notifications_off: Désactivées
+  edit_preferences: Modifier les préférences
+
+  permissions: Permissions
+  role: Rôle
+  companies_accessible: Sociétés accessibles
+  depots_assigned: Dépôts assignés
+  all: Tous/Toutes
+
+  recent_activity: Activité récente
+  equipments_added: Équipements ajoutés
+  movements_created: Mouvements créés
+  last_action: Dernière action
+  no_activity: Aucune activité
+
+  quick_actions: Actions rapides
+  export_data: Exporter les données
+  download_report: Télécharger le rapport
+  logout: Déconnexion
+
+  save: Enregistrer
+  cancel: Annuler
+  update: Mettre à jour
+
+  edit:
+    title: Modifier mon profil
+    heading: Modifier mes informations
+    first_name: Prénom
+    last_name: Nom
+    email: Email
+    phone: Téléphone
+    position: Poste
+
+  preferences:
+    title: Mes préférences
+    heading: Préférences
+    language_label: Langue
+    language:
+      fr: Français
+      en: Anglais
+    date_format_label: Format de date
+    notifications_label: Activer les notifications
+
+  password:
+    title: Changer mon mot de passe
+    heading: Changer mon mot de passe
+    current: Mot de passe actuel
+    new: Nouveau mot de passe
+    help: 8 caractères minimum, mélangez lettres, chiffres et symboles.
+    confirm: Confirmer le nouveau mot de passe
+
+  auth:
+    forgot:
+      title: Mot de passe oublié
+      heading: Mot de passe oublié
+      instruction: Entrez votre adresse email pour recevoir un lien de réinitialisation.
+      email_label: Adresse email
+      send_link: Envoyer le lien
+      back_to_login: Retour à la connexion
+    reset:
+      title: Réinitialiser le mot de passe
+      heading: Nouveau mot de passe
+      instruction: Choisissez un mot de passe sécurisé pour votre compte.
+      new_password: Nouveau mot de passe
+      confirm_password: Confirmer le mot de passe
+      submit: Réinitialiser
+
+  email:
+    reset:
+      subject: Réinitialisation de votre mot de passe
+      title: Réinitialisation de mot de passe
+      greeting: "Bonjour %name%,"
+      instruction: "Nous avons reçu une demande de réinitialisation de votre mot de passe. Cliquez sur le bouton ci-dessous pour définir un nouveau mot de passe. Ce lien expire dans %expires%."
+      button: Réinitialiser mon mot de passe
+      ignore: Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet email. Votre mot de passe restera inchangé.
+      fallback: Si le bouton ne fonctionne pas, copiez et collez ce lien dans votre navigateur :
+      footer: Cet email a été envoyé automatiquement.

@@ -224,5 +224,26 @@
     </div>
 
     {% block extra_js %}{% endblock %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const notyf = new Notyf({ duration: 3500, ripple: true, dismissible: true });
+        {% for type, messages in app.flashes %}
+          {% for message in messages %}
+            {% set txt = message|trans([], 'notifications') %}
+            {% if type == 'success' %}
+              notyf.success('{{ txt|e('js') }}');
+            {% elseif type == 'error' %}
+              notyf.error('{{ txt|e('js') }}');
+            {% elseif type == 'warning' %}
+              notyf.open({ type: 'warning', message: '{{ txt|e('js') }}' });
+            {% else %}
+              notyf.open({ type: 'info', message: '{{ txt|e('js') }}' });
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+      });
+    </script>
 </body>
 </html>

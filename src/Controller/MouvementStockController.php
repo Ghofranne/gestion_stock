@@ -34,7 +34,7 @@ final class MouvementStockController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($mouvementStock);
             $entityManager->flush();
-
+            $this->addFlash('success', 'notifications.mouvement.created');
             return $this->redirectToRoute('app_mouvement_stock_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -60,7 +60,7 @@ final class MouvementStockController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
-
+            $this->addFlash('success', 'notifications.mouvement.updated');
             return $this->redirectToRoute('app_mouvement_stock_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -76,6 +76,7 @@ final class MouvementStockController extends AbstractController
         if ($this->isCsrfTokenValid('delete'.$mouvementStock->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($mouvementStock);
             $entityManager->flush();
+            $this->addFlash('success', 'notifications.mouvement.deleted');
         }
 
         return $this->redirectToRoute('app_mouvement_stock_index', [], Response::HTTP_SEE_OTHER);

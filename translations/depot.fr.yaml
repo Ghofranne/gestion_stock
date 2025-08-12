@@ -1,0 +1,45 @@
+depot:
+  index:
+    title: Dépôts
+    heading: Liste des dépôts
+    name: Nom
+    address: Adresse
+    company: Société
+    actions: Actions
+    no_company: Aucune société
+    confirm_delete: Supprimer ce dépôt ?
+    none: Aucun dépôt trouvé
+    add: Ajouter un dépôt
+  actions:
+    view: Voir
+    edit: Modifier
+    delete: Supprimer
+  show:
+    equipments: Équipements
+    types: Types
+    back: Retour à la liste
+    edit: Modifier
+    add_equipments: Ajouter des équipements
+  new:
+    title: Ajouter un dépôt
+    heading: Créer un nouveau dépôt
+    back: Retour à la liste
+  edit:
+    title: Modifier le dépôt
+    heading: Modifier le dépôt
+    update: Mettre à jour
+    back: Retour à la liste
+  form:
+    save: Enregistrer
+    name: Nom
+    address: Adresse
+    company: Société
+    name_placeholder: Saisissez le nom du dépôt
+    address_placeholder: Saisissez l'adresse
+    company_placeholder: Sélectionnez une société
+
+  labels:
+    in_stock: en stock
+    model: Modèle
+    operator: Opérateur
+    reference: Réf

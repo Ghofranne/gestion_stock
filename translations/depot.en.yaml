@@ -1,0 +1,45 @@
+depot:
+  index:
+    title: Warehouses
+    heading: Warehouse list
+    name: Name
+    address: Address
+    company: Company
+    actions: Actions
+    no_company: No company
+    confirm_delete: Delete this warehouse?
+    none: No warehouse found
+    add: Add a warehouse
+  actions:
+    view: View
+    edit: Edit
+    delete: Delete
+  show:
+    equipments: Equipments
+    types: Types
+    back: Back to list
+    edit: Edit
+    add_equipments: Add equipments
+  new:
+    title: Add a warehouse
+    heading: Create a new warehouse
+    back: Back to list
+  edit:
+    title: Edit warehouse
+    heading: Edit warehouse
+    update: Update
+    back: Back to list
+  form:
+    save: Save
+    name: Name
+    address: Address
+    company: Company
+    name_placeholder: Enter warehouse name
+    address_placeholder: Enter address
+    company_placeholder: Select a company
+
+  labels:
+    in_stock: in stock
+    model: Model
+    operator: Operator
+    reference: Ref

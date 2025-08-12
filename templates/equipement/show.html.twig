@@ -1,33 +1,33 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Equipement{% endblock %}
+{% block title %}{{ 'equipement.show.title'|trans([], 'equipement') }}{% endblock %}
 
 {% block body %}
     <div class="show-container">
-        <h2 class="show-title">Détail de l'équipement</h2>
+        <h2 class="show-title">{{ 'equipement.show.heading'|trans([], 'equipement') }}</h2>
         <div class="show-card">
             <div class="show-attr">
-                <span class="show-label">Type d'équipement :</span>
+                <span class="show-label">{{ 'equipement.labels.type'|trans([], 'equipement') }}</span>
                 <span class="show-value">{{ equipement.typeEquipement }}</span>
             </div>
             {% if equipement.typeEquipement == 'SIM' %}
-                <div class="show-attr"><span class="show-label">IMEI :</span> <span class="show-value">{{ equipement.imei }}</span></div>
-                <div class="show-attr"><span class="show-label">Num appel :</span> <span class="show-value">{{ equipement.numAppel }}</span></div>
-                <div class="show-attr"><span class="show-label">Opérateur :</span> <span class="show-value">{{ equipement.operateur }}</span></div>
-                <div class="show-attr"><span class="show-label">État :</span> <span class="show-value">{{ equipement.etat }}</span></div>
+                <div class="show-attr"><span class="show-label">{{ 'equipement.labels.imei'|trans([], 'equipement') }}</span> <span class="show-value">{{ equipement.imei }}</span></div>
+                <div class="show-attr"><span class="show-label">{{ 'equipement.labels.num_call'|trans([], 'equipement') }}</span> <span class="show-value">{{ equipement.numAppel }}</span></div>
+                <div class="show-attr"><span class="show-label">{{ 'equipement.labels.operator'|trans([], 'equipement') }}</span> <span class="show-value">{{ equipement.operateur }}</span></div>
+                <div class="show-attr"><span class="show-label">{{ 'equipement.labels.state'|trans([], 'equipement') }}</span> <span class="show-value">{{ equipement.etat }}</span></div>
             {% elseif equipement.typeEquipement == 'TPE' %}
-                <div class="show-attr"><span class="show-label">SN :</span> <span class="show-value">{{ equipement.sn }}</span></div>
-                <div class="show-attr"><span class="show-label">Modèle :</span> <span class="show-value">{{ equipement.model }}</span></div>
-                <div class="show-attr"><span class="show-label">Fournisseur :</span> <span class="show-value">{{ equipement.fournisseur }}</span></div>
-                <div class="show-attr"><span class="show-label">État :</span> <span class="show-value">{{ equipement.etat }}</span></div>
+                <div class="show-attr"><span class="show-label">{{ 'equipement.labels.sn'|trans([], 'equipement') }}</span> <span class="show-value">{{ equipement.sn }}</span></div>
+                <div class="show-attr"><span class="show-label">{{ 'equipement.labels.model'|trans([], 'equipement') }}</span> <span class="show-value">{{ equipement.model }}</span></div>
+                <div class="show-attr"><span class="show-label">{{ 'equipement.labels.supplier'|trans([], 'equipement') }}</span> <span class="show-value">{{ equipement.fournisseur }}</span></div>
+                <div class="show-attr"><span class="show-label">{{ 'equipement.labels.state'|trans([], 'equipement') }}</span> <span class="show-value">{{ equipement.etat }}</span></div>
             {% elseif equipement.typeEquipement == 'Carte' %}
-                <div class="show-attr"><span class="show-label">Référence carte :</span> <span class="show-value">{{ equipement.referenceCarte }}</span></div>
-                <div class="show-attr"><span class="show-label">État :</span> <span class="show-value">{{ equipement.etat }}</span></div>
+                <div class="show-attr"><span class="show-label">{{ 'equipement.labels.card_ref'|trans([], 'equipement') }}</span> <span class="show-value">{{ equipement.referenceCarte }}</span></div>
+                <div class="show-attr"><span class="show-label">{{ 'equipement.labels.state'|trans([], 'equipement') }}</span> <span class="show-value">{{ equipement.etat }}</span></div>
             {% endif %}
         </div>
         <div class="show-actions">
-            <a href="{{ path('app_equipement_index') }}" class="btn-back">&#8592; Retour à la liste</a>
-            <a href="{{ path('app_equipement_edit', {'id': equipement.id}) }}" class="btn">Modifier</a>
+            <a href="{{ path('app_equipement_index') }}" class="btn-back">&#8592; {{ 'equipement.show.back'|trans([], 'equipement') }}</a>
+            <a href="{{ path('app_equipement_edit', {'id': equipement.id}) }}" class="btn">{{ 'equipement.actions.edit'|trans([], 'equipement') }}</a>
             {{ include('equipement/_delete_form.html.twig') }}
         </div>
     </div>

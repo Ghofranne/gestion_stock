@@ -1,18 +1,18 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Depot index{% endblock %}
+{% block title %}{{ 'depot.index.title'|trans([], 'depot') }}{% endblock %}
 
 {% block body %}
     <div class="list-container">
-        <h2 class="list-title">Liste des dépôts</h2>
+        <h2 class="list-title">{{ 'depot.index.heading'|trans([], 'depot') }}</h2>
         <div class="table-card">
             <table class="modern-table">
                 <thead>
                     <tr>
-                        <th>Nom</th>
-                        <th>Adresse</th>
-                        <th>Société</th>
-                        <th>Actions</th>
+                        <th>{{ 'depot.index.name'|trans([], 'depot') }}</th>
+                        <th>{{ 'depot.index.address'|trans([], 'depot') }}</th>
+                        <th>{{ 'depot.index.company'|trans([], 'depot') }}</th>
+                        <th>{{ 'depot.index.actions'|trans([], 'depot') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -24,33 +24,33 @@
                             {% if depot.societe %}
                                 <span class="societe-badge">{{ depot.societe.nom }}</span>
                             {% else %}
-                                <em class="no-societe">Aucune société</em>
+                                <em class="no-societe">{{ 'depot.index.no_company'|trans([], 'depot') }}</em>
                             {% endif %}
                         </td>
                         <td>
                             <div class="action-icons">
-                                <a href="{{ path('app_depot_show', {'id': depot.id}) }}" class="icon-btn" title="Voir">
-                                    👁️<span class="sr-only">Voir</span>
+                                <a href="{{ path('app_depot_show', {'id': depot.id}) }}" class="icon-btn" title="{{ 'depot.actions.view'|trans([], 'depot') }}">
+                                    👁️<span class="sr-only">{{ 'depot.actions.view'|trans([], 'depot') }}</span>
                                 </a>
-                                <a href="{{ path('app_depot_edit', {'id': depot.id}) }}" class="icon-btn" title="Modifier">
-                                    ✏️<span class="sr-only">Modifier</span>
+                                <a href="{{ path('app_depot_edit', {'id': depot.id}) }}" class="icon-btn" title="{{ 'depot.actions.edit'|trans([], 'depot') }}">
+                                    ✏️<span class="sr-only">{{ 'depot.actions.edit'|trans([], 'depot') }}</span>
                                 </a>
-                                <form method="post" action="{{ path('app_depot_delete', {'id': depot.id}) }}" class="inline-form" onsubmit="return confirm('Supprimer ce dépôt ?');">
+                                <form method="post" action="{{ path('app_depot_delete', {'id': depot.id}) }}" class="inline-form" onsubmit="return confirm('{{ 'depot.index.confirm_delete'|trans([], 'depot') }}');">
                                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ depot.id) }}">
-                                    <button class="icon-btn icon-danger" title="Supprimer">🗑️<span class="sr-only">Supprimer</span></button>
+                                    <button class="icon-btn icon-danger" title="{{ 'depot.actions.delete'|trans([], 'depot') }}">🗑️<span class="sr-only">{{ 'depot.actions.delete'|trans([], 'depot') }}</span></button>
                                 </form>
                             </div>
                         </td>
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="4">Aucun dépôt trouvé</td>
+                        <td colspan="4">{{ 'depot.index.none'|trans([], 'depot') }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
             </table>
         </div>
-        <a href="{{ path('app_depot_new') }}" class="btn-create">+ Ajouter un dépôt</a>
+        <a href="{{ path('app_depot_new') }}" class="btn-create">+ {{ 'depot.index.add'|trans([], 'depot') }}</a>
     </div>
     <style>
         .list-container {

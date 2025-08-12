@@ -91,7 +91,7 @@ final class SocieteController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($societe);
             $entityManager->flush();
-
+            $this->addFlash('success', 'notifications.societe.created');
             return $this->redirectToRoute('app_societe_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -189,7 +189,7 @@ final class SocieteController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
-
+            $this->addFlash('success', 'notifications.societe.updated');
             return $this->redirectToRoute('app_societe_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -205,6 +205,7 @@ final class SocieteController extends AbstractController
         if ($this->isCsrfTokenValid('delete'.$societe->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($societe);
             $entityManager->flush();
+            $this->addFlash('success', 'notifications.societe.deleted');
         }
 
         return $this->redirectToRoute('app_societe_index', [], Response::HTTP_SEE_OTHER);

@@ -1,0 +1,73 @@
+societe:
+  index:
+    title: Liste des sociétés
+    heading: Sociétés
+    address: Adresse
+    email: Email
+    phone: Téléphone
+    view: Voir
+    edit: Modifier
+    none: Aucune société trouvée.
+    create_new: Créer une nouvelle société
+  overview:
+    title: Vue d'ensemble - Sociétés
+    heading: Vue d'ensemble des Sociétés
+    subtitle: Aperçu complet de chaque société avec ses dépôts, mouvements et équipements
+  actions:
+    list: Liste des sociétés
+    new: Nouvelle société
+    view: Voir détails
+    edit: Modifier
+    back_to_list: Retour à la liste
+    update: Mettre à jour
+    save: Enregistrer
+    delete: Supprimer
+  empty:
+    title: Aucune société trouvée
+    subtitle: Commencez par créer une société pour voir les données
+    cta: Créer une société
+  stats:
+    depots: Dépôts
+    mouvements: Mouvements
+    equipements: Équipements
+  sections:
+    depots: Dépôts
+    mouvements_recents: Mouvements récents
+    equipements: Équipements
+  no_data:
+    depot: Aucun dépôt
+    mouvement: Aucun mouvement
+    equipement: Aucun équipement
+  item:
+    more: "... et %count% autres"
+  equipment:
+    imei_prefix: "IMEI :"
+    sn_prefix: "SN :"
+    ref_prefix: "Ref :"
+    id_prefix: "ID :"
+
+  show:
+    details: Détails
+    depots_equipements: Dépôts et Équipements
+    no_depot: Aucun dépôt enregistré pour cette société.
+    create_depot: Créer un dépôt
+    equipements_count: "%count% équipements"
+    no_equipement_in_depot: Aucun équipement dans ce dépôt
+    add_depot: Ajouter un dépôt
+
+  edit:
+    title: Modifier la Société
+    heading: Modifier la société
+
+  delete:
+    confirm: Êtes-vous sûr de vouloir supprimer cet élément ?
+
+  form:
+    name: Nom
+    address: Adresse
+    email: Email
+    phone: Téléphone
+    name_placeholder: Saisissez le nom de la société
+    address_placeholder: Saisissez l'adresse
+    email_placeholder: Saisissez l'email
+    phone_placeholder: Saisissez le téléphone

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ app.request.locale|default('fr') }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -259,34 +259,34 @@
                 <ul class="nav-menu">
                     <li class="nav-item">
                         <a href="{{ path('app_menu') }}" class="nav-link {% if app.request.get('_route') == 'app_menu' %}active{% endif %}">
-                            Accueil
+                            {{ 'menu.home'|trans }}
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ path('app_societe_index') }}" class="nav-link {% if app.request.get('_route') starts with 'app_societe' %}active{% endif %}">
-                            Sociétés
+                            {{ 'menu.companies'|trans }}
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ path('app_depot_index') }}" class="nav-link {% if app.request.get('_route') starts with 'app_depot' %}active{% endif %}">
-                            Dépôts
+                            {{ 'menu.depots'|trans }}
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ path('app_equipement_index') }}" class="nav-link {% if app.request.get('_route') starts with 'app_equipement' %}active{% endif %}">
-                            Équipements
+                            {{ 'menu.equipments'|trans }}
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ path('app_mouvement_stock_index') }}" class="nav-link {% if app.request.get('_route') starts with 'app_mouvement_stock' %}active{% endif %}">
-                            Mouvements de Stock
+                            {{ 'menu.movements'|trans }}
                         </a>
                     </li>
                     
                     </li>
                     <li class="nav-item">
                         <a href="{{ path('app_profil') }}" class="nav-link {% if app.request.get('_route') == 'app_profil' %}active{% endif %}">
-                            Profil
+                            {{ 'menu.profile'|trans }}
                         </a>
                     </li>
                     <li class="nav-item">
@@ -295,7 +295,7 @@
                         </span>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ path('app_logout') }}" class="nav-link btn-logout-nav" title="Déconnexion">
+                        <a href="{{ path('app_logout') }}" class="nav-link btn-logout-nav" title="{{ 'menu.logout'|trans }}">
                             🚪
                         </a>
                     </li>
@@ -313,10 +313,32 @@
                 <div class="logo-icon">SP</div>
                 <div class="logo-text">StockPro</div>
             </div>
-            <p style="margin-top: 20px;">© {{ "now"|date("Y") }} StockPro. Tous droits réservés. Solution de gestion de stock multi-dépôts.</p>
+            <p style="margin-top: 20px;">{{ 'footer.copyright'|trans({'%year%': ("now"|date("Y"))}) }}</p>
         </div>
     </footer>
     {% block javascripts %}
+    {# Notyf toast notifications #}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const notyf = new Notyf({ duration: 3500, ripple: true, dismissible: true });
+            {% for type, messages in app.flashes %}
+                {% for message in messages %}
+                    {% set txt = message|trans([], 'notifications') %}
+                    {% if type == 'success' %}
+                        notyf.success('{{ txt|e('js') }}');
+                    {% elseif type == 'error' %}
+                        notyf.error('{{ txt|e('js') }}');
+                    {% elseif type == 'warning' %}
+                        notyf.open({ type: 'warning', message: '{{ txt|e('js') }}' });
+                    {% else %}
+                        notyf.open({ type: 'info', message: '{{ txt|e('js') }}' });
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+        });
+    </script>
     <script>
         // Navigation entre les pages
         function showPage(pageId) {

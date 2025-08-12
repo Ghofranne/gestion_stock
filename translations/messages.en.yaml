@@ -1,0 +1,66 @@
+menu:
+  home: Home
+  companies: Companies
+  depots: Warehouses
+  equipments: Equipments
+  movements: Stock Movements
+  profile: Profile
+  logout: Logout
+
+profile:
+  title: My Profile - StockPro
+  personal_info: Personal information
+  email: Email
+  phone: Phone
+  position: Position
+  edit_info: Edit my information
+  security: Security
+  password: Password
+  last_login: Last login
+  change_password: Change password
+  preferences: Preferences
+  language: Language
+  date_format: Date format
+  notifications: Notifications
+  edit_preferences: Edit preferences
+  permissions: Permissions & access
+  role: Role
+  companies_accessible: Accessible companies
+  depots_assigned: Assigned warehouses
+  recent_activity: Recent activity
+  equipments_added: Equipments added
+  movements_created: Movements created
+  last_action: Last action
+  quick_actions: Quick actions
+  export_data: Export my data
+  download_report: Download a report
+  logout: Logout
+
+footer:
+  copyright: " %year% StockPro. All rights reserved. Multi-warehouse inventory management solution."
+
+dashboard:
+  title: Home - Inventory Management System
+  heading: Inventory Management System
+  actions:
+    access: Access
+    consult: View
+  cards:
+    companies:
+      title: Company Management
+      desc: Manage company information and their settings
+    overview:
+      title: Overview
+      desc: A complete overview for each company with warehouses, movements and equipments
+    depots:
+      title: Warehouse Management
+      desc: Administer your warehouses and their locations
+    equipments:
+      title: Equipment Management
+      desc: Track and manage your equipment inventory
+    movements:
+      title: Movement Management
+      desc: View and manage all stock movements
+    transfer:
+      title: Stock Transfer
+      desc: Perform transfers between warehouses

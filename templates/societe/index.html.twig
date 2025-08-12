@@ -1,9 +1,9 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Societe index{% endblock %}
+{% block title %}{{ 'societe.index.title'|trans([], 'societe') }}{% endblock %}
 
 {% block body %}
-    <h1>Societe index</h1>
+    <h1>{{ 'societe.index.heading'|trans([], 'societe') }}</h1>
 
     <div class="societe-cards">
         {% for societe in societes %}
@@ -12,21 +12,21 @@
                     <span class="societe-card-title">{{ societe.nom }}</span>
                 </div>
                 <div class="societe-card-body">
-                    <p><strong>Adresse :</strong> {{ societe.adress }}</p>
-                    <p><strong>Email :</strong> {{ societe.email }}</p>
-                    <p><strong>Téléphone :</strong> {{ societe.telephone }}</p>
+                    <p><strong>{{ 'societe.index.address'|trans([], 'societe') }} :</strong> {{ societe.adress }}</p>
+                    <p><strong>{{ 'societe.index.email'|trans([], 'societe') }} :</strong> {{ societe.email }}</p>
+                    <p><strong>{{ 'societe.index.phone'|trans([], 'societe') }} :</strong> {{ societe.telephone }}</p>
                 </div>
                 <div class="societe-card-actions">
-                    <a href="{{ path('app_societe_show', {'id': societe.id}) }}" class="btn-card">Voir</a>
-                    <a href="{{ path('app_societe_edit', {'id': societe.id}) }}" class="btn-card">Modifier</a>
+                    <a href="{{ path('app_societe_show', {'id': societe.id}) }}" class="btn-card">{{ 'societe.index.view'|trans([], 'societe') }}</a>
+                    <a href="{{ path('app_societe_edit', {'id': societe.id}) }}" class="btn-card">{{ 'societe.index.edit'|trans([], 'societe') }}</a>
                 </div>
             </div>
         {% else %}
-            <p>Aucune société trouvée.</p>
+            <p>{{ 'societe.index.none'|trans([], 'societe') }}</p>
         {% endfor %}
     </div>
 
-    <a href="{{ path('app_societe_new') }}" class="btn-add">Créer une nouvelle société</a>
+    <a href="{{ path('app_societe_new') }}" class="btn-add">{{ 'societe.index.create_new'|trans([], 'societe') }}</a>
 
     <style>
         .societe-cards {

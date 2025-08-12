@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Détail Mouvement - StockPro{% endblock %}
+{% block title %}{{ 'mouvement.show.title'|trans([], 'mouvement') }}{% endblock %}
 
 {% block body %}
     <div class="detail-container">
@@ -8,18 +8,18 @@
             <div class="header-content">
                 <h1 class="detail-title">
                     <span class="title-icon">📋</span>
-                    Détail du Mouvement
+                    {{ 'mouvement.show.heading'|trans([], 'mouvement') }}
                 </h1>
                 
             </div>
             <div class="header-actions">
                 <a href="{{ path('app_mouvement_stock_edit', {'id': mouvement_stock.id}) }}" class="btn-primary">
                     <span class="btn-icon">✏️</span>
-                    Modifier
+                    {{ 'mouvement.actions.edit'|trans([], 'mouvement') }}
                 </a>
                 <a href="{{ path('app_mouvement_stock_index') }}" class="btn-back">
                     <span class="btn-icon">←</span>
-                    Retour à la liste
+                    {{ 'mouvement.common.back'|trans([], 'mouvement') }}
                 </a>
             </div>
         </div>
@@ -30,29 +30,38 @@
                     <div class="card-header">
                         <h3 class="card-title">
                             <span class="card-icon">📦</span>
-                            Informations du Mouvement
+                            {{ 'mouvement.show.main_info'|trans([], 'mouvement') }}
                         </h3>
                     </div>
                     <div class="card-content">
                         <div class="info-grid">
                             
                             <div class="info-item">
-                                <label class="info-label">Type de mouvement</label>
+                                <label class="info-label">{{ 'mouvement.labels.type'|trans([], 'mouvement') }}</label>
                                 <span class="movement-badge movement-{{ mouvement_stock.typeMouvement|lower }}">
-                                    {% if mouvement_stock.typeMouvement == 'Entrée' %}
-                                        📥 {{ mouvement_stock.typeMouvement }}
+                                    {% set t = mouvement_stock.typeMouvement %}
+                                    {% if t == 'entree' %}
+                                        📥 {{ 'mouvement.types.entree'|trans([], 'mouvement') }}
+                                    {% elseif t == 'sortie' %}
+                                        📤 {{ 'mouvement.types.sortie'|trans([], 'mouvement') }}
+                                    {% elseif t == 'transfert' %}
+                                        🔄 {{ 'mouvement.types.transfert'|trans([], 'mouvement') }}
+                                    {% elseif t == 'ajustement' %}
+                                        ♻️ {{ 'mouvement.types.ajustement'|trans([], 'mouvement') }}
+                                    {% elseif t == 'retour' %}
+                                        ↩️ {{ 'mouvement.types.retour'|trans([], 'mouvement') }}
                                     {% else %}
-                                        📤 {{ mouvement_stock.typeMouvement }}
+                                        🔄 {{ ('mouvement.types.' ~ t)|trans([], 'mouvement') }}
                                     {% endif %}
                                 </span>
                             </div>
                             <div class="info-item">
-                                <label class="info-label">Date du mouvement</label>
+                                <label class="info-label">{{ 'mouvement.labels.date'|trans([], 'mouvement') }}</label>
                                 <span class="info-value">
                                     {% if mouvement_stock.date %}
                                         🗓️ {{ mouvement_stock.date|date('d/m/Y ') }}
                                     {% else %}
-                                        <em>Non renseignée</em>
+                                        <em>{{ 'mouvement.show.date_none'|trans([], 'mouvement') }}</em>
                                     {% endif %}
                                 </span>
                             </div>
@@ -65,7 +74,7 @@
                     <div class="card-header">
                         <h3 class="card-title">
                             <span class="card-icon">🔧</span>
-                            Équipement Associé
+                            {{ 'mouvement.show.equipment_title'|trans([], 'mouvement') }}
                         </h3>
                     </div>
                     <div class="card-content">
@@ -76,49 +85,49 @@
                             <div class="equipment-info-grid">
                                 {% if mouvement_stock.equipement.imei %}
                                 <div class="equipment-item">
-                                    <label>IMEI</label>
+                                    <label>{{ 'mouvement.equipment.imei'|trans([], 'mouvement') }}</label>
                                     <span>{{ mouvement_stock.equipement.imei }}</span>
                                 </div>
                                 {% endif %}
                                 {% if mouvement_stock.equipement.sn %}
                                 <div class="equipment-item">
-                                    <label>Numéro de série</label>
+                                    <label>{{ 'mouvement.equipment.sn'|trans([], 'mouvement') }}</label>
                                     <span>{{ mouvement_stock.equipement.sn }}</span>
                                 </div>
                                 {% endif %}
                                 {% if mouvement_stock.equipement.numAppel %}
                                 <div class="equipment-item">
-                                    <label>Numéro d'appel</label>
+                                    <label>{{ 'mouvement.equipment.num_call'|trans([], 'mouvement') }}</label>
                                     <span>{{ mouvement_stock.equipement.numAppel }}</span>
                                 </div>
                                 {% endif %}
                                 {% if mouvement_stock.equipement.model %}
                                 <div class="equipment-item">
-                                    <label>Modèle</label>
+                                    <label>{{ 'mouvement.equipment.model'|trans([], 'mouvement') }}</label>
                                     <span>{{ mouvement_stock.equipement.model }}</span>
                                 </div>
                                 {% endif %}
                                 {% if mouvement_stock.equipement.operateur %}
                                 <div class="equipment-item">
-                                    <label>Opérateur</label>
+                                    <label>{{ 'mouvement.equipment.operator'|trans([], 'mouvement') }}</label>
                                     <span>{{ mouvement_stock.equipement.operateur }}</span>
                                 </div>
                                 {% endif %}
                                 {% if mouvement_stock.equipement.fournisseur and mouvement_stock.equipement.typeEquipement == 'TPE' %}
                                 <div class="equipment-item">
-                                    <label>Fournisseur</label>
+                                    <label>{{ 'mouvement.equipment.supplier'|trans([], 'mouvement') }}</label>
                                     <span>{{ mouvement_stock.equipement.fournisseur }}</span>
                                 </div>
                                 {% endif %}
                                 <div class="equipment-item">
-                                    <label>État</label>
+                                    <label>{{ 'mouvement.equipment.state'|trans([], 'mouvement') }}</label>
                                     <span class="state-badge state-{{ mouvement_stock.equipement.etat|lower }}">{{ mouvement_stock.equipement.etat }}</span>
                                 </div>
                             </div>
                             <div class="equipment-actions">
                                 <a href="{{ path('app_equipement_show', {'id': mouvement_stock.equipement.id}) }}" class="btn-equipment">
                                     <span class="btn-icon">👁️</span>
-                                    Voir l'équipement
+                                    {{ 'mouvement.show.view_equipment'|trans([], 'mouvement') }}
                                 </a>
                             </div>
                         </div>
@@ -131,7 +140,7 @@
                     <div class="card-header">
                         <h3 class="card-title">
                             <span class="card-icon">💬</span>
-                            Commentaire
+                            {{ 'mouvement.show.comment'|trans([], 'mouvement') }}
                         </h3>
                     </div>
                     <div class="card-content">

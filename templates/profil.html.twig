@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Mon Profil - StockPro{% endblock %}
+{% block title %}{{ 'profile.title'|trans([], 'profile') }}{% endblock %}
 
 {% block stylesheets %}
 <style>
@@ -141,10 +141,10 @@
             {% if app.user and (app.user.prenom or app.user.nom) %}
                 {{ app.user.prenom ?? '' }} {{ app.user.nom ?? '' }}
             {% else %}
-                {{ app.user ? app.user.email|split('@')[0] : 'Utilisateur' }}
+                {{ app.user ? app.user.email|split('@')[0] : ('profile.user'|trans([], 'profile')) }}
             {% endif %}
         </h1>
-        <p class="profile-role">{{ app.user.roles[0] == 'ROLE_ADMIN' ? 'Administrateur' : 'Utilisateur' }}</p>
+        <p class="profile-role">{{ app.user.roles[0] == 'ROLE_ADMIN' ? ('profile.role_admin'|trans([], 'profile')) : ('profile.role_user'|trans([], 'profile')) }}</p>
     </div>
 
     <!-- Grille des sections -->
@@ -153,22 +153,22 @@
         <div class="profile-card">
             <h2 class="card-title">
                 <span>👤</span>
-                Informations personnelles
+                {{ 'profile.personal_info'|trans([], 'profile') }}
             </h2>
             <div class="info-row">
-                <span class="info-label">Email</span>
+                <span class="info-label">{{ 'profile.email_label'|trans([], 'profile') }}</span>
                 <span class="info-value">{{ app.user.email }}</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Téléphone</span>
-                <span class="info-value">{{ app.user.telephone ?? 'Non renseigné' }}</span>
+                <span class="info-label">{{ 'profile.phone'|trans([], 'profile') }}</span>
+                <span class="info-value">{{ app.user.telephone ?? ('profile.not_provided'|trans([], 'profile')) }}</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Poste</span>
-                <span class="info-value">{{ app.user.poste ?? 'Non renseigné' }}</span>
+                <span class="info-label">{{ 'profile.position'|trans([], 'profile') }}</span>
+                <span class="info-value">{{ app.user.poste ?? ('profile.not_provided'|trans([], 'profile')) }}</span>
             </div>
             <div style="margin-top: 1.5rem;">
-                <a href="{{ path('app_profil_edit') }}" class="btn-profile">Modifier mes informations</a>
+                <a href="{{ path('app_profil_edit') }}" class="btn-profile">{{ 'profile.edit_info'|trans([], 'profile') }}</a>
             </div>
         </div>
 
@@ -176,18 +176,18 @@
         <div class="profile-card">
             <h2 class="card-title">
                 <span>🔒</span>
-                Sécurité
+                {{ 'profile.security'|trans([], 'profile') }}
             </h2>
             <div class="info-row">
-                <span class="info-label">Mot de passe</span>
+                <span class="info-label">{{ 'profile.password_label'|trans([], 'profile') }}</span>
                 <span class="info-value">••••••••</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Dernière connexion</span>
-                <span class="info-value">{{ app.user.lastLoginAt ? app.user.lastLoginAt|date('d/m/Y H:i') : 'Première connexion' }}</span>
+                <span class="info-label">{{ 'profile.last_login'|trans([], 'profile') }}</span>
+                <span class="info-value">{{ app.user.lastLoginAt ? app.user.lastLoginAt|date('d/m/Y H:i') : ('profile.first_login'|trans([], 'profile')) }}</span>
             </div>
             <div style="margin-top: 1.5rem;">
-                <a href="{{ path('app_profil_password') }}" class="btn-profile">Changer le mot de passe</a>
+                <a href="{{ path('app_profil_password') }}" class="btn-profile">{{ 'profile.change_password'|trans([], 'profile') }}</a>
             </div>
         </div>
 
@@ -195,22 +195,22 @@
         <div class="profile-card">
             <h2 class="card-title">
                 <span>⚙️</span>
-                Préférences
+                {{ 'profile.preferences_label'|trans([], 'profile') }}
             </h2>
             <div class="info-row">
-                <span class="info-label">Langue</span>
-                <span class="info-value">Français</span>
+                <span class="info-label">{{ 'profile.language'|trans([], 'profile') }}</span>
+                <span class="info-value">{{ preferences.language ?? ('profile.lang.fr'|trans([], 'profile')) }}</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Format de date</span>
-                <span class="info-value">DD/MM/YYYY</span>
+                <span class="info-label">{{ 'profile.date_format'|trans([], 'profile') }}</span>
+                <span class="info-value">{{ preferences.date_format ?? 'DD/MM/YYYY' }}</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Notifications</span>
-                <span class="info-value">Activées</span>
+                <span class="info-label">{{ 'profile.notifications'|trans([], 'profile') }}</span>
+                <span class="info-value">{{ (preferences.notifications ?? true) ? ('profile.notifications_on'|trans([], 'profile')) : ('profile.notifications_off'|trans([], 'profile')) }}</span>
             </div>
             <div style="margin-top: 1.5rem;">
-                <a href="#" class="btn-profile">Modifier les préférences</a>
+                <a href="{{ path('app_profil_preferences') }}" class="btn-profile">{{ 'profile.edit_preferences'|trans([], 'profile') }}</a>
             </div>
         </div>
 
@@ -218,19 +218,19 @@
         <div class="profile-card">
             <h2 class="card-title">
                 <span>🔐</span>
-                Permissions et accès
+                {{ 'profile.permissions'|trans([], 'profile') }}
             </h2>
             <div class="info-row">
-                <span class="info-label">Rôle</span>
-                <span class="info-value">{{ app.user.roles[0] == 'ROLE_ADMIN' ? 'Administrateur' : 'Utilisateur' }}</span>
+                <span class="info-label">{{ 'profile.role'|trans([], 'profile') }}</span>
+                <span class="info-value">{{ app.user.roles[0] == 'ROLE_ADMIN' ? ('profile.role_admin'|trans([], 'profile')) : ('profile.role_user'|trans([], 'profile')) }}</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Sociétés accessibles</span>
-                <span class="info-value">{{ societes_count ?? 'Toutes' }}</span>
+                <span class="info-label">{{ 'profile.companies_accessible'|trans([], 'profile') }}</span>
+                <span class="info-value">{{ societes_count ?? ('profile.all'|trans([], 'profile')) }}</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Dépôts assignés</span>
-                <span class="info-value">{{ depots_count ?? 'Tous' }}</span>
+                <span class="info-label">{{ 'profile.depots_assigned'|trans([], 'profile') }}</span>
+                <span class="info-value">{{ depots_count ?? ('profile.all'|trans([], 'profile')) }}</span>
             </div>
         </div>
 
@@ -238,19 +238,19 @@
         <div class="profile-card">
             <h2 class="card-title">
                 <span>📊</span>
-                Activité récente
+                {{ 'profile.recent_activity'|trans([], 'profile') }}
             </h2>
             <div class="info-row">
-                <span class="info-label">Équipements ajoutés</span>
+                <span class="info-label">{{ 'profile.equipments_added'|trans([], 'profile') }}</span>
                 <span class="info-value">{{ equipements_count ?? 0 }}</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Mouvements créés</span>
+                <span class="info-label">{{ 'profile.movements_created'|trans([], 'profile') }}</span>
                 <span class="info-value">{{ mouvements_count ?? 0 }}</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Dernière action</span>
-                <span class="info-value">{{ last_activity ?? 'Aucune activité' }}</span>
+                <span class="info-label">{{ 'profile.last_action'|trans([], 'profile') }}</span>
+                <span class="info-value">{{ last_activity ?? ('profile.no_activity'|trans([], 'profile')) }}</span>
             </div>
         </div>
 
@@ -258,13 +258,13 @@
         <div class="profile-card">
             <h2 class="card-title">
                 <span>⚡</span>
-                Actions rapides
+                {{ 'profile.quick_actions'|trans([], 'profile') }}
             </h2>
             <div style="display: flex; flex-direction: column; gap: 1rem;">
-                <a href="#" class="btn-profile">Exporter mes données</a>
-                <a href="#" class="btn-profile">Télécharger un rapport</a>
+                <a href="#" class="btn-profile">{{ 'profile.export_data'|trans([], 'profile') }}</a>
+                <a href="#" class="btn-profile">{{ 'profile.download_report'|trans([], 'profile') }}</a>
                 <a href="{{ path('app_logout') }}" class="btn-profile" style="background: linear-gradient(135deg, #e53e3e, #c53030);">
-                    Déconnexion
+                    {{ 'profile.logout'|trans([], 'profile') }}
                 </a>
             </div>
         </div>

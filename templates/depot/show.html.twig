@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ depot.nom }} - Dépôt{% endblock %}
+{% block title %}{{ depot.nom }} - {{ 'depot.edit.title'|trans([], 'depot') }}{% endblock %}
 
 {% block body %}
 <div class="depot-details">
@@ -22,23 +22,23 @@
         <div class="depot-stats">
             <div class="stat-card">
                 <div class="stat-number">{{ total_equipements }}</div>
-                <div class="stat-label">Équipements</div>
+                <div class="stat-label">{{ 'depot.show.equipments'|trans([], 'depot') }}</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number">{{ equipements_data|length }}</div>
-                <div class="stat-label">Types</div>
+                <div class="stat-label">{{ 'depot.show.types'|trans([], 'depot') }}</div>
             </div>
         </div>
     </div>
 
     <!-- Équipements du dépôt -->
     <div class="equipements-section">
-        <h2>🔧 Équipements en Stock</h2>
+        <h2>🔧 {{ 'depot.show.equipments'|trans([], 'depot') }} {{ 'depot.labels.in_stock'|trans([], 'depot') }}</h2>
         
         {% if equipements_data is empty %}
             <div class="empty-state">
-                <p>📦 Aucun équipement en stock dans ce dépôt.</p>
-                <a href="{{ path('app_mouvement_stock_new') }}" class="btn btn-primary">Ajouter des équipements</a>
+                <p>📦 {{ 'depot.index.none'|trans([], 'depot') }}</p>
+                <a href="{{ path('app_mouvement_stock_new') }}" class="btn btn-primary">{{ 'depot.show.add_equipments'|trans([], 'depot') }}</a>
             </div>
         {% else %}
             <div class="equipements-grid">
@@ -80,13 +80,13 @@
                             
                             {% if equipement_data.equipement.model %}
                                 <div class="equipement-model">
-                                    <strong>Modèle:</strong> {{ equipement_data.equipement.model }}
+                                    <strong>{{ 'depot.labels.model'|trans([], 'depot') }}:</strong> {{ equipement_data.equipement.model }}
                                 </div>
                             {% endif %}
                             
                             {% if equipement_data.equipement.operateur %}
                                 <div class="equipement-operator">
-                                    <strong>Opérateur:</strong> {{ equipement_data.equipement.operateur }}
+                                    <strong>{{ 'depot.labels.operator'|trans([], 'depot') }}:</strong> {{ equipement_data.equipement.operateur }}
                                 </div>
                             {% endif %}
                         </div>
@@ -99,13 +99,13 @@
     <!-- Actions -->
     <div class="actions-section">
         <a href="{{ path('app_depot_index') }}" class="btn btn-secondary">
-            ← Retour à la liste
+            ← {{ 'depot.show.back'|trans([], 'depot') }}
         </a>
         <a href="{{ path('app_depot_edit', {'id': depot.id}) }}" class="btn btn-primary">
-            ✏️ Modifier
+            ✏️ {{ 'depot.show.edit'|trans([], 'depot') }}
         </a>
         <a href="{{ path('app_mouvement_stock_new') }}" class="btn btn-success">
-            + Ajouter des équipements
+            + {{ 'depot.show.add_equipments'|trans([], 'depot') }}
         </a>
     </div>
 </div>

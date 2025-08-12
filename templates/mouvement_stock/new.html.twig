@@ -1,26 +1,25 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Nouveau Mouvement - StockPro{% endblock %}
+{% block title %}{{ 'mouvement.new.title'|trans([], 'mouvement') }}{% endblock %}
 
 {% block body %}
     <div class="form-container">
         <div class="form-header">
             <div class="header-content">
                 <h1 class="form-title">
-                    
-                    Nouveau Mouvement de Stock
+                    {{ 'mouvement.new.heading'|trans([], 'mouvement') }}
                 </h1>
                 
             </div>
             <a href="{{ path('app_mouvement_stock_index') }}" class="btn-back">
                 <span class="btn-icon">←</span>
-                Retour à la liste
+                {{ 'mouvement.common.back'|trans([], 'mouvement') }}
             </a>
         </div>
 
         <div class="form-card">
             <div class="form-content">
-                {{ include('mouvement_stock/_form.html.twig', {'button_label': 'Créer le mouvement'}) }}
+                {{ include('mouvement_stock/_form.html.twig', {'button_label': 'mouvement.form.create'|trans([], 'mouvement')}) }}
             </div>
         </div>
     </div>

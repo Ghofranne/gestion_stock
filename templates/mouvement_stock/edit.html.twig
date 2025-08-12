@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Modifier Mouvement - StockPro{% endblock %}
+{% block title %}{{ 'mouvement.edit.title'|trans([], 'mouvement') }}{% endblock %}
 
 {% block body %}
     <div class="form-container">
@@ -8,7 +8,7 @@
             <div class="header-content">
                 <h1 class="form-title">
                     <span class="title-icon">✏️</span>
-                    Modifier le Mouvement
+                    {{ 'mouvement.edit.heading'|trans([], 'mouvement') }}
                 </h1>
                
             </div>
@@ -16,14 +16,14 @@
                 
                 <a href="{{ path('app_mouvement_stock_index') }}" class="btn-back">
                     <span class="btn-icon">←</span>
-                    Retour à la liste
+                    {{ 'mouvement.common.back'|trans([], 'mouvement') }}
                 </a>
             </div>
         </div>
 
         <div class="form-card">
             <div class="form-content">
-                {{ include('mouvement_stock/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
+                {{ include('mouvement_stock/_form.html.twig', {'button_label': 'mouvement.form.update'|trans([], 'mouvement')}) }}
             </div>
         </div>
 
@@ -31,9 +31,9 @@
             <div class="danger-header">
                 <h3 class="danger-title">
                     <span class="danger-icon">⚠️</span>
-                    Zone de danger
+                    {{ 'mouvement.edit.danger.title'|trans([], 'mouvement') }}
                 </h3>
-                <p class="danger-subtitle">Cette action est irréversible</p>
+                <p class="danger-subtitle">{{ 'mouvement.edit.danger.subtitle'|trans([], 'mouvement') }}</p>
             </div>
             <div class="danger-content">
                 {{ include('mouvement_stock/_delete_form.html.twig') }}

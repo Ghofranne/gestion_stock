@@ -1,0 +1,58 @@
+equipement:
+  index:
+    title: Équipements
+    heading: Liste des équipements
+    confirm_delete: Êtes-vous sûr de vouloir supprimer cet équipement ?
+    none: Aucun équipement trouvé
+    add: Ajouter un équipement
+  actions:
+    edit: Modifier
+    delete: Supprimer
+  labels:
+    imei: IMEI :
+    num_call: Num appel :
+    operator: Opérateur :
+    state: État :
+    sn: SN :
+    model: Modèle :
+    supplier: Fournisseur :
+    card_ref: Référence carte :
+    type: Type d'équipement :
+  new:
+    title: Nouvel équipement
+    heading: Créer un nouvel équipement
+    back: Retour à la liste
+  edit:
+    title: Modifier l'équipement
+    heading: Modifier l'équipement
+    update: Mettre à jour
+    back: Retour à la liste
+  show:
+    title: Équipement
+    heading: Détail de l'équipement
+    back: Retour à la liste
+  form:
+    save: Enregistrer
+    type: Type d'équipement
+    type_placeholder: Sélectionnez un type
+    sn: Numéro de série (SN)
+    sn_placeholder: Saisissez le numéro de série
+    model: Modèle
+    model_placeholder: Saisissez le modèle
+    imei: IMEI
+    imei_placeholder: Saisissez l'IMEI
+    num_call: Numéro d'appel
+    num_call_placeholder: Saisissez le numéro d'appel
+    operator: Opérateur
+    operator_placeholder: Saisissez l'opérateur
+    card_ref: Référence carte
+    card_ref_placeholder: Saisissez la référence carte
+    supplier: Fournisseur
+    supplier_placeholder: Saisissez le fournisseur
+    state: État
+    state_placeholder: Saisissez l'état
+
+  types:
+    tpe: TPE
+    sim: SIM
+    card: Carte

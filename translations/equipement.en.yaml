@@ -1,0 +1,58 @@
+equipement:
+  index:
+    title: Equipment
+    heading: Equipment list
+    confirm_delete: Are you sure you want to delete this equipment?
+    none: No equipment found
+    add: Add equipment
+  actions:
+    edit: Edit
+    delete: Delete
+  labels:
+    imei: IMEI:
+    num_call: Call number:
+    operator: Operator:
+    state: Status:
+    sn: SN:
+    model: Model:
+    supplier: Supplier:
+    card_ref: Card reference:
+    type: Equipment type:
+  new:
+    title: New equipment
+    heading: Create new equipment
+    back: Back to list
+  edit:
+    title: Edit equipment
+    heading: Edit equipment
+    update: Update
+    back: Back to list
+  show:
+    title: Equipment
+    heading: Equipment details
+    back: Back to list
+  form:
+    save: Save
+    type: Equipment type
+    type_placeholder: Select a type
+    sn: Serial number (SN)
+    sn_placeholder: Enter serial number
+    model: Model
+    model_placeholder: Enter model
+    imei: IMEI
+    imei_placeholder: Enter IMEI
+    num_call: Call number
+    num_call_placeholder: Enter call number
+    operator: Operator
+    operator_placeholder: Enter operator
+    card_ref: Card reference
+    card_ref_placeholder: Enter card reference
+    supplier: Supplier
+    supplier_placeholder: Enter supplier
+    state: Status
+    state_placeholder: Enter status
+
+  types:
+    tpe: TPE
+    sim: SIM
+    card: Card

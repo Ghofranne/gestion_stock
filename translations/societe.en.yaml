@@ -1,0 +1,73 @@
+societe:
+  index:
+    title: Company list
+    heading: Companies
+    address: Address
+    email: Email
+    phone: Phone
+    view: View
+    edit: Edit
+    none: No company found.
+    create_new: Create a new company
+  overview:
+    title: Overview - Companies
+    heading: Companies Overview
+    subtitle: Complete overview of each company with its depots, movements and equipment
+  actions:
+    list: Companies list
+    new: New company
+    view: View details
+    edit: Edit
+    back_to_list: Back to list
+    update: Update
+    save: Save
+    delete: Delete
+  empty:
+    title: No company found
+    subtitle: Start by creating a company to see data
+    cta: Create a company
+  stats:
+    depots: Depots
+    mouvements: Movements
+    equipements: Equipment
+  sections:
+    depots: Depots
+    mouvements_recents: Recent movements
+    equipements: Equipment
+  no_data:
+    depot: No depot
+    mouvement: No movement
+    equipement: No equipment
+  item:
+    more: "... and %count% more"
+  equipment:
+    imei_prefix: "IMEI:"
+    sn_prefix: "SN:"
+    ref_prefix: "Ref:"
+    id_prefix: "ID:"
+
+  show:
+    details: Details
+    depots_equipements: Depots and Equipment
+    no_depot: No depot recorded for this company.
+    create_depot: Create a depot
+    equipements_count: "%count% equipment"
+    no_equipement_in_depot: No equipment in this depot
+    add_depot: Add a depot
+
+  edit:
+    title: Edit Company
+    heading: Edit company
+
+  delete:
+    confirm: Are you sure you want to delete this item?
+
+  form:
+    name: Name
+    address: Address
+    email: Email
+    phone: Phone
+    name_placeholder: Enter company name
+    address_placeholder: Enter address
+    email_placeholder: Enter email
+    phone_placeholder: Enter phone number

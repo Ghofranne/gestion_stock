@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'profile.preferences.title'|trans([], 'profile') }}{% endblock %}
+
+{% block body %}
+<div style="max-width:720px;margin:2rem auto;background:#fff;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.08);padding:1.5rem">
+  <h2 style="margin-bottom:1rem;color:#2d3748">{{ 'profile.preferences.heading'|trans([], 'profile') }}</h2>
+
+  {% for label, messages in app.flashes %}
+    {% for message in messages %}
+      <div class="flash-{{ label }}" style="background:#f6f7fb;border-left:4px solid #667eea;padding:.75rem 1rem;border-radius:8px;margin:.5rem 0;color:#374151">{{ message }}</div>
+    {% endfor %}
+  {% endfor %}
+
+  <form method="post" style="display:grid;gap:1rem">
+    <div>
+      <label for="language" style="font-weight:600">{{ 'profile.preferences.language_label'|trans([], 'profile') }}</label>
+      <select id="language" name="language" style="width:100%;padding:.7rem;border:1px solid #e5e7eb;border-radius:10px">
+        <option value="Français" {{ preferences.language == 'Français' ? 'selected' : '' }}>{{ 'profile.preferences.language.fr'|trans([], 'profile') }}</option>
+        <option value="English" {{ preferences.language == 'English' ? 'selected' : '' }}>{{ 'profile.preferences.language.en'|trans([], 'profile') }}</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="date_format" style="font-weight:600">{{ 'profile.preferences.date_format_label'|trans([], 'profile') }}</label>
+      <select id="date_format" name="date_format" style="width:100%;padding:.7rem;border:1px solid #e5e7eb;border-radius:10px">
+        <option value="DD/MM/YYYY" {{ preferences.date_format == 'DD/MM/YYYY' ? 'selected' : '' }}>DD/MM/YYYY</option>
+        <option value="MM/DD/YYYY" {{ preferences.date_format == 'MM/DD/YYYY' ? 'selected' : '' }}>MM/DD/YYYY</option>
+        <option value="YYYY-MM-DD" {{ preferences.date_format == 'YYYY-MM-DD' ? 'selected' : '' }}>YYYY-MM-DD</option>
+      </select>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <input type="checkbox" id="notifications" name="notifications" {{ preferences.notifications ? 'checked' : '' }}>
+      <label for="notifications">{{ 'profile.preferences.notifications_label'|trans([], 'profile') }}</label>
+    </div>
+
+    <div>
+      <button class="btn" style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:.7rem 1.2rem;border:none;border-radius:10px;font-weight:600">{{ 'profile.save'|trans([], 'profile') }}</button>
+      <a href="{{ path('app_profil') }}" style="margin-left:.5rem;color:#667eea;text-decoration:none">{{ 'profile.cancel'|trans([], 'profile') }}</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

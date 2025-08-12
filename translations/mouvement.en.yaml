@@ -1,0 +1,75 @@
+mouvement:
+  index:
+    title: Stock Movements
+    heading: Stock Movements
+    new: New movement
+    list_title: Movement list
+    search: Search...
+    headers:
+      id: ID
+      type: Movement type
+      date: Date
+      equipment: Equipment
+      actions: Actions
+    confirm_delete: Are you sure you want to delete this movement? This action is irreversible.
+    no_equipment: No equipment
+    empty:
+      title: No movements recorded
+      subtitle: Start by creating your first stock movement
+      cta: Create a movement
+  actions:
+    view: View details
+    edit: Edit
+    delete: Delete
+  types:
+    entree: Inbound
+    sortie: Outbound
+    transfert: Transfer
+    ajustement: Adjustment
+    retour: Return
+  new:
+    title: New Movement - StockPro
+    heading: New Stock Movement
+  edit:
+    title: Edit Movement - StockPro
+    heading: Edit Movement
+    danger:
+      title: Danger zone
+      subtitle: This action is irreversible
+  show:
+    title: Movement Detail - StockPro
+    heading: Movement Detail
+    main_info: Movement Information
+    date_none: Not provided
+    equipment_title: Associated Equipment
+    view_equipment: View equipment
+    comment: Comment
+  labels:
+    type: Movement type
+    date: Movement date
+    equipment: Equipment
+    depot_source: Source depot
+    depot_destination: Destination depot
+    comment_optional: Comment (optional)
+    quantity: Quantity
+  equipment:
+    imei: IMEI
+    sn: Serial number
+    num_call: Call number
+    model: Model
+    operator: Operator
+    supplier: Supplier
+    state: State
+  placeholders:
+    comment: Add a comment about this movement...
+    quantity: Quantity
+  form:
+    create: Create movement
+    update: Update
+    save: Save movement
+    type_placeholder: Select movement type
+    equipment_placeholder: Select equipment
+    depot_source_placeholder: Select source depot
+    depot_destination_placeholder: Select destination depot
+  common:
+    back: Back to list

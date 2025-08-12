@@ -47,6 +47,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $lastLoginAt = null;
 
+    // Reset password
+    #[ORM\Column(length: 64, nullable: true)]
+    private ?string $resetToken = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $resetRequestedAt = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -168,6 +175,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setLastLoginAt(?\DateTimeImmutable $lastLoginAt): static
     {
         $this->lastLoginAt = $lastLoginAt;
+        return $this;
+    }
+
+    // Reset token
+    public function getResetToken(): ?string
+    {
+        return $this->resetToken;
+    }
+
+    public function setResetToken(?string $resetToken): static
+    {
+        $this->resetToken = $resetToken;
+        return $this;
+    }
+
+    public function getResetRequestedAt(): ?\DateTimeImmutable
+    {
+        return $this->resetRequestedAt;
+    }
+
+    public function setResetRequestedAt(?\DateTimeImmutable $resetRequestedAt): static
+    {
+        $this->resetRequestedAt = $resetRequestedAt;
         return $this;
     }
 

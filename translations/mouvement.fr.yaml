@@ -1,0 +1,75 @@
+mouvement:
+  index:
+    title: Mouvements de Stock
+    heading: Mouvements de Stock
+    new: Nouveau mouvement
+    list_title: Liste des mouvements
+    search: Rechercher...
+    headers:
+      id: ID
+      type: Type de mouvement
+      date: Date
+      equipment: Équipement
+      actions: Actions
+    confirm_delete: Êtes-vous sûr de vouloir supprimer ce mouvement ? Cette action est irréversible.
+    no_equipment: Aucun équipement
+    empty:
+      title: Aucun mouvement enregistré
+      subtitle: Commencez par créer votre premier mouvement de stock
+      cta: Créer un mouvement
+  actions:
+    view: Voir détails
+    edit: Modifier
+    delete: Supprimer
+  types:
+    entree: Entrée
+    sortie: Sortie
+    transfert: Transfert
+    ajustement: Ajustement
+    retour: Retour
+  new:
+    title: Nouveau Mouvement - StockPro
+    heading: Nouveau Mouvement de Stock
+  edit:
+    title: Modifier Mouvement - StockPro
+    heading: Modifier le Mouvement
+    danger:
+      title: Zone de danger
+      subtitle: Cette action est irréversible
+  show:
+    title: Détail Mouvement - StockPro
+    heading: Détail du Mouvement
+    main_info: Informations du Mouvement
+    date_none: Non renseignée
+    equipment_title: Équipement Associé
+    view_equipment: Voir l'équipement
+    comment: Commentaire
+  labels:
+    type: Type de mouvement
+    date: Date du mouvement
+    equipment: Équipement
+    depot_source: Dépôt source
+    depot_destination: Dépôt destination
+    comment_optional: Commentaire (optionnel)
+    quantity: Quantité
+  equipment:
+    imei: IMEI
+    sn: Numéro de série
+    num_call: Numéro d'appel
+    model: Modèle
+    operator: Opérateur
+    supplier: Fournisseur
+    state: État
+  placeholders:
+    comment: Ajoutez un commentaire sur ce mouvement...
+    quantity: Quantité
+  form:
+    create: Créer le mouvement
+    update: Mettre à jour
+    save: Enregistrer le mouvement
+    type_placeholder: Sélectionnez le type de mouvement
+    equipment_placeholder: Sélectionnez un équipement
+    depot_source_placeholder: Sélectionnez un dépôt source
+    depot_destination_placeholder: Sélectionnez un dépôt destination
+  common:
+    back: Retour à la liste

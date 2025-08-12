@@ -1,0 +1,19 @@
+notifications:
+  equipement:
+    created: "Équipement créé avec succès"
+    updated: "Équipement mis à jour avec succès"
+    deleted: "Équipement supprimé avec succès"
+  depot:
+    created: "Dépôt créé avec succès"
+    updated: "Dépôt mis à jour avec succès"
+    deleted: "Dépôt supprimé avec succès"
+  societe:
+    created: "Société créée avec succès"
+    updated: "Société mise à jour avec succès"
+    deleted: "Société supprimée avec succès"
+  mouvement:
+    created: "Mouvement enregistré"
+    updated: "Mouvement mis à jour"
+    deleted: "Mouvement supprimé"
+  error:
+    generic: "Une erreur est survenue"

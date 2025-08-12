@@ -32,7 +32,7 @@ final class EquipementController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($equipement);
             $entityManager->flush();
-
+            $this->addFlash('success', 'notifications.equipement.created');
             return $this->redirectToRoute('app_equipement_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -58,7 +58,7 @@ final class EquipementController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
-
+            $this->addFlash('success', 'notifications.equipement.updated');
             return $this->redirectToRoute('app_equipement_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -75,6 +75,7 @@ final class EquipementController extends AbstractController
         if ($this->isCsrfTokenValid('delete'.$equipement->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($equipement);
             $entityManager->flush();
+            $this->addFlash('success', 'notifications.equipement.deleted');
         }
 
         return $this->redirectToRoute('app_equipement_index', [], Response::HTTP_SEE_OTHER);

@@ -1,15 +1,15 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Mouvements de Stock{% endblock %}
+{% block title %}{{ 'mouvement.index.title'|trans([], 'mouvement') }}{% endblock %}
 
 {% block body %}
     <div class="index-container">
         <div class="header-section">
-            <h1 class="page-title">📦 Mouvements de Stock</h1>
+            <h1 class="page-title">📦 {{ 'mouvement.index.heading'|trans([], 'mouvement') }}</h1>
             
             <a href="{{ path('app_mouvement_stock_new') }}" class="btn-primary">
                 <span class="btn-icon">➕</span>
-                Nouveau mouvement
+                {{ 'mouvement.index.new'|trans([], 'mouvement') }}
             </a>
         </div>
 
@@ -18,20 +18,20 @@
 
             <div class="table-container">
                 <div class="table-header">
-                    <h3>Liste des mouvements</h3>
+                    <h3>{{ 'mouvement.index.list_title'|trans([], 'mouvement') }}</h3>
                     <div class="search-box">
-                        <input type="text" placeholder="Rechercher..." class="search-input">
+                        <input type="text" placeholder="{{ 'mouvement.index.search'|trans([], 'mouvement') }}" class="search-input">
                         <span class="search-icon">🔍</span>
                     </div>
                 </div>
                 
                 <div class="modern-table">
                     <div class="table-header-row">
-                        <div class="table-cell header">ID</div>
-                        <div class="table-cell header">Type de mouvement</div>
-                        <div class="table-cell header">Date</div>
-                        <div class="table-cell header">Équipement</div>
-                        <div class="table-cell header">Actions</div>
+                        <div class="table-cell header">{{ 'mouvement.index.headers.id'|trans([], 'mouvement') }}</div>
+                        <div class="table-cell header">{{ 'mouvement.index.headers.type'|trans([], 'mouvement') }}</div>
+                        <div class="table-cell header">{{ 'mouvement.index.headers.date'|trans([], 'mouvement') }}</div>
+                        <div class="table-cell header">{{ 'mouvement.index.headers.equipment'|trans([], 'mouvement') }}</div>
+                        <div class="table-cell header">{{ 'mouvement.index.headers.actions'|trans([], 'mouvement') }}</div>
                     </div>
                     
                     {% for mouvement_stock in mouvement_stocks %}
@@ -41,12 +41,19 @@
                             </div>
                             <div class="table-cell">
                                 <span class="movement-type {{ mouvement_stock.typeMouvement|lower }}">
-                                    {% if mouvement_stock.typeMouvement == 'Entrée' %}
-                                        📥 Entrée
-                                    {% elseif mouvement_stock.typeMouvement == 'Sortie' %}
-                                        📤 Sortie
+                                    {% set t = mouvement_stock.typeMouvement %}
+                                    {% if t == 'entree' %}
+                                        📥 {{ 'mouvement.types.entree'|trans([], 'mouvement') }}
+                                    {% elseif t == 'sortie' %}
+                                        📤 {{ 'mouvement.types.sortie'|trans([], 'mouvement') }}
+                                    {% elseif t == 'transfert' %}
+                                        🔄 {{ 'mouvement.types.transfert'|trans([], 'mouvement') }}
+                                    {% elseif t == 'ajustement' %}
+                                        ♻️ {{ 'mouvement.types.ajustement'|trans([], 'mouvement') }}
+                                    {% elseif t == 'retour' %}
+                                        ↩️ {{ 'mouvement.types.retour'|trans([], 'mouvement') }}
                                     {% else %}
-                                        🔄 {{ mouvement_stock.typeMouvement }}
+                                        🔄 {{ ('mouvement.types.' ~ t)|trans([], 'mouvement') }}
                                     {% endif %}
                                 </span>
                             </div>
@@ -71,20 +78,20 @@
                                         </span>
                                     </div>
                                 {% else %}
-                                    <span class="no-equipment">Aucun équipement</span>
+                                    <span class="no-equipment">{{ 'mouvement.index.no_equipment'|trans([], 'mouvement') }}</span>
                                 {% endif %}
                             </div>
                             <div class="table-cell">
                                 <div class="action-buttons">
-                                    <a href="{{ path('app_mouvement_stock_show', {'id': mouvement_stock.id}) }}" class="btn-action view" title="Voir détails">
+                                    <a href="{{ path('app_mouvement_stock_show', {'id': mouvement_stock.id}) }}" class="btn-action view" title="{{ 'mouvement.actions.view'|trans([], 'mouvement') }}">
                                         👁️
                                     </a>
-                                    <a href="{{ path('app_mouvement_stock_edit', {'id': mouvement_stock.id}) }}" class="btn-action edit" title="Modifier">
+                                    <a href="{{ path('app_mouvement_stock_edit', {'id': mouvement_stock.id}) }}" class="btn-action edit" title="{{ 'mouvement.actions.edit'|trans([], 'mouvement') }}">
                                         ✏️
                                     </a>
-                                    <form method="post" action="{{ path('app_mouvement_stock_delete', {'id': mouvement_stock.id}) }}" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce mouvement ? Cette action est irréversible.');">
+                                    <form method="post" action="{{ path('app_mouvement_stock_delete', {'id': mouvement_stock.id}) }}" style="display: inline;" onsubmit="return confirm('{{ 'mouvement.index.confirm_delete'|trans([], 'mouvement') }}');">
                                         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ mouvement_stock.id) }}">
-                                        <button type="submit" class="btn-action delete" title="Supprimer">
+                                        <button type="submit" class="btn-action delete" title="{{ 'mouvement.actions.delete'|trans([], 'mouvement') }}">
                                             🗑️
                                         </button>
                                     </form>
@@ -97,11 +104,11 @@
         {% else %}
             <div class="empty-state">
                 <div class="empty-icon">📦</div>
-                <h3>Aucun mouvement enregistré</h3>
-                <p>Commencez par créer votre premier mouvement de stock</p>
+                <h3>{{ 'mouvement.index.empty.title'|trans([], 'mouvement') }}</h3>
+                <p>{{ 'mouvement.index.empty.subtitle'|trans([], 'mouvement') }}</p>
                 <a href="{{ path('app_mouvement_stock_new') }}" class="btn-primary">
                     <span class="btn-icon">➕</span>
-                    Créer un mouvement
+                    {{ 'mouvement.index.empty.cta'|trans([], 'mouvement') }}
                 </a>
             </div>
         {% endif %}

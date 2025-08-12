@@ -3,3 +3,12 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+
+# Fallback explicit routes for Google OAuth (in case attributes are not loaded)
+app_connect_google:
+    path: /connect/google
+    controller: App\Controller\ConnectController::connectGoogle
+
+app_connect_google_check:
+    path: /connect/google/check
+    controller: App\Controller\ConnectController::connectGoogleCheck

@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Modifier mon profil - StockPro{% endblock %}
+{% block title %}{{ 'profile.edit.title'|trans([], 'profile') }} - StockPro{% endblock %}
 
 {% block stylesheets %}
 <style>
@@ -30,7 +30,7 @@
 
 {% block body %}
 <div class="form-card">
-  <h1 style="margin-bottom:1rem; color:#2d3748;">Modifier mes informations</h1>
+  <h1 style="margin-bottom:1rem; color:#2d3748;">{{ 'profile.edit.heading'|trans([], 'profile') }}</h1>
   {% for label, messages in app.flashes %}
     {% for message in messages %}
       <div class="flash-{{ label }}">{{ message }}</div>
@@ -39,31 +39,31 @@
   <form method="post">
     <div class="form-row" style="display:flex; gap:1rem;">
       <div style="flex:1;">
-        <label class="form-label" for="prenom">Prénom</label>
+        <label class="form-label" for="prenom">{{ 'profile.edit.first_name'|trans([], 'profile') }}</label>
         <input id="prenom" name="prenom" type="text" class="form-input" value="{{ user.prenom }}">
       </div>
       <div style="flex:1;">
-        <label class="form-label" for="nom">Nom</label>
+        <label class="form-label" for="nom">{{ 'profile.edit.last_name'|trans([], 'profile') }}</label>
         <input id="nom" name="nom" type="text" class="form-input" value="{{ user.nom }}">
       </div>
     </div>
     <div class="form-row">
-      <label class="form-label" for="email">Email</label>
+      <label class="form-label" for="email">{{ 'profile.edit.email'|trans([], 'profile') }}</label>
       <input id="email" name="email" type="email" required class="form-input" value="{{ user.email }}">
     </div>
     <div class="form-row" style="display:flex; gap:1rem;">
       <div style="flex:1;">
-        <label class="form-label" for="telephone">Téléphone</label>
+        <label class="form-label" for="telephone">{{ 'profile.edit.phone'|trans([], 'profile') }}</label>
         <input id="telephone" name="telephone" type="text" class="form-input" value="{{ user.telephone }}">
       </div>
       <div style="flex:1;">
-        <label class="form-label" for="poste">Poste</label>
+        <label class="form-label" for="poste">{{ 'profile.edit.position'|trans([], 'profile') }}</label>
         <input id="poste" name="poste" type="text" class="form-input" value="{{ user.poste }}">
       </div>
     </div>
     <div class="form-actions">
-      <button class="btn btn-primary" type="submit">Enregistrer</button>
-      <a class="btn btn-secondary" href="{{ path('app_profil') }}">Annuler</a>
+      <button class="btn btn-primary" type="submit">{{ 'profile.save'|trans([], 'profile') }}</button>
+      <a class="btn btn-secondary" href="{{ path('app_profil') }}">{{ 'profile.cancel'|trans([], 'profile') }}</a>
     </div>
   </form>
 </div>

@@ -1,49 +1,49 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Accueil - Système de Gestion de Stock{% endblock %}
+{% block title %}{{ 'dashboard.title'|trans }}{% endblock %}
 
 {% block body %}
     <div class="welcome-card">
-        <h1>Système de Gestion de Stock</h1>
+        <h1>{{ 'dashboard.heading'|trans }}</h1>
         
     </div>
     <div class="menu-grid">
         <div class="menu-card">
             <div class="menu-icon">🏢</div>
-            <h3>Gestion des Sociétés</h3>
-            <p>Gérez les informations des sociétés et leurs paramètres</p>
-            <a href="{{ path('app_societe_index') }}" class="btn btn-outline" style="margin-top:1rem;">Accéder</a>
+            <h3>{{ 'dashboard.cards.companies.title'|trans }}</h3>
+            <p>{{ 'dashboard.cards.companies.desc'|trans }}</p>
+            <a href="{{ path('app_societe_index') }}" class="btn btn-outline" style="margin-top:1rem;">{{ 'dashboard.actions.access'|trans }}</a>
         </div>
         <div class="menu-card">
             <div class="menu-icon">📊</div>
-            <h3>Vue d'ensemble</h3>
-            <p>Aperçu complet de chaque société avec ses dépôts, mouvements et équipements</p>
-            <a href="{{ path('app_societe_overview') }}" class="btn btn-outline" style="margin-top:1rem;">Consulter</a>
+            <h3>{{ 'dashboard.cards.overview.title'|trans }}</h3>
+            <p>{{ 'dashboard.cards.overview.desc'|trans }}</p>
+            <a href="{{ path('app_societe_overview') }}" class="btn btn-outline" style="margin-top:1rem;">{{ 'dashboard.actions.consult'|trans }}</a>
         </div>
         <div class="menu-card">
             <div class="menu-icon">🏬</div>
-            <h3>Gestion des Dépôts</h3>
-            <p>Administrez vos dépôts et leurs emplacements</p>
-            <a href="{{ path('app_depot_index') }}" class="btn btn-outline" style="margin-top:1rem;">Accéder</a>
+            <h3>{{ 'dashboard.cards.depots.title'|trans }}</h3>
+            <p>{{ 'dashboard.cards.depots.desc'|trans }}</p>
+            <a href="{{ path('app_depot_index') }}" class="btn btn-outline" style="margin-top:1rem;">{{ 'dashboard.actions.access'|trans }}</a>
         </div>
         <div class="menu-card">
             <div class="menu-icon">🛠️</div>
-            <h3>Gestion des Équipements</h3>
-            <p>Suivez et gérez votre inventaire d'équipements</p>
-            <a href="{{ path('app_equipement_index') }}" class="btn btn-outline" style="margin-top:1rem;">Accéder</a>
+            <h3>{{ 'dashboard.cards.equipments.title'|trans }}</h3>
+            <p>{{ 'dashboard.cards.equipments.desc'|trans }}</p>
+            <a href="{{ path('app_equipement_index') }}" class="btn btn-outline" style="margin-top:1rem;">{{ 'dashboard.actions.access'|trans }}</a>
         </div>
         <!-- Ajoute d'autres cards si besoin -->
          <div class="menu-card">
             <div class="menu-icon">📦</div>
-            <h3>Gestion des mouvements</h3>
-            <p>Consultez et gérez tous les mouvements de stock</p>
-            <a href="{{ path('app_mouvement_stock_index') }}" class="btn btn-outline" style="margin-top:1rem;">Accéder</a>
+            <h3>{{ 'dashboard.cards.movements.title'|trans }}</h3>
+            <p>{{ 'dashboard.cards.movements.desc'|trans }}</p>
+            <a href="{{ path('app_mouvement_stock_index') }}" class="btn btn-outline" style="margin-top:1rem;">{{ 'dashboard.actions.access'|trans }}</a>
         </div>
          <div class="menu-card">
             <div class="menu-icon">🚛</div>
-            <h3>Transfert Stock</h3>
-            <p>Effectuez des transferts entre dépôts</p>
-            <a href="{{ path('app_depot_index') }}" class="btn btn-outline" style="margin-top:1rem;">Accéder</a>
+            <h3>{{ 'dashboard.cards.transfer.title'|trans }}</h3>
+            <p>{{ 'dashboard.cards.transfer.desc'|trans }}</p>
+            <a href="{{ path('app_depot_index') }}" class="btn btn-outline" style="margin-top:1rem;">{{ 'dashboard.actions.access'|trans }}</a>
         </div>
     </div>
 <style>

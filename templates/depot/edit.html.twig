@@ -1,14 +1,14 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Depot{% endblock %}
+{% block title %}{{ 'depot.edit.title'|trans([], 'depot') }}{% endblock %}
 
 {% block body %}
     <div class="form-container">
-        <h2 class="form-title">Modifier le dépôt</h2>
+        <h2 class="form-title">{{ 'depot.edit.heading'|trans([], 'depot') }}</h2>
         <div class="form-card">
-            {{ include('depot/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
+            {{ include('depot/_form.html.twig', {'button_label': ('depot.edit.update'|trans([], 'depot'))}) }}
         </div>
-        <a href="{{ path('app_depot_index') }}" class="btn-back">&#8592; Retour à la liste</a>
+        <a href="{{ path('app_depot_index') }}" class="btn-back">&#8592; {{ 'depot.edit.back'|trans([], 'depot') }}</a>
         <div style="margin-top:1.5rem;">{{ include('depot/_delete_form.html.twig') }}</div>
     </div>
     <style>

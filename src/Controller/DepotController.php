@@ -33,7 +33,7 @@ final class DepotController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($depot);
             $entityManager->flush();
-
+            $this->addFlash('success', 'notifications.depot.created');
             return $this->redirectToRoute('app_depot_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -117,7 +117,7 @@ final class DepotController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
-
+            $this->addFlash('success', 'notifications.depot.updated');
             return $this->redirectToRoute('app_depot_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -133,6 +133,7 @@ final class DepotController extends AbstractController
         if ($this->isCsrfTokenValid('delete'.$depot->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($depot);
             $entityManager->flush();
+            $this->addFlash('success', 'notifications.depot.deleted');
         }
 
         return $this->redirectToRoute('app_depot_index', [], Response::HTTP_SEE_OTHER);

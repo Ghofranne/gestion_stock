@@ -1,14 +1,14 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Societe{% endblock %}
+{% block title %}{{ 'societe.edit.title'|trans([], 'societe') }}{% endblock %}
 
 {% block body %}
     <div class="form-container">
-        <h2 class="form-title">Modifier la société</h2>
+        <h2 class="form-title">{{ 'societe.edit.heading'|trans([], 'societe') }}</h2>
         <div class="form-card">
-            {{ include('societe/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
+            {{ include('societe/_form.html.twig', {'button_label': ('societe.actions.update'|trans([], 'societe'))}) }}
         </div>
-        <a href="{{ path('app_societe_index') }}" class="btn-back">&#8592; Retour à la liste</a>
+        <a href="{{ path('app_societe_index') }}" class="btn-back">&#8592; {{ 'societe.actions.back_to_list'|trans([], 'societe') }}</a>
         <div style="margin-top:1.5rem;">{{ include('societe/_delete_form.html.twig') }}</div>
     </div>
     <style>

@@ -11,7 +11,7 @@
         <div class="js-dynamic-field js-fournisseur-field">{{ form_row(form.fournisseur) }}</div>
         {{ form_row(form.etat) }}
     </div>
-    <button class="btn">{{ button_label|default('Save') }}</button>
+    <button class="btn">{{ button_label|default(('equipement.form.save'|trans([], 'equipement'))) }}</button>
     <style>
         .form-fields {
             display: flex;

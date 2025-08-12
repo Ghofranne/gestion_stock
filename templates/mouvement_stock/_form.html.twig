@@ -2,31 +2,31 @@
     <div class="form-fields">
         <div class="field-row">
             <div class="field-group">
-                {{ form_label(form.type_mouvement, 'Type de mouvement') }}
+                {{ form_label(form.type_mouvement, 'mouvement.labels.type'|trans([], 'mouvement')) }}
                 {{ form_widget(form.type_mouvement) }}
                 {{ form_errors(form.type_mouvement) }}
             </div>
             <div class="field-group">
-                {{ form_label(form.date, 'Date du mouvement') }}
+                {{ form_label(form.date, 'mouvement.labels.date'|trans([], 'mouvement')) }}
                 {{ form_widget(form.date) }}
                 {{ form_errors(form.date) }}
             </div>
         </div>
 
         <div class="field-group full-width">
-            {{ form_label(form.equipement, 'Équipement') }}
+            {{ form_label(form.equipement, 'mouvement.labels.equipment'|trans([], 'mouvement')) }}
             {{ form_widget(form.equipement) }}
             {{ form_errors(form.equipement) }}
         </div>
 
         <div class="field-row">
             <div class="field-group" id="depot-source-group">
-                {{ form_label(form.depotSource, 'Dépôt source') }}
+                {{ form_label(form.depotSource, 'mouvement.labels.depot_source'|trans([], 'mouvement')) }}
                 {{ form_widget(form.depotSource) }}
                 {{ form_errors(form.depotSource) }}
             </div>
             <div class="field-group" id="depot-destination-group">
-                {{ form_label(form.depotDestination, 'Dépôt destination') }}
+                {{ form_label(form.depotDestination, 'mouvement.labels.depot_destination'|trans([], 'mouvement')) }}
                 {{ form_widget(form.depotDestination) }}
                 {{ form_errors(form.depotDestination) }}
             </div>
@@ -34,21 +34,21 @@
 
         {% if form.commentaire is defined %}
         <div class="field-group full-width">
-            {{ form_label(form.commentaire, 'Commentaire (optionnel)') }}
-            {{ form_widget(form.commentaire, {'attr': {'rows': '3', 'placeholder': 'Ajoutez un commentaire sur ce mouvement...'}}) }}
+            {{ form_label(form.commentaire, 'mouvement.labels.comment_optional'|trans([], 'mouvement')) }}
+            {{ form_widget(form.commentaire, {'attr': {'rows': '3', 'placeholder': 'mouvement.placeholders.comment'|trans([], 'mouvement')}}) }}
             {{ form_errors(form.commentaire) }}
         </div>
         {% endif %}
         
         <div class="field-group quantity-field">
-            {{ form_label(form.quantite, 'Quantité') }}
+            {{ form_label(form.quantite, 'mouvement.labels.quantity'|trans([], 'mouvement')) }}
             {{ form_widget(form.quantite) }}
             {{ form_errors(form.quantite) }}
         </div>
     </div>
 
     <button type="submit" class="btn">
-        {{ button_label|default('Enregistrer le mouvement') }}
+        {{ button_label|default('mouvement.form.save'|trans([], 'mouvement')) }}
     </button>
 {{ form_end(form) }}
 

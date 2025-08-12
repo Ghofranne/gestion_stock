@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Equipement{% endblock %}
+{% block title %}{{ 'equipement.new.title'|trans([], 'equipement') }}{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -12,11 +12,11 @@
 
 {% block body %}
     <div class="form-container">
-        <h2 class="form-title">Créer un nouvel équipement</h2>
+        <h2 class="form-title">{{ 'equipement.new.heading'|trans([], 'equipement') }}</h2>
         <div class="form-card">
             {{ include('equipement/_form.html.twig') }}
         </div>
-        <a href="{{ path('app_equipement_index') }}" class="btn-back">&#8592; Retour à la liste</a>
+        <a href="{{ path('app_equipement_index') }}" class="btn-back">&#8592; {{ 'equipement.new.back'|trans([], 'equipement') }}</a>
     </div>
     <style>
         .form-container {

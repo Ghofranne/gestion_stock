@@ -1,24 +1,24 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Vue d'ensemble - Sociétés{% endblock %}
+{% block title %}{{ 'societe.overview.title'|trans([], 'societe') }}{% endblock %}
 
 {% block body %}
 <div class="overview-container">
     <div class="overview-header">
-        <h1>Vue d'ensemble des Sociétés</h1>
-        <p>Aperçu complet de chaque société avec ses dépôts, mouvements et équipements</p>
+        <h1>{{ 'societe.overview.heading'|trans([], 'societe') }}</h1>
+        <p>{{ 'societe.overview.subtitle'|trans([], 'societe') }}</p>
         <div class="header-actions">
-            <a href="{{ path('app_societe_index') }}" class="btn btn-outline">📋 Liste des sociétés</a>
-            <a href="{{ path('app_societe_new') }}" class="btn btn-primary">➕ Nouvelle société</a>
+            <a href="{{ path('app_societe_index') }}" class="btn btn-outline">📋 {{ 'societe.actions.list'|trans([], 'societe') }}</a>
+            <a href="{{ path('app_societe_new') }}" class="btn btn-primary">➕ {{ 'societe.actions.new'|trans([], 'societe') }}</a>
         </div>
     </div>
 
     {% if societes_data is empty %}
         <div class="empty-state">
             <div class="empty-icon">🏢</div>
-            <h3>Aucune société trouvée</h3>
-            <p>Commencez par créer une société pour voir les données</p>
-            <a href="{{ path('app_societe_new') }}" class="btn btn-primary">➕ Créer une société</a>
+            <h3>{{ 'societe.empty.title'|trans([], 'societe') }}</h3>
+            <p>{{ 'societe.empty.subtitle'|trans([], 'societe') }}</p>
+            <a href="{{ path('app_societe_new') }}" class="btn btn-primary">➕ {{ 'societe.empty.cta'|trans([], 'societe') }}</a>
         </div>
     {% else %}
         {% for data in societes_data %}
@@ -36,15 +36,15 @@
                     <div class="societe-stats">
                         <div class="stat-item">
                             <div class="stat-number">{{ data.stats.nb_depots }}</div>
-                            <div class="stat-label">Dépôts</div>
+                            <div class="stat-label">{{ 'societe.stats.depots'|trans([], 'societe') }}</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-number">{{ data.stats.nb_mouvements }}</div>
-                            <div class="stat-label">Mouvements</div>
+                            <div class="stat-label">{{ 'societe.stats.mouvements'|trans([], 'societe') }}</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-number">{{ data.stats.nb_equipements }}</div>
-                            <div class="stat-label">Équipements</div>
+                            <div class="stat-label">{{ 'societe.stats.equipements'|trans([], 'societe') }}</div>
                         </div>
                     </div>
                 </div>
@@ -53,9 +53,9 @@
                     <div class="content-grid">
                         <!-- Dépôts -->
                         <div class="content-section">
-                            <h3>🏬 Dépôts ({{ data.depots|length }})</h3>
+                            <h3>🏬 {{ 'societe.sections.depots'|trans([], 'societe') }} ({{ data.depots|length }})</h3>
                             {% if data.depots is empty %}
-                                <p class="no-data">Aucun dépôt</p>
+                                <p class="no-data">{{ 'societe.no_data.depot'|trans([], 'societe') }}</p>
                             {% else %}
                                 <div class="items-list">
                                     {% for depot in data.depots %}
@@ -73,9 +73,9 @@
 
                         <!-- Mouvements récents -->
                         <div class="content-section">
-                            <h3>📦 Mouvements récents ({{ data.mouvements|length }})</h3>
+                            <h3>📦 {{ 'societe.sections.mouvements_recents'|trans([], 'societe') }} ({{ data.mouvements|length }})</h3>
                             {% if data.mouvements is empty %}
-                                <p class="no-data">Aucun mouvement</p>
+                                <p class="no-data">{{ 'societe.no_data.mouvement'|trans([], 'societe') }}</p>
                             {% else %}
                                 <div class="items-list">
                                     {% for mouvement in data.mouvements|slice(0, 5) %}
@@ -94,7 +94,7 @@
                                     {% endfor %}
                                     {% if data.mouvements|length > 5 %}
                                         <div class="item">
-                                            <div class="item-more">... et {{ data.mouvements|length - 5 }} autres</div>
+                                            <div class="item-more">{{ 'societe.item.more'|trans({'%count%': (data.mouvements|length - 5)}, 'societe') }}</div>
                                         </div>
                                     {% endif %}
                                 </div>
@@ -103,9 +103,9 @@
 
                         <!-- Équipements -->
                         <div class="content-section">
-                            <h3>🛠️ Équipements ({{ data.equipements|length }})</h3>
+                            <h3>🛠️ {{ 'societe.sections.equipements'|trans([], 'societe') }} ({{ data.equipements|length }})</h3>
                             {% if data.equipements is empty %}
-                                <p class="no-data">Aucun équipement</p>
+                                <p class="no-data">{{ 'societe.no_data.equipement'|trans([], 'societe') }}</p>
                             {% else %}
                                 <div class="items-list">
                                     {% for equipement in data.equipements|slice(0, 5) %}
@@ -118,17 +118,17 @@
                                             <div class="item-info">
                                                 <div class="item-name">{{ equipement.typeEquipement }}</div>
                                                 <div class="item-detail">
-                                                    {% if equipement.imei %}IMEI: {{ equipement.imei }}
-                                                    {% elseif equipement.sn %}SN: {{ equipement.sn }}
-                                                    {% elseif equipement.referenceCarte %}Ref: {{ equipement.referenceCarte }}
-                                                    {% else %}ID: {{ equipement.id }}{% endif %}
+                                                    {% if equipement.imei %}{{ 'societe.equipment.imei_prefix'|trans([], 'societe') }} {{ equipement.imei }}
+                                                    {% elseif equipement.sn %}{{ 'societe.equipment.sn_prefix'|trans([], 'societe') }} {{ equipement.sn }}
+                                                    {% elseif equipement.referenceCarte %}{{ 'societe.equipment.ref_prefix'|trans([], 'societe') }} {{ equipement.referenceCarte }}
+                                                    {% else %}{{ 'societe.equipment.id_prefix'|trans([], 'societe') }} {{ equipement.id }}{% endif %}
                                                 </div>
                                             </div>
                                         </div>
                                     {% endfor %}
                                     {% if data.equipements|length > 5 %}
                                         <div class="item">
-                                            <div class="item-more">... et {{ data.equipements|length - 5 }} autres</div>
+                                            <div class="item-more">{{ 'societe.item.more'|trans({'%count%': (data.equipements|length - 5)}, 'societe') }}</div>
                                         </div>
                                     {% endif %}
                                 </div>
@@ -138,8 +138,8 @@
 
                     <!-- Actions -->
                     <div class="societe-actions">
-                        <a href="{{ path('app_societe_show', {'id': data.societe.id}) }}" class="btn btn-outline">👁️ Voir détails</a>
-                        <a href="{{ path('app_societe_edit', {'id': data.societe.id}) }}" class="btn btn-primary">✏️ Modifier</a>
+                        <a href="{{ path('app_societe_show', {'id': data.societe.id}) }}" class="btn btn-outline">👁️ {{ 'societe.actions.view'|trans([], 'societe') }}</a>
+                        <a href="{{ path('app_societe_edit', {'id': data.societe.id}) }}" class="btn btn-primary">✏️ {{ 'societe.actions.edit'|trans([], 'societe') }}</a>
                     </div>
                 </div>
             </div>

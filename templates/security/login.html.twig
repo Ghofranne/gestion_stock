@@ -19,7 +19,7 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            overflow: hidden;
+            overflow: auto;
         }
 
         /* Enhanced background shapes */
@@ -570,8 +570,7 @@
         </form>
 
         <div class="links">
-            <a href="#" onclick="showForgotPassword()">Mot de passe oublié ?</a>
-            <a href="#" onclick="showRegister()">Créer un compte</a>
+            <a href="{{ path('app_forgot_password') }}">Mot de passe oublié ?</a>
         </div>
 
         <div class="divider">
@@ -579,11 +578,8 @@
         </div>
 
         <div class="social-login">
-            <a href="#" class="social-btn" onclick="socialLogin('google')">
-                🔵 Google
-            </a>
-            <a href="#" class="social-btn" onclick="socialLogin('facebook')">
-                🔷 Facebook
+            <a href="{{ url('app_connect_google') }}" class="social-btn" target="_self" onclick="window.location.href='{{ url('app_connect_google') }}'; return false;">
+                🔵 Continuer avec Google
             </a>
         </div>
     </div>
@@ -756,9 +752,7 @@
         }
 
         // Fonctions pour les liens (à personnaliser)
-        function showForgotPassword() {
-            alert('Fonctionnalité "Mot de passe oublié" - À implémenter');
-        }
+        function showForgotPassword() {}
 
         function showRegister() {
             alert('Fonctionnalité "Créer un compte" - À implémenter');
