@@ -119,7 +119,7 @@
             background: linear-gradient(135deg, #667eea, #764ba2) !important;
             color: white !important;
             font-weight: 600 !important;
-            cursor: default !important;
+            cursor: pointer !important;
             max-width: 150px;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -284,15 +284,11 @@
                     </li>
                     
                     </li>
+                    {# profile menu item removed; username now links to profile #}
                     <li class="nav-item">
-                        <a href="{{ path('app_profil') }}" class="nav-link {% if app.request.get('_route') == 'app_profil' %}active{% endif %}">
-                            {{ 'menu.profile'|trans }}
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <span class="nav-link user-name-nav">
+                        <a href="{{ path('app_profil') }}" class="nav-link user-name-nav {% if app.request.get('_route') starts with 'app_profil' %}active{% endif %}">
                             {{ app.user ? app.user.email|split('@')[0] : 'Utilisateur' }}
-                        </span>
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ path('app_logout') }}" class="nav-link btn-logout-nav" title="{{ 'menu.logout'|trans }}">
@@ -367,6 +363,8 @@
         document.addEventListener('click', function(e) {
             const navMenu = document.getElementById('navMenu');
             const mobileBtn = document.querySelector('.mobile-menu-btn');
+            // Si l'un des éléments n'existe pas sur cette page, ne rien faire
+            if (!navMenu || !mobileBtn) return;
             if (!navMenu.contains(e.target) && !mobileBtn.contains(e.target)) {
                 navMenu.classList.remove('active');
             }

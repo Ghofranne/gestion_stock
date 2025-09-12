@@ -291,7 +291,6 @@
                                 <th>Dépôt Source</th>
                                 <th>Dépôt Destination</th>
                                 <th>Société</th>
-                                <th>Quantité</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -354,9 +353,7 @@
                                             <span class="badge badge-secondary">Non assigné</span>
                                         {% endif %}
                                     </td>
-                                    <td>
-                                        <span class="badge badge-movement">{{ item.mouvement.quantite ?? 1 }}</span>
-                                    </td>
+                                    
                                     <td>
                                         <div class="action-buttons">
                                             <a href="{{ path('app_mouvement_stock_show', {'id': item.mouvement.id}) }}" class="btn btn-sm btn-outline">

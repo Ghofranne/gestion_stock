@@ -1,0 +1,13 @@
+Date;Heure;Type d'action;Entité;ID;Détails;Adresse IP
+{% for activity in activities %}
+{% set dateFr = activity.createdAt|date('l d F Y')
+    |replace({
+        'Monday': 'lundi', 'Tuesday': 'mardi', 'Wednesday': 'mercredi', 'Thursday': 'jeudi',
+        'Friday': 'vendredi', 'Saturday': 'samedi', 'Sunday': 'dimanche',
+        'January': 'janvier', 'February': 'février', 'March': 'mars', 'April': 'avril',
+        'May': 'mai', 'June': 'juin', 'July': 'juillet', 'August': 'août',
+        'September': 'septembre', 'October': 'octobre', 'November': 'novembre', 'December': 'décembre'
+    })
+%}
+"{{ dateFr }}";"{{ activity.createdAt|date('H\hi') }}";"{% if activity.action == 'create' %}Création{% elseif activity.action == 'update' %}Modification{% elseif activity.action == 'delete' %}Suppression{% elseif activity.action == 'login' %}Connexion{% elseif activity.action == 'logout' %}Déconnexion{% else %}{{ activity.action }}{% endif %}";"{{ activity.entityType }}";"{{ activity.entityId|default('N/A') }}";"{{ activity.details|replace({';': ',', '"': '""'})|raw }}";"{{ activity.ipAddress|default('N/A') }}"
+{% endfor %}

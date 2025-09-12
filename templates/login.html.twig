@@ -538,6 +538,7 @@
         </div>
 
         <form id="login-form" action="{{ path('app_login') }}" method="post" novalidate>
+            <input type="hidden" name="_token" value="{{ csrf_token('authenticate') }}">
             <div class="form-group" id="email-group">
                 <label for="email">Adresse email</label>
                 <div class="input-container">
@@ -572,18 +573,7 @@
             <a href="#" onclick="showRegister()">Créer un compte</a>
         </div>
 
-        <div class="divider">
-            <span>ou continuez avec</span>
-        </div>
-
-        <div class="social-login">
-            <a href="#" class="social-btn" onclick="socialLogin('google')">
-                🔵 Google
-            </a>
-            <a href="#" class="social-btn" onclick="socialLogin('facebook')">
-                🔷 Facebook
-            </a>
-        </div>
+        
     </div>
 
     <script>

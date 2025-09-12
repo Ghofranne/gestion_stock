@@ -48,10 +48,10 @@ mouvement:
     type: Type de mouvement
     date: Date du mouvement
     equipment: Équipement
+    equipment_type: Type d'équipement
     depot_source: Dépôt source
     depot_destination: Dépôt destination
     comment_optional: Commentaire (optionnel)
-    quantity: Quantité
   equipment:
     imei: IMEI
     sn: Numéro de série
@@ -62,14 +62,29 @@ mouvement:
     state: État
   placeholders:
     comment: Ajoutez un commentaire sur ce mouvement...
-    quantity: Quantité
+    equipment_type: Sélectionnez un type d'équipement
   form:
     create: Créer le mouvement
     update: Mettre à jour
     save: Enregistrer le mouvement
     type_placeholder: Sélectionnez le type de mouvement
     equipment_placeholder: Sélectionnez un équipement
+    equipment_type_placeholder: Sélectionnez un type d'équipement
     depot_source_placeholder: Sélectionnez un dépôt source
     depot_destination_placeholder: Sélectionnez un dépôt destination
+  ajustement:
+    sens:
+      label: Sens de l'ajustement
+      placeholder: Sélectionnez un sens
+      entree: Entrée (gain de stock)
+      sortie: Sortie (perte de stock)
+    raison:
+      label: Raison de l'ajustement
+      placeholder: Décrivez la raison de l'ajustement
+      entree_placeholder: "Ex: Inventaire, erreur de saisie, retour de maintenance..."
+      sortie_placeholder: "Ex: Perte, casse, maintenance, vol..."
+ 
   common:
     back: Retour à la liste
+  notifications:
+    select_at_least_one_equipment: Veuillez sélectionner au moins un équipement.

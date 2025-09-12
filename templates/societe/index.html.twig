@@ -3,9 +3,13 @@
 {% block title %}{{ 'societe.index.title'|trans([], 'societe') }}{% endblock %}
 
 {% block body %}
+    <div class="societe-search">
+        <input type="text" id="societeSearch" class="search-input" placeholder="Rechercher...">
+        <span class="search-icon">🔍</span>
+    </div>
     <h1>{{ 'societe.index.heading'|trans([], 'societe') }}</h1>
 
-    <div class="societe-cards">
+    <div id="societeList" class="societe-cards">
         {% for societe in societes %}
             <div class="societe-card">
                 <div class="societe-card-header">
@@ -27,8 +31,34 @@
     </div>
 
     <a href="{{ path('app_societe_new') }}" class="btn-add">{{ 'societe.index.create_new'|trans([], 'societe') }}</a>
+    <div id="societesEmpty" class="societe-empty" style="display:none; margin-top:1rem; color:#555;">Aucune société ne correspond à votre recherche.</div>
 
     <style>
+        .societe-search {
+            position: relative;
+            display: block;
+            max-width: 360px;
+            margin: .25rem 0 .5rem auto; /* aligné à droite, plus haut */
+        }
+        .societe-search .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #764ba2;
+            pointer-events: none;
+        }
+        .societe-search .search-input {
+            width: 100%;
+            padding: .45rem .75rem .45rem 2rem; /* place pour l'icône */
+            border-radius: 999px; /* pill */
+            border: 1px solid rgba(0,0,0,.15);
+            background: #fff;
+            box-shadow: 0 1px 2px rgba(0,0,0,.04) inset;
+            font-size: .95rem;
+            outline: none;
+        }
+        .societe-search .search-input::placeholder { color: #9aa0a6; }
         .societe-cards {
             display: flex;
             flex-wrap: wrap;
@@ -97,4 +127,28 @@
             background: #667eea;
         }
     </style>
+    <script>
+    (function(){
+        function debounce(fn, delay){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn.apply(null,a), delay); }; }
+        function filterCards(q){
+            const query=(q||'').toLowerCase().trim();
+            const cards=document.querySelectorAll('#societeList .societe-card');
+            let visible=0;
+            cards.forEach(card=>{
+                const text=card.textContent.toLowerCase();
+                const match=!query||text.includes(query);
+                card.style.display = match ? '' : 'none';
+                if(match) visible++;
+            });
+            const empty=document.getElementById('societesEmpty');
+            if(empty) empty.style.display = visible===0 ? 'block' : 'none';
+        }
+        const input=document.getElementById('societeSearch');
+        const clear=document.getElementById('societeSearchClear');
+        if(input){ input.addEventListener('input', debounce(()=>filterCards(input.value), 150)); }
+        if(clear){ clear.addEventListener('click', ()=>{ input.value=''; filterCards(''); input.focus(); }); }
+        // initial
+        filterCards('');
+    })();
+    </script>
 {% endblock %}

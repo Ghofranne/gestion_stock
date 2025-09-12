@@ -252,6 +252,47 @@
                 <span class="info-label">{{ 'profile.last_action'|trans([], 'profile') }}</span>
                 <span class="info-value">{{ last_activity ?? ('profile.no_activity'|trans([], 'profile')) }}</span>
             </div>
+            
+            <!-- Historique des dernières activités -->
+            {% if user_activities is defined and user_activities is not empty %}
+                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(0,0,0,0.1);">
+                    <h3 style="font-size: 1rem; color: #4a5568; margin-bottom: 1rem;">🕒 {{ 'history.latest_activities'|trans }}</h3>
+                    {% for activity in user_activities %}
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(0,0,0,0.05);">
+                            <div>
+                                <span style="font-weight: 600; color: #2d3748;">{{ activity.actionIcon }}
+                                    {% set actionLower = activity.action|default('')|lower|trim %}
+                                    {% set entityType = activity.entityType|default('') %}
+                                    {% set entityShort = entityType ? (entityType|split('\\')|last|lower) : '' %}
+                                    {% set entityLabel = entityShort ? ('history.entity.' ~ entityShort)|trans : '' %}
+                                    {% if actionLower in ['create','update','delete'] and activity.entityName %}
+                                        {% set key = 'history.detail.' ~ actionLower %}
+                                        {{ key|trans({'%entity%': entityLabel ?: entityShort, '%name%': activity.entityName}) }}
+                                    {% elseif actionLower == 'login' %}
+                                        {{ 'history.login_success'|trans }}
+                                    {% else %}
+                                        {% set _desc = activity.actionDescription|default('') %}
+                                        {% if _desc starts with 'history.' %}
+                                            {{ _desc|trans }}
+                                        {% else %}
+                                            {{ _desc }}
+                                        {% endif %}
+                                    {% endif %}
+                                </span>
+                                {# Details intentionally hidden per request #}
+                            </div>
+                            <small style="color: #718096;">{{ activity.createdAt|date('d/m H:i') }}</small>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <!-- Lien vers l'historique complet -->
+            <div style="margin-top: 1rem; text-align: center;">
+                <a href="{{ path('app_profil_historique') }}" class="btn-profile" style="background: linear-gradient(135deg, #4299e1, #3182ce);">
+                    📋 {{ 'history.view_full'|trans }}
+                </a>
+            </div>
         </div>
 
         <!-- Actions rapides -->

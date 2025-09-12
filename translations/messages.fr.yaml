@@ -64,3 +64,73 @@ dashboard:
     transfer:
       title: Transfert Stock
       desc: Effectuez des transferts entre dépôts
+
+# Historique / History page
+history:
+  page_title: "Mon Historique d'Activités"
+  header: "Historique d'activités"
+  back_to_profile: "Retour au profil"
+  search_placeholder: "Rechercher dans l'historique..."
+  filters:
+    all: "Toutes les actions"
+    create: "Créations"
+    update: "Modifications"
+    delete: "Suppressions"
+    login: "Connexions"
+    logout: "Déconnexions"
+  empty:
+    title: "Aucune activité récente"
+    subtitle: "Vos actions apparaîtront ici"
+  action:
+    create: "Création"
+    update: "Modification"
+    delete: "Suppression"
+    login: "Connexion"
+    logout: "Déconnexion"
+  no_details: "Aucun détail disponible pour cette action."
+  see_details: "Voir les détails"
+  see: "Voir"
+  hide: "Masquer"
+  select_all: "Tout sélectionner"
+  bulk:
+    delete: "Supprimer la sélection"
+  js:
+    confirm_delete: "Êtes-vous sûr de vouloir supprimer %count% activité(s) ?"
+    delete_success: "%count% activité(s) supprimée(s) avec succès"
+    delete_error: "Une erreur est survenue lors de la suppression"
+  entity:
+    user: "Utilisateur"
+    societe: "Société"
+    depot: "Dépôt"
+    equipement: "Équipement"
+    mouvementstock: "Mouvement"
+  detail:
+    create: "%entity% \"%name%\" créé(e)"
+    update: "%entity% \"%name%\" mise à jour"
+    delete: "%entity% \"%name%\" supprimé(e)"
+  login_success: "Connexion réussie"
+  latest_activities: "Dernières activités"
+  view_full: "Voir l'historique complet"
+  system: "Système"
+  admin:
+    title: "Historique des activités - Administration"
+    heading: "Historique des activités"
+    stats:
+      total: "Total activités"
+      today: "Aujourd'hui"
+    table:
+      title: "Historique des activités (%count% entrées)"
+      columns:
+        action: "Action"
+        entity: "Entité"
+        user: "Utilisateur"
+        datetime: "Date & Heure"
+        details: "Détails"
+    search_placeholder: "Rechercher (action, entité, utilisateur, détails)"
+    sort:
+      aria: "Trier"
+      date_desc: "Trier: Date décroissante"
+      date_asc: "Date croissante"
+      action_asc: "Action (A→Z)"
+      entity_asc: "Entité (A→Z)"
+      user_asc: "Utilisateur (A→Z)"

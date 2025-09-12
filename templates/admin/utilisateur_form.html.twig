@@ -86,6 +86,18 @@
                             {% endif %}
                         </small>
                     </div>
+
+                    <!-- Statut du compte -->
+                    <div class="form-group">
+                        <label for="enabled">🟢 Compte actif</label>
+                        <label class="switch">
+                            <input type="checkbox" id="enabled" name="enabled" {% if mode == 'create' or user.enabled %}checked{% endif %}>
+                            <span class="slider round"></span>
+                        </label>
+                        {% if mode == 'edit' and user == app.user %}
+                            <small class="help-text">Vous ne pouvez pas désactiver votre propre compte.</small>
+                        {% endif %}
+                    </div>
                 </div>
 
                 <!-- Rôles et permissions -->
@@ -93,6 +105,9 @@
                     <h3>🔐 Rôles et Permissions</h3>
                     <p class="section-description">Sélectionnez les rôles à attribuer à cet utilisateur</p>
                     
+                    {# ROLE_USER attribué automatiquement, sans affichage de la carte #}
+                    <input type="hidden" name="roles[]" value="ROLE_USER">
+
                     <div class="roles-grid">
                         <div class="role-option">
                             <label class="role-label">
@@ -139,28 +154,60 @@
                                 </div>
                             </label>
                         </div>
+                        {# Carte "Utilisateur" supprimée de l'UI volontairement #}
+                    </div>
+                </div>
 
-                        <div class="role-option">
-                            <label class="role-label">
-                                <input type="checkbox" 
-                                       name="roles[]" 
-                                       value="ROLE_USER"
-                                       {% if user.roles is empty or 'ROLE_USER' in user.roles %}checked{% endif %}>
-                                <div class="role-card user">
-                                    <div class="role-icon">👤</div>
-                                    <div class="role-info">
-                                        <h4>Utilisateur</h4>
-                                        <p>Accès en consultation</p>
-                                        <ul class="role-permissions">
-                                            <li>✓ Consultation des équipements</li>
-                                            <li>✓ Consultation des mouvements</li>
-                                            <li>✓ Rapports basiques</li>
-                                        </ul>
-                                    </div>
-                                </div>
+                <!-- 2FA / Authentification à deux facteurs -->
+                <div class="roles-section">
+                    <h3>🛡️ Sécurité - Authentification à deux facteurs (2FA)</h3>
+                    <p class="section-description">
+                        Renforcez la sécurité du compte en exigeant un second facteur lors de la connexion.
+                    </p>
+
+                    <div class="form-grid">
+                        <!-- Activer 2FA -->
+                        <div class="form-group">
+                            <label for="two_factor_enabled">🔔 Activer la 2FA</label>
+                            <label class="switch">
+                                <input type="checkbox" id="two_factor_enabled" name="two_factor_enabled" {% if user.twoFactorEnabled %}checked{% endif %}>
+                                <span class="slider round"></span>
                             </label>
+                            <small class="help-text">Si activé, l'utilisateur devra valider un code après le mot de passe.</small>
+                        </div>
+
+                        <!-- Méthode par défaut -->
+                        <div class="form-group">
+                            <label for="two_factor_default_method">📲 Méthode par défaut</label>
+                            <select id="two_factor_default_method" name="two_factor_default_method">
+                                {% set currentMethod = user.twoFactorDefaultMethod ?? 'email' %}
+                                <option value="email" {% if currentMethod == 'email' %}selected{% endif %}>Email (code à usage unique)</option>
+                                <option value="totp" {% if currentMethod == 'totp' %}selected{% endif %}>Application d'authentification (TOTP)</option>
+                                <option value="sms" {% if currentMethod == 'sms' %}selected{% endif %}>SMS (à venir)</option>
+                            </select>
+                            <small class="help-text">Email est prêt à l'emploi. TOTP/SMS nécessitent une configuration ultérieure.</small>
+                        </div>
+
+                        <!-- Codes de secours -->
+                        <div class="form-group">
+                            <label for="generate_backup_codes">🧩 Codes de secours</label>
+                            <div>
+                                <label class="role-label" style="display:flex; align-items:center; gap:0.5rem;">
+                                    <input type="checkbox" id="generate_backup_codes" name="generate_backup_codes">
+                                    <span>Générer de nouveaux codes de secours maintenant</span>
+                                </label>
+                            </div>
+                            <small class="help-text">
+                                Les nouveaux codes remplaceront les anciens. Les codes seront affichés une seule fois en haut de page.
+                            </small>
                         </div>
                     </div>
+
+                    {% if user.twoFactorBackupCodes %}
+                        <div class="alert alert-success" style="margin-top:1rem;">
+                            ✅ Des codes de secours existent déjà pour cet utilisateur.
+                        </div>
+                    {% endif %}
                 </div>
 
                 <!-- Boutons d'action -->

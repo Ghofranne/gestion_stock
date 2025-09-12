@@ -48,6 +48,7 @@ mouvement:
     type: Movement type
     date: Movement date
     equipment: Equipment
+    equipment_type: Equipment type
     depot_source: Source depot
     depot_destination: Destination depot
     comment_optional: Comment (optional)
@@ -63,13 +64,28 @@ mouvement:
   placeholders:
     comment: Add a comment about this movement...
     quantity: Quantity
+    equipment_type: Select an equipment type
   form:
     create: Create movement
     update: Update
     save: Save movement
     type_placeholder: Select movement type
     equipment_placeholder: Select equipment
+    equipment_type_placeholder: Select an equipment type
     depot_source_placeholder: Select source depot
     depot_destination_placeholder: Select destination depot
+  ajustement:
+    sens:
+      label: Adjustment Direction
+      placeholder: Select a direction
+      entree: Inbound (stock gain)
+      sortie: Outbound (stock loss)
+    raison:
+      label: Adjustment Reason
+      placeholder: Describe the reason for adjustment
+      entree_placeholder: "E.g.: Inventory, input error, return from maintenance..."
+      sortie_placeholder: "E.g.: Loss, damage, maintenance, theft..."
   common:
     back: Back to list
+  notifications:
+    select_at_least_one_equipment: Please select at least one equipment.

@@ -1,4 +1,4 @@
-{{ form_start(form) }}
+{{ form_start(form, { attr: { id: 'mouvement-stock-form', novalidate: 'novalidate' } }) }}
     <div class="form-fields">
         <div class="field-row">
             <div class="field-group">
@@ -13,22 +13,58 @@
             </div>
         </div>
 
-        <div class="field-group full-width">
-            {{ form_label(form.equipement, 'mouvement.labels.equipment'|trans([], 'mouvement')) }}
-            {{ form_widget(form.equipement) }}
-            {{ form_errors(form.equipement) }}
-        </div>
-
         <div class="field-row">
-            <div class="field-group" id="depot-source-group">
+            <div class="field-group" id="depot-source-group" style="display:none;">
                 {{ form_label(form.depotSource, 'mouvement.labels.depot_source'|trans([], 'mouvement')) }}
                 {{ form_widget(form.depotSource) }}
                 {{ form_errors(form.depotSource) }}
             </div>
-            <div class="field-group" id="depot-destination-group">
+        </div>
+
+        <div class="field-row equipements-row">
+            <div class="field-group" id="equipements-group" style="display:none;">
+                {{ form_label(form.equipements, 'mouvement.labels.equipment'|trans([], 'mouvement')) }}
+                <div style="display:none;">{# select masqué, on conserve pour la valeur et la soumission #}
+                    {{ form_widget(form.typeFilter) }}
+                </div>
+                <div class="equipements-toolbar">
+                    <label class="checkbox-inline" title="Tous les types">
+                        <input type="checkbox" id="type-all-checkbox" aria-label="Tous les types" />
+                    </label>
+                    <div class="equip-type-pills" id="equip-type-pills">
+                        <button type="button" class="pill" data-type="TPE">TPE</button>
+                        <button type="button" class="pill" data-type="SIM">SIM</button>
+                        <button type="button" class="pill" data-type="Carte">Carte</button>
+                        <button type="button" class="pill" data-type="Autres">Autres</button>
+                    </div>
+                </div>
+                <div id="equipements-cards" class="equipements-cards"></div>
+                <div style="display:none;">
+                    {{ form_widget(form.equipements) }}
+                </div>
+                {{ form_errors(form.equipements) }}
+            </div>
+        </div>
+
+        <div class="field-row">
+            <div class="field-group" id="depot-destination-group" style="display:none;">
                 {{ form_label(form.depotDestination, 'mouvement.labels.depot_destination'|trans([], 'mouvement')) }}
                 {{ form_widget(form.depotDestination) }}
                 {{ form_errors(form.depotDestination) }}
+            </div>
+        </div>
+
+        <!-- Ajustement Fields -->
+        <div class="field-row">
+            <div class="field-group" id="ajustement-sens-group" style="display:none;">
+                {{ form_label(form.sensAjustement) }}
+                {{ form_widget(form.sensAjustement) }}
+                {{ form_errors(form.sensAjustement) }}
+            </div>
+            <div class="field-group" id="ajustement-raison-group" style="display:none;">
+                {{ form_label(form.raisonAjustement) }}
+                {{ form_widget(form.raisonAjustement) }}
+                {{ form_errors(form.raisonAjustement) }}
             </div>
         </div>
 
@@ -39,12 +75,6 @@
             {{ form_errors(form.commentaire) }}
         </div>
         {% endif %}
-        
-        <div class="field-group quantity-field">
-            {{ form_label(form.quantite, 'mouvement.labels.quantity'|trans([], 'mouvement')) }}
-            {{ form_widget(form.quantite) }}
-            {{ form_errors(form.quantite) }}
-        </div>
     </div>
 
     <button type="submit" class="btn">
@@ -236,103 +266,854 @@ document.addEventListener('DOMContentLoaded', function() {
     const typeMouvementSelect = document.querySelector('#mouvement_stock_type_mouvement');
     const depotSourceGroup = document.getElementById('depot-source-group');
     const depotDestinationGroup = document.getElementById('depot-destination-group');
+    const ajustementSensGroup = document.getElementById('ajustement-sens-group');
+    const ajustementRaisonGroup = document.getElementById('ajustement-raison-group');
     const depotSourceSelect = document.querySelector('#mouvement_stock_depotSource');
+    const sensAjustementSelect = document.querySelector('#mouvement_stock_sensAjustement');
+    const raisonAjustementInput = document.querySelector('#mouvement_stock_raisonAjustement');
     const depotDestinationSelect = document.querySelector('#mouvement_stock_depotDestination');
+    const typeFilterSelect = document.querySelector('#mouvement_stock_typeFilter');
+    const typeFilterGroup = document.getElementById('type-filter-group');
+    const equipementsSelect = document.querySelector('#mouvement_stock_equipements');
+    const equipementsGroup = document.getElementById('equipements-group');
+    const equipementsCards = document.getElementById('equipements-cards');
+    const typeAllCheckbox = document.getElementById('type-all-checkbox');
+    const pillsContainer = document.getElementById('equip-type-pills');
+    let lastDepotId = null;
+    let lastTypeFilter = null;
+    let currentItems = []; // items currently displayed in cards/select
+    let isLoadingReturned = false; // guard to prevent overlapping fetches
     
-    // Configuration des champs requis selon le type de mouvement
+    // Configuration pour chaque type de mouvement
     const mouvementConfig = {
-        'entree': {
-            depotSource: { required: false, visible: false },
-            depotDestination: { required: true, visible: true }
-        },
-        'sortie': {
-            depotSource: { required: true, visible: true },
-            depotDestination: { required: false, visible: false }
-        },
-        'transfert': {
-            depotSource: { required: true, visible: true },
-            depotDestination: { required: true, visible: true }
-        },
-        'ajustement': {
-            depotSource: { required: false, visible: false },
-            depotDestination: { required: true, visible: true }
-        },
-        'retour': {
-            depotSource: { required: false, visible: false },
-            depotDestination: { required: true, visible: true }
-        }
+        'entree': { showSource: false, showDestination: true, showEquipements: true, showAjustementFields: false },
+        'sortie': { showSource: true, showDestination: false, showEquipements: true, showAjustementFields: false },
+        'transfert': { showSource: true, showDestination: true, showEquipements: true, showAjustementFields: false },
+        'ajustement': { showSource: false, showDestination: false, showEquipements: true, showAjustementFields: true },
+        // Retour: on a besoin d'afficher la liste des équipements sortis pour les réintégrer
+        'retour': { showSource: false, showDestination: true, showEquipements: true, showAjustementFields: false }
     };
     
+    function getActiveDepotSelect() {
+        const selectedType = typeMouvementSelect.value;
+        // Cas particulier: Ajustement dépend du sens
+        if (selectedType === 'ajustement') {
+            const sens = sensAjustementSelect ? sensAjustementSelect.value : '';
+            if (sens === 'sortie') return depotSourceSelect;
+            if (sens === 'entree') return depotDestinationSelect;
+            // si pas de sens, pas de dépôt actif
+            return null;
+        }
+        const config = mouvementConfig[selectedType] || {};
+        // Utiliser le dépôt source s'il est visible, sinon le dépôt destination s'il est visible
+        if (config.showSource) return depotSourceSelect;
+        if (config.showDestination) return depotDestinationSelect;
+        return null;
+    }
+
     function updateFormFields() {
         const selectedType = typeMouvementSelect.value;
         const config = mouvementConfig[selectedType];
         
         if (!config) {
-            // Si aucun type sélectionné, afficher tous les champs
-            depotSourceGroup.style.display = 'block';
-            depotDestinationGroup.style.display = 'block';
-            depotSourceSelect.required = false;
-            depotDestinationSelect.required = false;
+            depotSourceGroup.style.display = 'none';
+            depotDestinationGroup.style.display = 'none';
+            equipementsGroup.style.display = 'none';
+            ajustementSensGroup.style.display = 'none';
+            ajustementRaisonGroup.style.display = 'none';
             return;
         }
         
-        // Gérer le dépôt source
-        if (config.depotSource.visible) {
-            depotSourceGroup.style.display = 'block';
-            depotSourceSelect.required = config.depotSource.required;
-            if (config.depotSource.required) {
-                depotSourceGroup.classList.add('required');
-            } else {
-                depotSourceGroup.classList.remove('required');
-            }
+        // Afficher/masquer les champs en fonction de la configuration
+        depotSourceGroup.style.display = config.showSource ? 'block' : 'none';
+        depotDestinationGroup.style.display = config.showDestination ? 'block' : 'none';
+        equipementsGroup.style.display = config.showEquipements ? 'block' : 'none';
+        ajustementSensGroup.style.display = config.showAjustementFields ? 'block' : 'none';
+        ajustementRaisonGroup.style.display = config.showAjustementFields ? 'block' : 'none';
+        // IMPORTANT: les widgets sens/raison ont pu être rendus avec style="display:none" côté serveur
+        if (config.showAjustementFields) {
+            if (sensAjustementSelect) sensAjustementSelect.style.display = '';
+            if (raisonAjustementInput) raisonAjustementInput.style.display = '';
         } else {
-            depotSourceGroup.style.display = 'none';
-            depotSourceSelect.required = false;
-            depotSourceSelect.value = ''; // Vider la sélection
-            depotSourceGroup.classList.remove('required');
+            if (sensAjustementSelect) sensAjustementSelect.style.display = 'none';
+            if (raisonAjustementInput) raisonAjustementInput.style.display = 'none';
         }
         
-        // Gérer le dépôt destination
-        if (config.depotDestination.visible) {
-            depotDestinationGroup.style.display = 'block';
-            depotDestinationSelect.required = config.depotDestination.required;
-            if (config.depotDestination.required) {
-                depotDestinationGroup.classList.add('required');
-            } else {
-                depotDestinationGroup.classList.remove('required');
-            }
-        } else {
-            depotDestinationGroup.style.display = 'none';
-            depotDestinationSelect.required = false;
-            depotDestinationSelect.value = ''; // Vider la sélection
-            depotDestinationGroup.classList.remove('required');
-        }
+        // Mettre à jour les champs requis
+        depotSourceSelect.required = config.showSource;
+        depotDestinationSelect.required = config.showDestination;
+        if (sensAjustementSelect) sensAjustementSelect.required = config.showAjustementFields;
+        if (raisonAjustementInput) raisonAjustementInput.required = config.showAjustementFields;
         
-        // Mettre à jour les labels pour indiquer les champs obligatoires
+        // Mettre à jour les libellés
         updateLabels();
+        
+        // Si c'est un retour, charger les équipements sortis
+        if (selectedType === 'retour') {
+            loadReturnedEquipements();
+        } else if (selectedType === 'transfert') {
+            // Pour les transferts:
+            // - le dépôt destination ne doit s'afficher que lorsqu'au moins un équipement est sélectionné
+            // - recharger la liste d'équipements si le dépôt source change
+            if (depotSourceSelect) {
+                depotSourceSelect.addEventListener('change', toggleDestinationForTransfert);
+            }
+            // Appliquer immédiatement l'état correct du dépôt destination selon la sélection actuelle
+            if (typeof toggleDestinationForTransfert === 'function') {
+                toggleDestinationForTransfert();
+            }
+        }
+        
+        // Si c'est un ajustement, on peut ajouter une logique spécifique
+        if (selectedType === 'ajustement' && ajustementSensGroup && ajustementRaisonGroup) {
+            // Ajouter des écouteurs d'événements pour les champs d'ajustement si nécessaire
+            if (sensAjustementSelect) {
+                sensAjustementSelect.addEventListener('change', function() {
+                    // Mettre à jour dynamiquement les champs en fonction du sens de l'ajustement
+                    updateAjustementFields();
+                });
+                // Définir une valeur par défaut si vide pour éviter un état bloqué
+                if (!sensAjustementSelect.value) {
+                    sensAjustementSelect.value = 'sortie';
+                }
+            }
+            // S'assurer que les inputs sont visibles
+            if (sensAjustementSelect) sensAjustementSelect.style.display = '';
+            if (raisonAjustementInput) raisonAjustementInput.style.display = '';
+            // Important: réappliquer la logique d'affichage une fois la config générique posée
+            updateAjustementFields();
+        }
+
+        // Comportement demandé: en 'sortie', n'afficher aucun équipement tant qu'aucun dépôt n'est choisi
+        // On garde le groupe visible mais la liste vide et désactivée jusqu'à ce qu'un dépôt soit sélectionné
+        if (selectedType === 'sortie') {
+            const activeDepot = getActiveDepotSelect();
+            const hasDepot = !!(activeDepot && activeDepot.value);
+            if (!hasDepot) {
+                // Vider et désactiver sans masquer le groupe
+                if (equipementsSelect) {
+                    equipementsSelect.innerHTML = '';
+                    equipementsSelect.disabled = true;
+                    equipementsSelect.style.pointerEvents = 'none';
+                }
+                if (equipementsCards) {
+                    equipementsCards.innerHTML = '';
+                }
+                if (equipementsGroup) {
+                    equipementsGroup.style.display = 'block';
+                    equipementsGroup.style.pointerEvents = 'none';
+                }
+            } else {
+                // Un dépôt est présent: réactiver la sélection
+                if (equipementsSelect) {
+                    equipementsSelect.disabled = false;
+                    equipementsSelect.style.pointerEvents = 'auto';
+                }
+                if (equipementsGroup) {
+                    equipementsGroup.style.pointerEvents = 'auto';
+                }
+            }
+        }
     }
     
     function updateLabels() {
         const sourceLabel = depotSourceGroup.querySelector('label');
         const destinationLabel = depotDestinationGroup.querySelector('label');
-        
-        // Supprimer les anciens indicateurs
-        sourceLabel.innerHTML = sourceLabel.innerHTML.replace(' *', '');
-        destinationLabel.innerHTML = destinationLabel.innerHTML.replace(' *', '');
-        
-        // Ajouter les nouveaux indicateurs
-        if (depotSourceSelect.required) {
-            sourceLabel.innerHTML += ' <span style="color: red;">*</span>';
+
+        function setRequired(labelEl, isRequired) {
+            if (!labelEl) return;
+            // Supprimer toute étoile précédente marquée
+            labelEl.querySelectorAll('span.req-star').forEach(s => s.remove());
+            if (isRequired) {
+                const star = document.createElement('span');
+                star.className = 'req-star';
+                star.style.color = 'red';
+                star.textContent = ' *';
+                labelEl.appendChild(star);
+            }
         }
-        if (depotDestinationSelect.required) {
-            destinationLabel.innerHTML += ' <span style="color: red;">*</span>';
+
+        setRequired(sourceLabel, !!depotSourceSelect.required);
+        setRequired(destinationLabel, !!depotDestinationSelect.required && depotDestinationGroup.style.display !== 'none' && depotDestinationGroup.style.visibility !== 'hidden');
+    }
+
+    function disableEquipements(disabled) {
+        const isDisabled = !!disabled;
+        if (isDisabled) {
+            equipementsSelect.setAttribute('disabled', 'disabled');
+            equipementsSelect.disabled = true;
+            equipementsSelect.style.pointerEvents = 'none';
+            equipementsSelect.innerHTML = '';
+            if (equipementsGroup) {
+                equipementsGroup.style.display = 'none';
+                equipementsGroup.style.pointerEvents = 'none';
+            }
+            if (equipementsCards) {
+                equipementsCards.innerHTML = '';
+            }
+        } else {
+            equipementsSelect.disabled = false;
+            equipementsSelect.removeAttribute('disabled');
+            equipementsSelect.style.pointerEvents = 'auto';
+            if (equipementsGroup) {
+                equipementsGroup.style.display = 'block';
+                equipementsGroup.style.pointerEvents = 'auto';
+            }
+            if (equipementsCards) {
+                equipementsCards.style.pointerEvents = 'auto';
+            }
         }
     }
+
+    async function loadEquipements() {
+        const activeDepot = getActiveDepotSelect();
+        const depotId = activeDepot ? activeDepot.value : '';
+        if (!depotId) { return; }
+        const type = typeFilterSelect.value || '';
+        // Sauvegarder la sélection courante pour la restaurer après rechargement
+        const previouslySelected = equipementsSelect ? Array.from(equipementsSelect.selectedOptions).map(o => Number(o.value)) : [];
+        try {
+            const url = `/mouvement/stock/equipements-par-depot/${depotId}?type=${encodeURIComponent(type)}`;
+            const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            if (!res.ok) return;
+            const data = await res.json();
+            equipementsSelect.innerHTML = '';
+            const items = data.items || [];
+            currentItems = items;
+            // Recréer les <option> cachées
+            items.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = `${item.label} — ${item.etat || ''}`;
+                if (previouslySelected.includes(Number(item.id))) {
+                    option.selected = true;
+                }
+                // Ne pas sélectionner par défaut; l'utilisateur choisit manuellement
+                equipementsSelect.appendChild(option);
+            });
+            // Rendre les cartes visuelles
+            renderEquipementCards(items);
+        } catch (e) {
+            console.error('Erreur chargement équipements', e);
+        }
+    }
+
+    async function loadUnassignedEquipements() {
+        const type = typeFilterSelect.value || '';
+        const previouslySelected = equipementsSelect ? Array.from(equipementsSelect.selectedOptions).map(o => Number(o.value)) : [];
+        try {
+            const url = `/mouvement/stock/equipements-non-assignes?type=${encodeURIComponent(type)}`;
+            const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            if (!res.ok) return;
+            const data = await res.json();
+            equipementsSelect.innerHTML = '';
+            // Sécurité supplémentaire côté client: garder uniquement état "Disponible"
+            const items = (data.items || []).filter(it => (it.etat || '').toLowerCase() === 'disponible');
+            currentItems = items;
+            items.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = `${item.label} — ${item.etat || ''}`;
+                if (previouslySelected.includes(Number(item.id))) {
+                    option.selected = true;
+                }
+                // Ne pas sélectionner par défaut; l'utilisateur choisit manuellement
+                equipementsSelect.appendChild(option);
+            });
+            renderEquipementCards(items);
+        } catch (e) {
+            console.error('Erreur chargement équipements (non assignés)', e);
+        }
+    }
+
+    async function loadReturnedEquipements() {
+        if (isLoadingReturned) return;
+        isLoadingReturned = true;
+        const type = typeFilterSelect.value || '';
+        const previouslySelected = equipementsSelect ? Array.from(equipementsSelect.selectedOptions).map(o => Number(o.value)) : [];
+        try {
+            const url = `/mouvement/stock/equipements-sortis?type=${encodeURIComponent(type)}`;
+            const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            if (!res.ok) {
+                // 502 or other -> afficher une liste vide sans re-déclencher de boucle
+                equipementsSelect.innerHTML = '';
+                currentItems = [];
+                renderEquipementCards([]);
+                return;
+            }
+            const data = await res.json();
+            equipementsSelect.innerHTML = '';
+            // Ne pas sur-filtrer côté client: on fait confiance à l'endpoint "equipements-sortis"
+            const items = (data.items || []);
+            currentItems = items;
+            items.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = `${item.label} — ${item.etat || ''}`;
+                if (previouslySelected.includes(Number(item.id))) {
+                    option.selected = true;
+                }
+                // Ne pas sélectionner par défaut; l'utilisateur choisit manuellement
+                equipementsSelect.appendChild(option);
+            });
+            renderEquipementCards(items);
+        } catch (e) {
+            console.error('Erreur chargement équipements (sortis)', e);
+        } finally {
+            isLoadingReturned = false;
+        }
+    }
+
+    function renderEquipementCards(items) {
+        if (!equipementsCards) return;
+        equipementsCards.innerHTML = '';
+        items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'equip-card';
+            card.dataset.id = item.id;
+            const icon = getTypeIcon(item.type);
+            const etatText = (item.etat || '').trim();
+            const state = etatText.toLowerCase();
+            let badgeClass = 'neutral';
+            if (state === 'disponible') badgeClass = 'success';
+            else if (state === 'affecté' || state === 'affecte') badgeClass = 'info';
+            else if (state === 'non disponible') badgeClass = 'danger';
+            else if (state === 'retour') badgeClass = 'warning';
+            card.innerHTML = `
+                <div class="equip-card__icon">${icon}</div>
+                <div class="equip-card__body">
+                    <div class="equip-card__head">
+                        <div class="equip-card__title">${escapeHtml(item.type || '')}</div>
+                        <span class="equip-badge equip-badge--${badgeClass}" title="Etat">${escapeHtml(etatText)}</span>
+                    </div>
+                    <div class="equip-card__sub">${escapeHtml(prefixId(item))}</div>
+                </div>
+                <button type="button" class="equip-card__remove" title="Désélectionner" aria-label="Désélectionner">×</button>`;
+            // Etat sélection initial (si option déjà sélectionnée)
+            const opt = Array.from(equipementsSelect.options).find(o => o.value == String(item.id));
+            if (opt && opt.selected) {
+                card.classList.add('selected');
+            }
+            // Toggle au clic
+            card.addEventListener('click', (ev) => {
+                ev.preventDefault();
+                ev.stopPropagation();
+                const option = Array.from(equipementsSelect.options).find(o => o.value == String(item.id));
+                if (option) {
+                    const willSelect = !option.selected;
+                    option.selected = willSelect;
+                    if (!willSelect) { option.removeAttribute('selected'); }
+                    card.classList.toggle('selected', willSelect);
+                    // Déclencher le handler pour MAJ destination
+                    equipementsSelect.dispatchEvent(new Event('input', { bubbles: true }));
+                    equipementsSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                    // Si type 'retour': définir directement le dépôt destination selon l'item cliqué
+                    if (typeMouvementSelect && typeMouvementSelect.value === 'retour') {
+                        const destId = item.lastDepotSourceId ? String(item.lastDepotSourceId) : '';
+                        if (destId && depotDestinationSelect) {
+                            const hasOption = Array.from(depotDestinationSelect.options).some(o => String(o.value) === destId);
+                            if (hasOption) {
+                                depotDestinationSelect.value = destId;
+                                if (depotDestinationGroup) depotDestinationGroup.style.display = 'block';
+                                depotDestinationSelect.required = true;
+                                depotDestinationSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                                updateLabels();
+                            }
+                        }
+                        // Puis harmoniser si plusieurs sélections (nettoyage en cas de conflits)
+                        suggestDestinationForReturn();
+                    }
+                }
+            });
+            // Bouton de désélection explicite (croix)
+            const removeBtn = card.querySelector('.equip-card__remove');
+            if (removeBtn) {
+                removeBtn.addEventListener('click', (ev) => {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    const option = Array.from(equipementsSelect.options).find(o => o.value == String(item.id));
+                    if (option) {
+                        option.selected = false;
+                        option.removeAttribute('selected');
+                        card.classList.remove('selected');
+                        equipementsSelect.dispatchEvent(new Event('input', { bubbles: true }));
+                        equipementsSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                        if (typeMouvementSelect && typeMouvementSelect.value === 'retour') {
+                            suggestDestinationForReturn();
+                        }
+                    }
+                });
+            }
+            equipementsCards.appendChild(card);
+        });
+        // Cas: si type retour et une seule sélection, caler le dépôt destination sur cette sélection
+        if (typeMouvementSelect && typeMouvementSelect.value === 'retour') {
+            suggestDestinationForReturn();
+        }
+    }
+
+    function suggestDestinationForReturn() {
+        if (!depotDestinationSelect) return;
+        // Récupérer les IDs sélectionnés et leurs lastDepotSourceId depuis currentItems
+        const selectedIds = equipementsSelect ? Array.from(equipementsSelect.selectedOptions).map(o => Number(o.value)) : [];
+        if (!selectedIds.length) {
+            // Aucune sélection -> vider et déverrouiller le dépôt destination
+            if (depotDestinationSelect) {
+                depotDestinationSelect.value = '';
+                updateLabels();
+            }
+            return;
+        }
+        const sources = new Set();
+        selectedIds.forEach(id => {
+            const it = currentItems.find(x => Number(x.id) === Number(id));
+            if (it && it.lastDepotSourceId) sources.add(String(it.lastDepotSourceId));
+        });
+        if (sources.size === 1) {
+            const destId = String(Array.from(sources)[0]);
+            const hasOption = Array.from(depotDestinationSelect.options).some(o => String(o.value) === destId);
+            if (hasOption) {
+                depotDestinationSelect.value = destId;
+                if (depotDestinationGroup) depotDestinationGroup.style.display = 'block';
+                depotDestinationSelect.required = true;
+                updateLabels();
+            } else {
+                // Debug: option manquante
+                try { console.debug('[Retour] Option dépôt destination introuvable pour id=', destId); } catch (e) {}
+            }
+        } else {
+            // Ambigu (plusieurs dépôts source) -> ne pas préremplir
+            depotDestinationSelect.value = '';
+            updateLabels();
+        }
+    }
+
+    function escapeHtml(str) {
+        if (str == null) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+    function getTypeIcon(type) {
+        switch ((type || '').toUpperCase()) {
+            case 'SIM':
+                return '<span class="equip-emoji" aria-hidden="true">📱</span>';
+            case 'CARTE':
+                return '<span class="equip-emoji" aria-hidden="true">💾</span>';
+            case 'TPE':
+                return '<span class="equip-emoji" aria-hidden="true">💳</span>';
+            default:
+                return '<span class="equip-fallback" aria-hidden="true">🔧</span>';
+        }
+    }
+    function prefixId(item) {
+        // Afficher la description en priorité si disponible
+        if (item.description && String(item.description).trim() !== '') return `${item.description}`;
+        if (item.imei) return `IMEI : ${item.imei}`;
+        if (item.sn) return `SN : ${item.sn}`;
+        if (item.referenceCarte) return `Réf : ${item.referenceCarte}`;
+        return `ID : ${item.id}`;
+    }
     
-    // Écouter les changements du type de mouvement
-    typeMouvementSelect.addEventListener('change', updateFormFields);
+    // Utilitaire: charger selon le contexte courant
+    function triggerLoadForCurrentContext() {
+        const selectedType = typeMouvementSelect.value;
+        // Par défaut: tous les types
+        if (typeFilterSelect && typeFilterSelect.value == null) {
+            typeFilterSelect.value = '';
+        }
+        // Mettre à jour l'état visuel des pills
+        updateActivePill();
+
+        if (equipementsSelect && equipementsSelect.disabled) return;
+
+        if (selectedType === 'entree') {
+            loadUnassignedEquipements();
+            lastDepotId = 'unassigned';
+            lastTypeFilter = typeFilterSelect ? typeFilterSelect.value : '';
+            return;
+        }
+        if (selectedType === 'retour') {
+            loadReturnedEquipements();
+            lastDepotId = 'returned';
+            lastTypeFilter = typeFilterSelect ? typeFilterSelect.value : '';
+            return;
+        }
+        const activeDepot = getActiveDepotSelect();
+        const depotId = activeDepot && activeDepot.value ? activeDepot.value : '';
+        if (depotId) {
+            loadEquipements();
+            lastDepotId = depotId;
+            lastTypeFilter = typeFilterSelect ? typeFilterSelect.value : '';
+        }
+    }
+
+    // Changement du type de mouvement: reset des dépendances puis rechargement du contexte
+    typeMouvementSelect.addEventListener('change', function() {
+        // Réinitialiser les sélections de dépôts
+        if (depotSourceSelect) depotSourceSelect.value = '';
+        if (depotDestinationSelect) depotDestinationSelect.value = '';
+        // Vider la sélection d'équipements et les cartes
+        if (equipementsSelect) {
+            equipementsSelect.innerHTML = '';
+            equipementsSelect.selectedIndex = -1;
+        }
+        if (equipementsCards) {
+            equipementsCards.innerHTML = '';
+        }
+        // Réinitialiser le filtre de type sur "Tous"
+        if (typeFilterSelect) {
+            typeFilterSelect.value = '';
+        }
+        if (typeAllCheckbox) {
+            typeAllCheckbox.checked = true;
+        }
+        updateActivePill && updateActivePill();
+        // Invalider le cache de dernier contexte pour forcer le rechargement
+        lastDepotId = null;
+        lastTypeFilter = null;
+        // Appliquer l'affichage des champs selon le nouveau type
+        updateFormFields();
+        // Charger les données adaptées au nouveau type
+        triggerLoadForCurrentContext();
+    });
+    // Dépôt source et filtre type déclenchent le rechargement
+    depotSourceSelect.addEventListener('change', function() {
+        updateFormFields(); // active/désactive
+        triggerLoadForCurrentContext(); // charge selon contexte
+    });
+    depotDestinationSelect.addEventListener('change', function() {
+        // Ne pas recharger la liste des équipements quand seul le dépôt destination change
+        // (cas Transfert: la liste dépend du dépôt source; cas Entrée/Retour: liste indépendante du dépôt)
+        updateFormFields();
+        // Donc pas de triggerLoadForCurrentContext() ici pour préserver la sélection
+    });
+    if (typeFilterSelect) {
+        typeFilterSelect.addEventListener('change', function() {
+            // Maj de la case "Tous les types"
+            if (typeAllCheckbox) {
+                typeAllCheckbox.checked = (typeFilterSelect.value === '' || typeFilterSelect.value == null);
+            }
+            // MAJ état visuel des pills
+            updateActivePill();
+            if (!equipementsSelect.disabled) {
+                // éviter de recharger si le même filtre est rechoisi
+                const isEntree = (typeMouvementSelect.value === 'entree');
+                const isRetour = (typeMouvementSelect.value === 'retour');
+                if (isEntree) {
+                    if (lastTypeFilter !== typeFilterSelect.value || lastDepotId !== 'unassigned') {
+                        lastTypeFilter = typeFilterSelect.value;
+                        lastDepotId = 'unassigned';
+                        loadUnassignedEquipements();
+                    }
+                } else if (isRetour) {
+                    if (lastTypeFilter !== typeFilterSelect.value || lastDepotId !== 'returned') {
+                        lastTypeFilter = typeFilterSelect.value;
+                        lastDepotId = 'returned';
+                        loadReturnedEquipements();
+                    }
+                } else {
+                    const activeDepot = getActiveDepotSelect();
+                    const currentDepotId = activeDepot && activeDepot.value ? activeDepot.value : '';
+                    if (lastTypeFilter !== typeFilterSelect.value || lastDepotId !== currentDepotId) {
+                        lastTypeFilter = typeFilterSelect.value;
+                        lastDepotId = currentDepotId;
+                        loadEquipements();
+                    }
+                }
+            }
+        });
+    }
+    if (typeAllCheckbox) {
+        typeAllCheckbox.addEventListener('change', function() {
+            if (!typeFilterSelect) return;
+            if (typeAllCheckbox.checked) {
+                // Mettre le select sur "Tous" => valeur vide
+                typeFilterSelect.value = '';
+                updateActivePill();
+                if (!equipementsSelect.disabled) {
+                    const isEntree = (typeMouvementSelect.value === 'entree');
+                    const isRetour = (typeMouvementSelect.value === 'retour');
+                    lastTypeFilter = '';
+                    if (isEntree) {
+                        lastDepotId = 'unassigned';
+                        loadUnassignedEquipements();
+                    } else if (isRetour) {
+                        lastDepotId = 'returned';
+                        loadReturnedEquipements();
+                    } else {
+                        const activeDepot = getActiveDepotSelect();
+                        lastDepotId = activeDepot && activeDepot.value ? activeDepot.value : '';
+                        loadEquipements();
+                    }
+                }
+            }
+        });
+    }
+    if (pillsContainer) {
+        pillsContainer.addEventListener('click', function(e) {
+            const btn = e.target.closest('button.pill');
+            if (!btn) return;
+            const value = btn.getAttribute('data-type') || '';
+            if (typeAllCheckbox) typeAllCheckbox.checked = false;
+            if (typeFilterSelect) {
+                // Normaliser valeur 'Carte' telle que définie dans le select
+                typeFilterSelect.value = value;
+                typeFilterSelect.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
+    }
+
+    function updateActivePill() {
+        if (!pillsContainer || !typeFilterSelect) return;
+        const val = typeFilterSelect.value || '';
+        pillsContainer.querySelectorAll('button.pill').forEach(b => {
+            b.classList.toggle('active', b.getAttribute('data-type') === val);
+        });
+    }
+    // Sur changement d'équipements, ne pas recharger la liste, juste (dé)montrer le dépôt destination (transfert)
+    if (equipementsSelect) {
+        const handler = function() {
+            if (typeMouvementSelect.value === 'transfert') {
+                toggleDestinationForTransfert();
+            } else if (typeMouvementSelect.value === 'retour') {
+                // Mettre à jour la destination selon la sélection courante
+                suggestDestinationForReturn();
+            }
+        };
+        equipementsSelect.addEventListener('change', handler);
+        equipementsSelect.addEventListener('input', handler);
+    }
+
+    function toggleDestinationForTransfert() {
+        const hasEquipSelection = !!(equipementsSelect && equipementsSelect.selectedOptions && equipementsSelect.selectedOptions.length > 0);
+        if (hasEquipSelection) {
+            depotDestinationGroup.style.display = 'block';
+            depotDestinationSelect.required = true;
+            depotDestinationGroup.classList.add('required');
+        } else {
+            depotDestinationGroup.style.display = 'none';
+            depotDestinationSelect.required = false;
+            depotDestinationGroup.classList.remove('required');
+            depotDestinationSelect.value = '';
+        }
+        updateLabels();
+    }
+    
+    // Fonction pour gérer les champs d'ajustement
+    function updateAjustementFields() {
+        if (!sensAjustementSelect) return;
+        
+        const sens = sensAjustementSelect.value;
+        const isAjustement = typeMouvementSelect.value === 'ajustement';
+        
+        if (!isAjustement) {
+            // Si ce n'est pas un ajustement, on ne fait rien
+            return;
+        }
+        
+        if (sens === 'entree') {
+            // Entrée: dépôt destination visible et requis, source masqué
+            depotDestinationGroup.style.display = 'block';
+            depotDestinationSelect.required = true;
+            depotSourceGroup.style.display = 'none';
+            depotSourceSelect.required = false;
+            // Placeholder adapté
+            if (raisonAjustementInput) {
+                raisonAjustementInput.placeholder = "{{ 'mouvement.ajustement.raison.entree_placeholder'|trans([], 'mouvement') }}";
+            }
+            // Charger équipements non assignés (hors stock)
+            if (typeof loadUnassignedEquipements === 'function') {
+                // Auto-sélectionner le premier dépôt destination si vide
+                if (depotDestinationSelect && !depotDestinationSelect.value) {
+                    const firstOpt = Array.from(depotDestinationSelect.options).find(o => o.value && o.value !== '');
+                    if (firstOpt) {
+                        depotDestinationSelect.value = firstOpt.value;
+                    }
+                }
+                loadUnassignedEquipements();
+                lastDepotId = 'unassigned';
+            }
+        } else if (sens === 'sortie') {
+            // Sortie: dépôt source visible et requis, destination masqué
+            depotDestinationGroup.style.display = 'none';
+            depotDestinationSelect.required = false;
+            depotSourceGroup.style.display = 'block';
+            depotSourceSelect.required = true;
+            // Placeholder adapté
+            if (raisonAjustementInput) {
+                raisonAjustementInput.placeholder = "{{ 'mouvement.ajustement.raison.sortie_placeholder'|trans([], 'mouvement') }}";
+            }
+            // Charger équipements du dépôt source si sélectionné
+            if (depotSourceSelect) {
+                // Auto-sélectionner le premier dépôt source si vide
+                if (!depotSourceSelect.value) {
+                    const firstSrc = Array.from(depotSourceSelect.options).find(o => o.value && o.value !== '');
+                    if (firstSrc) {
+                        depotSourceSelect.value = firstSrc.value;
+                    }
+                }
+            }
+            if (depotSourceSelect && depotSourceSelect.value) {
+                if (typeof loadEquipements === 'function') {
+                    loadEquipements();
+                    lastDepotId = depotSourceSelect.value;
+                }
+            }
+        }
+        
+        // Mettre à jour les libellés
+        updateLabels();
+    }
     
     // Initialiser l'état du formulaire au chargement
     updateFormFields();
+
+    // Par défaut: afficher tous les types sans avoir à cocher la case
+    if (typeAllCheckbox && typeFilterSelect) {
+        typeFilterSelect.value = '';
+        typeAllCheckbox.checked = true;
+    }
+
+    // Mettre à jour les champs d'ajustement si nécessaire
+    if (typeMouvementSelect.value === 'ajustement' && sensAjustementSelect) {
+        // Par défaut, si aucun sens choisi, définir sur 'sortie' pour éviter un état vide
+        if (!sensAjustementSelect.value) {
+            sensAjustementSelect.value = 'sortie';
+        }
+        updateAjustementFields();
+        // Recharger selon le contexte ajustement
+        triggerLoadForCurrentContext();
+    }
+    
+    // Reflect checkbox state on load & charger la liste immédiatement
+    if (typeAllCheckbox && typeFilterSelect) {
+        typeAllCheckbox.checked = (typeFilterSelect.value === '' || typeFilterSelect.value == null);
+    }
+    updateActivePill();
+    triggerLoadForCurrentContext();
+
+    // Sécuriser la soumission: retirer required des champs cachés et réappliquer la logique Ajustement
+    const formEl = document.querySelector('form[name="mouvement_stock"]') || document.querySelector('form');
+    if (formEl) {
+        // Important: La validation HTML5 empêche l'événement 'submit' de se déclencher si des champs required sont invalides.
+        // On nettoie donc AVANT, sur le clic du bouton de soumission.
+        const submitBtn = formEl.querySelector('button[type="submit"], input[type="submit"]');
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function(ev) {
+                // Empêcher le submit natif pour exécuter notre normalisation d'abord
+                ev.preventDefault();
+                // Mettre à jour l'état des champs
+                updateFormFields();
+                if (typeMouvementSelect.value === 'ajustement') {
+                    updateAjustementFields();
+                }
+                // Enlever required sur les champs invisibles
+                formEl.querySelectorAll('input, select, textarea').forEach(el => {
+                    const style = getComputedStyle(el);
+                    const isHidden = (el.offsetParent === null) || (style.display === 'none') || (style.visibility === 'hidden');
+                    if (isHidden) {
+                        el.required = false;
+                    }
+                });
+                // Si tout est valide, soumettre manuellement
+                if (typeof formEl.reportValidity === 'function') {
+                    if (formEl.reportValidity()) {
+                        formEl.submit();
+                    }
+                } else {
+                    formEl.submit();
+                }
+            }, true);
+        }
+        formEl.addEventListener('submit', function(e) {
+            // Toujours mettre à jour l'état des champs juste avant submit
+            updateFormFields();
+            if (typeMouvementSelect.value === 'ajustement') {
+                updateAjustementFields();
+            }
+            // Enlever required sur les champs invisibles pour ne pas bloquer HTML5
+            formEl.querySelectorAll('input, select, textarea').forEach(el => {
+                const isHidden = (el.offsetParent === null) || (getComputedStyle(el).display === 'none') || (getComputedStyle(el).visibility === 'hidden');
+                if (isHidden) {
+                    el.required = false;
+                }
+            });
+        }, true);
+    }
 });
 </script>
+
+<style>
+.equipements-cards {
+  display: grid;
+  grid-template-columns: 1fr; /* mobile */
+  gap: 10px;
+  margin-top: 6px;
+}
+@media (min-width: 900px) {
+  /* Use auto-fit so it falls back to 1 column if the container is narrower */
+  .equipements-cards { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+}
+.equip-card {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: #f8faff;
+  border: 1px solid #edf0ff;
+  border-radius: 14px;
+  padding: 12px 14px 12px 16px;
+  cursor: pointer;
+  transition: box-shadow .15s ease, transform .05s ease, border-color .15s ease, background .15s ease;
+  user-select: none; /* évite de sélectionner le texte au clic */
+}
+.equip-card::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 8px;
+  bottom: 8px;
+  width: 4px;
+  background: linear-gradient(180deg, #6c5ce7, #8a7dff);
+  border-radius: 8px;
+}
+.equip-card:hover {
+  box-shadow: 0 4px 14px rgba(108,92,231,.15);
+  border-color: #e2e6ff;
+}
+.equip-card:active { transform: translateY(1px); }
+.equip-card.selected { border-color: #6c5ce7; background: #f3f2ff; box-shadow: 0 0 0 2px rgba(108,92,231,.12); }
+.equip-card__icon {
+  width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: #f1f3ff; flex: 0 0 36px;
+}
+.equip-card__icon .equip-svg { display: block; }
+.equip-card__body { flex: 1; min-width: 0; }
+.equip-card__head { display:flex; align-items:center; justify-content: space-between; gap:8px; }
+.equip-card__title { font-weight: 700; margin-bottom: 2px; color: #1d2140; }
+.equip-card__sub { color: #6b6f8a; font-size: 0.92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.equip-badge { display:inline-block; padding:2px 8px; border-radius:999px; font-size:.72rem; font-weight:700; letter-spacing:.2px; border:1px solid transparent; white-space:nowrap; }
+.equip-badge--success { background:#ecfdf5; color:#047857; border-color:#a7f3d0; }
+.equip-badge--info { background:#eef2ff; color:#3730a3; border-color:#c7d2fe; }
+.equip-badge--danger { background:#fef2f2; color:#b91c1c; border-color:#fecaca; }
+.equip-badge--warning { background:#fffbeb; color:#92400e; border-color:#fde68a; }
+.equip-badge--neutral { background:#f3f4f6; color:#374151; border-color:#e5e7eb; }
+.equipements-row { justify-content: flex-start; }
+.equipements-row #equipements-group { align-items: flex-start; max-width: 100%; }
+.equipements-toolbar { display:flex; align-items:center; justify-content:flex-start; gap:8px; margin: 0 0 6px; }
+.equipements-toolbar .checkbox-inline { display:flex; align-items:center; gap:6px; color:#4b4f6b; font-size: .85rem; line-height:1; }
+.equipements-toolbar input[type="checkbox"] {
+  appearance: auto; /* reset any global custom check style */
+  -webkit-appearance: checkbox;
+  width: 16px; height: 16px; margin: 0; accent-color: #6c5ce7;
+}
+.equip-type-pills { display:flex; gap:6px; flex-wrap: wrap; }
+.equip-type-pills .pill {
+  border: 1px solid #e2e6ff; background: #fff; color:#3a3f63; padding:4px 8px; border-radius: 999px; cursor:pointer; font-size:.82rem;
+}
+.equip-type-pills .pill:hover { border-color:#cfd6ff; background:#f7f8ff; }
+.equip-type-pills .pill.active { border-color:#6c5ce7; background:#f3f2ff; color:#2a2766; box-shadow: 0 0 0 2px rgba(108,92,231,.08); }
+</style>

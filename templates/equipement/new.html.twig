@@ -1,4 +1,5 @@
 {% extends 'base.html.twig' %}
+{% set embedded = app.request.get('embedded') %}
 
 {% block title %}{{ 'equipement.new.title'|trans([], 'equipement') }}{% endblock %}
 
@@ -7,16 +8,30 @@
     <style>
         .js-dynamic-field { display: none !important; }
         .js-dynamic-field[style*="display: block"] { display: block !important; }
+        /* Mode embarqué: masquer l'en-tête/nav/footer globaux et adapter le fond */
+        .is-embedded { box-shadow: none; border-radius: 12px; margin: 0.5rem auto; }
+        {% if embedded %}
+        body { background: transparent !important; }
+        header, nav, .navbar, .site-header, .app-header, footer { display: none !important; }
+        .form-container { background: #fff; }
+        {% endif %}
     </style>
 {% endblock %}
 
 {% block body %}
-    <div class="form-container">
-        <h2 class="form-title">{{ 'equipement.new.heading'|trans([], 'equipement') }}</h2>
+    <div class="form-container {{ embedded ? 'is-embedded' : '' }}">
+        <div class="modal-like-header">
+            <div class="title-left">
+                <span class="icon" aria-hidden="true">🧩</span>
+                <span class="title-text">Ajouter un équipement</span>
+            </div>
+        </div>
         <div class="form-card">
             {{ include('equipement/_form.html.twig') }}
         </div>
-        <a href="{{ path('app_equipement_index') }}" class="btn-back">&#8592; {{ 'equipement.new.back'|trans([], 'equipement') }}</a>
+        {% if not embedded %}
+            <a href="{{ path('app_equipement_index') }}" class="btn-back">&#8592; {{ 'equipement.new.back'|trans([], 'equipement') }}</a>
+        {% endif %}
     </div>
     <style>
         .form-container {
@@ -30,6 +45,9 @@
             flex-direction: column;
             align-items: center;
         }
+        .modal-like-header { width:100%; display:flex; align-items:center; justify-content: space-between; border-bottom:1px solid #eee; padding-bottom:0.8rem; margin-bottom:1rem; }
+        .modal-like-header .title-left { display:flex; align-items:center; gap:10px; font-weight:700; font-size:1.2rem; color:#2d3748; }
+        .modal-like-header .icon { font-size:1.4rem; }
         .form-title {
             color: #764ba2;
             font-size: 1.6rem;

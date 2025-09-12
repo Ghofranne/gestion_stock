@@ -4,6 +4,16 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    app.security.session_max_minutes: 60
+    app.security.idle_timeout_minutes: 30
+    app.security.remember_me_enabled: true
+
+    app.password_policy.min_length: 8
+    app.password_policy.require_upper: true
+    app.password_policy.require_lower: true
+    app.password_policy.require_digit: true
+    app.password_policy.require_special: true
+    app.password_policy.history_depth: 5
 
 services:
     # default configuration for services in *this* file
@@ -15,6 +25,15 @@ services:
     # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/'
+
+    App\Security\PasswordPolicy:
+        arguments:
+            $minLength: '%app.password_policy.min_length%'
+            $requireUpper: '%app.password_policy.require_upper%'
+            $requireLower: '%app.password_policy.require_lower%'
+            $requireDigit: '%app.password_policy.require_digit%'
+            $requireSpecial: '%app.password_policy.require_special%'
+            $historyDepth: '%app.password_policy.history_depth%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

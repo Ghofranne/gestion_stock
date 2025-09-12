@@ -45,6 +45,7 @@ societe:
     sn_prefix: "SN:"
     ref_prefix: "Ref:"
     id_prefix: "ID:"
+    description_prefix: "Description:"
 
   show:
     details: Details

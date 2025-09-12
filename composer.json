@@ -11,6 +11,7 @@
         "doctrine/doctrine-bundle": "^2.15",
         "doctrine/doctrine-migrations-bundle": "^3.4",
         "doctrine/orm": "^3.5",
+        "dompdf/dompdf": "^3.1",
         "knpuniversity/oauth2-client-bundle": "*",
         "league/oauth2-google": "*",
         "symfony/asset": "7.3.*",

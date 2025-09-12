@@ -39,17 +39,24 @@ class MouvementStock
     #[ORM\Column]
     private ?\DateTime $date = null;
 
-    #[ORM\ManyToOne(inversedBy: 'mouvementStocks')]
+    #[ORM\ManyToOne(inversedBy: 'mouvementStocksSource')]
     private ?Depot $depotSource = null;
 
-    #[ORM\ManyToOne(inversedBy: 'mouvementStocks')]
+    #[ORM\ManyToOne(inversedBy: 'mouvementStocksDestination')]
     private ?Depot $depotDestination = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $commentaire = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?int $quantite = null;
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $sensAjustement = null; // 'entree' or 'sortie'
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $raisonAjustement = null;
+
+    #[ORM\ManyToOne(inversedBy: 'mouvementStocks')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $createdBy = null;
 
     public function getId(): ?int
     {
@@ -128,14 +135,38 @@ class MouvementStock
         return $this;
     }
 
-    public function getQuantite(): ?int
+    public function getCreatedBy(): ?User
     {
-        return $this->quantite;
+        return $this->createdBy;
     }
 
-    public function setQuantite(?int $quantite): static
+    public function setCreatedBy(?User $createdBy): static
     {
-        $this->quantite = $quantite;
+        $this->createdBy = $createdBy;
+
+        return $this;
+    }
+
+    public function getSensAjustement(): ?string
+    {
+        return $this->sensAjustement;
+    }
+
+    public function setSensAjustement(?string $sensAjustement): static
+    {
+        $this->sensAjustement = $sensAjustement;
+
+        return $this;
+    }
+
+    public function getRaisonAjustement(): ?string
+    {
+        return $this->raisonAjustement;
+    }
+
+    public function setRaisonAjustement(?string $raisonAjustement): static
+    {
+        $this->raisonAjustement = $raisonAjustement;
 
         return $this;
     }

@@ -99,7 +99,11 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="status-badge active">🟢 Actif</span>
+                                        {% if user.enabled %}
+                                            <span class="status-badge active">🟢 Actif</span>
+                                        {% else %}
+                                            <span class="status-badge" style="background:#fed7d7;color:#c53030;">🔴 Désactivé</span>
+                                        {% endif %}
                                     </td>
                                     <td>
                                         <div class="action-buttons">

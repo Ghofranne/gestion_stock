@@ -7,11 +7,14 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use App\Security\PasswordPolicy;
+use App\Repository\PasswordHistoryRepository;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use App\Repository\SocieteRepository;
 use App\Repository\EquipementRepository;
 use App\Repository\MouvementStockRepository;
+use App\Repository\UserActivityRepository;
 use App\Repository\DepotRepository;
 use App\Repository\UserRepository;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface as Hasher;
@@ -21,6 +24,7 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Mime\Email;
+use App\Service\UserActivityLogger;
 
 class SecurityController extends AbstractController
 {
@@ -145,6 +149,7 @@ class SecurityController extends AbstractController
         MouvementStockRepository $mouvementRepository,
         SocieteRepository $societeRepository,
         DepotRepository $depotRepository,
+        UserActivityRepository $activityRepository,
         Request $request
     ): Response {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
@@ -157,10 +162,14 @@ class SecurityController extends AbstractController
         $societesCount = $societeRepository->count([]);
         $depotsCount = $depotRepository->count([]);
         
-        // Récupérer la dernière activité (dernier mouvement par date)
-        $lastMovement = $mouvementRepository->findOneBy([], ['date' => 'DESC']);
-        $lastActivity = $lastMovement ?
-            'Mouvement ' . $lastMovement->getTypeMouvement() . ' - ' . $lastMovement->getDate()->format('d/m/Y H:i') :
+        // Récupérer l'historique complet des activités de l'utilisateur connecté
+        $userActivities = $activityRepository->findUserHistory($user, 5); // 5 dernières activités
+        $totalUserActivities = $activityRepository->countUserActivities($user);
+        
+        // Récupérer la dernière activité
+        $lastActivity = !empty($userActivities) ? $userActivities[0] : null;
+        $lastActivityText = $lastActivity ?
+            $lastActivity->getActionDescription() . ' - ' . $lastActivity->getCreatedAt()->format('d/m/Y H:i') :
             'Aucune activité récente';
         
         // Préférences depuis la session (fallback valeurs par défaut)
@@ -174,11 +183,13 @@ class SecurityController extends AbstractController
 
         return $this->render('profil.html.twig', [
             'equipements_count' => $equipementsCount,
-            'mouvements_count' => $mouvementsCount,
+            'mouvements_count' => $totalUserActivities, // Nombre total d'activités de l'utilisateur
             'societes_count' => $societesCount,
             'depots_count' => $depotsCount,
-            'last_activity' => $lastActivity,
+            'last_activity' => $lastActivityText,
             'preferences' => $prefs,
+            'user_activities' => $userActivities, // Nouvelles activités complètes
+            'total_user_activities' => $totalUserActivities,
         ]);
     }
 
@@ -271,7 +282,10 @@ class SecurityController extends AbstractController
     public function changePassword(
         Request $request,
         EntityManagerInterface $em,
-        UserPasswordHasherInterface $passwordHasher
+        UserPasswordHasherInterface $passwordHasher,
+        UserActivityLogger $activityLogger,
+        PasswordPolicy $policy,
+        PasswordHistoryRepository $historyRepo
     ): Response {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         /** @var \App\Entity\User $user */
@@ -289,9 +303,29 @@ class SecurityController extends AbstractController
                 $error = 'La confirmation ne correspond pas.';
             } elseif (!$passwordHasher->isPasswordValid($user, $current)) {
                 $error = 'Le mot de passe actuel est incorrect.';
+            } elseif (($msg = $policy->validateComplexity($new)) !== null) {
+                $error = $msg;
+            } elseif ($policy->violatesHistory($user, $new) || password_verify($new, $user->getPassword())) {
+                $error = sprintf('Vous ne pouvez pas réutiliser vos %d derniers mots de passe.', $policy->getHistoryDepth());
             } else {
+                // Enregistrer l'ancien hash dans l'historique
+                $oldHash = $user->getPassword();
+                if ($oldHash) {
+                    $history = new \App\Entity\PasswordHistory();
+                    $history->setUser($user)->setPasswordHash($oldHash);
+                    $em->persist($history);
+                }
+
+                // Définir le nouveau mot de passe
                 $user->setPassword($passwordHasher->hashPassword($user, $new));
                 $em->flush();
+
+                // Purger l'historique au-delà de la profondeur autorisée
+                $historyRepo->pruneExceeding($user, $policy->getHistoryDepth());
+                
+                // Logger l'activité
+                $activityLogger->logPasswordChange();
+                
                 $this->addFlash('success', 'Mot de passe modifié avec succès.');
                 return $this->redirectToRoute('app_profil');
             }
@@ -302,6 +336,84 @@ class SecurityController extends AbstractController
         ]);
     }
 
+    /**
+     * Page d'historique détaillé des activités de l'utilisateur
+     */
+    #[Route(path: '/profil/historique', name: 'app_profil_historique')]
+    public function profilHistorique(UserActivityRepository $activityRepository): Response
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        
+        $user = $this->getUser();
+        
+        // Récupérer l'historique complet des activités de l'utilisateur
+        $historique = $activityRepository->findUserHistory($user, 50);
+        $totalActivites = $activityRepository->countUserActivities($user);
+        $activitesRecentes = $activityRepository->findRecentUserActivities($user, 10);
+        $statistiques = $activityRepository->getUserActivityStats($user);
+        
+        // Utilisation du nouveau template d'historique
+        return $this->render('profile/historique_new.html.twig', [
+            'user' => $user,
+            'activites' => $historique,
+            'totalActivites' => $totalActivites,
+            'activitesRecentes' => $activitesRecentes,
+            'statistiques' => $statistiques,
+        ]);
+    }
+
+    /**
+     * Supprime une ou plusieurs activités de l'historique
+     */
+    #[Route('/api/activities/delete', name: 'app_activity_delete', methods: ['POST'])]
+    public function deleteActivities(Request $request, UserActivityRepository $activityRepository, EntityManagerInterface $em): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        // Désactivation volontaire de la suppression de l'historique
+        return $this->json([
+            'success' => false,
+            'message' => 'La suppression des activités de l\'historique est désactivée.'
+        ], 403);
+    }
+    
+    /**
+     * Exporte les activités sélectionnées au format CSV
+     */
+    #[Route('/export/activities', name: 'app_activity_export', methods: ['POST'])]
+    public function exportActivities(Request $request, UserActivityRepository $activityRepository): Response
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        
+        try {
+            $ids = json_decode($request->request->get('ids', '[]'), true);
+            $user = $this->getUser();
+            
+            $activities = $activityRepository->createQueryBuilder('a')
+                ->where('a.id IN (:ids)')
+                ->andWhere('a.user = :user')
+                ->setParameter('ids', $ids)
+                ->setParameter('user', $user)
+                ->orderBy('a.createdAt', 'DESC')
+                ->getQuery()
+                ->getResult();
+            
+            $filename = sprintf('export-activites-%s.csv', date('Y-m-d'));
+            
+            $response = $this->render('export/activities.csv.twig', [
+                'activities' => $activities
+            ]);
+            
+            $response->headers->set('Content-Type', 'text/csv');
+            $response->headers->set('Content-Disposition', sprintf('attachment; filename="%s"', $filename));
+            
+            return $response;
+            
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Une erreur est survenue lors de l\'export');
+            return $this->redirectToRoute('app_profil_historique');
+        }
+    }
+    
     #[Route(path: '/logout', name: 'app_logout')]
     public function logout(): void
     {

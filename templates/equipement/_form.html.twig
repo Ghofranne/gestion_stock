@@ -9,7 +9,10 @@
         <div class="js-dynamic-field js-tpe-field">{{ form_row(form.model) }}</div>
         <div class="js-dynamic-field js-carte-field">{{ form_row(form.referenceCarte) }}</div>
         <div class="js-dynamic-field js-fournisseur-field">{{ form_row(form.fournisseur) }}</div>
-        {{ form_row(form.etat) }}
+        <div class="js-dynamic-field js-other-field">{{ form_row(form.description) }}</div>
+        {% if form.etat is defined %}
+            {{ form_row(form.etat) }}
+        {% endif %}
     </div>
     <button class="btn">{{ button_label|default(('equipement.form.save'|trans([], 'equipement'))) }}</button>
     <style>
@@ -57,20 +60,23 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Trouver le select du type d'équipement
-            const typeSelect = document.querySelector('select');
+            // Trouver le select du type d'équipement (sélecteur spécifique)
+            const typeSelect = document.querySelector("select[name$='[typeEquipement]']") || document.querySelector('select');
             if (!typeSelect) return;
+            const formEl = typeSelect.closest('form') || document;
             
             function updateFields() {
-                const type = typeSelect.value;
+                const type = (typeSelect.value || '').trim();
+                const norm = type.toLowerCase();
                 console.log('Type sélectionné :', type);
                 
                 // Tous les champs
                 const fields = {
-                    sim: document.querySelectorAll('.js-sim-field'),
-                    tpe: document.querySelectorAll('.js-tpe-field'),
-                    carte: document.querySelectorAll('.js-carte-field'),
-                    fournisseur: document.querySelectorAll('.js-fournisseur-field')
+                    sim: formEl.querySelectorAll('.js-sim-field'),
+                    tpe: formEl.querySelectorAll('.js-tpe-field'),
+                    carte: formEl.querySelectorAll('.js-carte-field'),
+                    fournisseur: formEl.querySelectorAll('.js-fournisseur-field'),
+                    other: formEl.querySelectorAll('.js-other-field')
                 };
                 
                 console.log('Champs trouvés:', {
@@ -102,10 +108,15 @@
                     const inputs = f.querySelectorAll('input, select, textarea');
                     inputs.forEach(input => input.disabled = true);
                 });
+                fields.other.forEach(f => {
+                    f.style.display = 'none';
+                    const inputs = f.querySelectorAll('input, select, textarea');
+                    inputs.forEach(input => input.disabled = true);
+                });
                 
                 // Afficher selon le type
-                switch(type) {
-                    case 'SIM':
+                switch(norm) {
+                    case 'sim':
                         // SIM : IMEI, numéro d'appel, opérateur, état
                         fields.sim.forEach(f => {
                             f.style.display = 'block';
@@ -114,7 +125,7 @@
                         });
                         console.log('Affichage SIM : IMEI, numéro d\'appel, opérateur, état');
                         break;
-                    case 'TPE':
+                    case 'tpe':
                         // TPE : SN, modèle, fournisseur, état
                         fields.tpe.forEach(f => {
                             f.style.display = 'block';
@@ -148,7 +159,44 @@
                         
                         console.log('Affichage TPE : SN, modèle, fournisseur, état');
                         break;
-                    case 'Carte':
+                    case 'autres':
+                        // Autres : afficher fournisseur et description
+                        fields.fournisseur.forEach(f => {
+                            f.style.display = 'block';
+                            const inputs = f.querySelectorAll('input, select, textarea');
+                            inputs.forEach(input => input.disabled = false);
+                        });
+                        fields.other.forEach(f => {
+                            f.style.display = 'block';
+                            const inputs = f.querySelectorAll('input, select, textarea');
+                            inputs.forEach(input => {
+                                input.disabled = false;
+                                // description requis pour 'Autres'
+                                if (input.name && input.name.endsWith('[description]')) {
+                                    input.required = true;
+                                }
+                            });
+                        });
+                        // Vérification retardée pour contrer les scripts conflictuels
+                        setTimeout(() => {
+                            fields.fournisseur.forEach(f => {
+                                f.style.display = 'block';
+                                const inputs = f.querySelectorAll('input, select, textarea');
+                                inputs.forEach(input => {
+                                    if (input.disabled) input.disabled = false;
+                                });
+                            });
+                            fields.other.forEach(f => {
+                                f.style.display = 'block';
+                                const inputs = f.querySelectorAll('input, select, textarea');
+                                inputs.forEach(input => {
+                                    if (input.disabled) input.disabled = false;
+                                });
+                            });
+                        }, 100);
+                        console.log('Affichage Autres : fournisseur, description');
+                        break;
+                    case 'carte':
                         // Carte : référence carte, état
                         fields.carte.forEach(f => {
                             f.style.display = 'block';
@@ -162,6 +210,12 @@
                         console.log('Type non reconnu, aucun champ spécifique affiché');
                         break;
                 }
+
+                // Si type différent de 'Autres', s'assurer que description n'est pas required
+                if (norm !== 'autres') {
+                    const desc = formEl.querySelector("[name$='[description]']");
+                    if (desc) desc.required = false;
+                }
             }
             
             // Initialiser
@@ -169,6 +223,10 @@
             
             // Écouter les changements
             typeSelect.addEventListener('change', updateFields);
+
+            // Réevaluer après un court délai pour contourner d'autres scripts
+            setTimeout(updateFields, 150);
+            setTimeout(updateFields, 400);
         });
     </script>
 {{ form_end(form) }}

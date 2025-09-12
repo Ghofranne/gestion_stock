@@ -1,0 +1,290 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Profil{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .profile-container {
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .profile-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .profile-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+    }
+    
+    .profile-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .profile-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .profile-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+    
+    .card-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+    }
+    
+    .card-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        margin-right: 1rem;
+    }
+    
+    .card-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin: 0;
+    }
+    
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .info-row:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: #4a5568;
+        flex: 0 0 40%;
+    }
+    
+    .info-value {
+        color: #2d3748;
+        flex: 1;
+        text-align: right;
+    }
+    
+    .role-badge {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        margin-left: 0.5rem;
+    }
+    
+    .btn {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        text-decoration: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-block;
+        margin-top: 1rem;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(135deg, #718096, #4a5568);
+        box-shadow: 0 4px 12px rgba(113, 128, 150, 0.3);
+    }
+    
+    .btn-secondary:hover {
+        box-shadow: 0 6px 20px rgba(113, 128, 150, 0.4);
+    }
+    
+    .btn-warning {
+        background: linear-gradient(135deg, #f6ad55, #ed8936);
+        box-shadow: 0 4px 12px rgba(246, 173, 85, 0.3);
+    }
+    
+    .btn-warning:hover {
+        box-shadow: 0 6px 20px rgba(246, 173, 85, 0.4);
+    }
+    
+    .btn-info {
+        background: linear-gradient(135deg, #4299e1, #3182ce);
+        box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+    }
+    
+    .btn-info:hover {
+        box-shadow: 0 6px 20px rgba(66, 153, 225, 0.4);
+    }
+    
+    .activity-description {
+        color: #718096;
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
+    
+    .card-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+    }
+    
+    .text-muted {
+        color: #718096;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="profile-container">
+    <div class="profile-header">
+        <h1 class="profile-title">👤 Mon Profil</h1>
+        <p class="text-muted">Gérez vos informations personnelles et consultez votre activité</p>
+    </div>
+
+    <div class="profile-grid">
+        <!-- Informations personnelles -->
+        <div class="profile-card">
+            <div class="card-header">
+                <div class="card-icon">👤</div>
+                <h3 class="card-title">Informations personnelles</h3>
+            </div>
+            <div class="card-body">
+                <div class="info-row">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value">{{ user.email }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Prénom:</span>
+                    <span class="info-value">{{ user.prenom ?? 'Non renseigné' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Nom:</span>
+                    <span class="info-value">{{ user.nom ?? 'Non renseigné' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Téléphone:</span>
+                    <span class="info-value">{{ user.telephone ?? 'Non renseigné' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Poste:</span>
+                    <span class="info-value">{{ user.poste ?? 'Non renseigné' }}</span>
+                </div>
+                
+                <a href="#" class="btn">✏️ Modifier les informations</a>
+            </div>
+        </div>
+
+        <!-- Sécurité -->
+        <div class="profile-card">
+            <div class="card-header">
+                <div class="card-icon">🛡️</div>
+                <h3 class="card-title">Sécurité</h3>
+            </div>
+            <div class="card-body">
+                <div class="info-row">
+                    <span class="info-label">Rôle:</span>
+                    <span class="info-value">
+                        {% for role in user.roles %}
+                            <span class="role-badge">{{ role }}</span>
+                        {% endfor %}
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Dernière connexion:</span>
+                    <span class="info-value">
+                        {% if user.lastLoginAt %}
+                            {{ user.lastLoginAt|date('d/m/Y à H:i') }}
+                        {% else %}
+                            Jamais connecté
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <a href="#" class="btn btn-warning">🔑 Changer le mot de passe</a>
+            </div>
+        </div>
+
+        <!-- Préférences -->
+        <div class="profile-card">
+            <div class="card-header">
+                <div class="card-icon">⚙️</div>
+                <h3 class="card-title">Préférences</h3>
+            </div>
+            <div class="card-body">
+                <div class="info-row">
+                    <span class="info-label">Langue:</span>
+                    <span class="info-value">Français</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Format de date:</span>
+                    <span class="info-value">DD/MM/YYYY</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Notifications:</span>
+                    <span class="info-value">Activées</span>
+                </div>
+                
+                <a href="#" class="btn btn-secondary">🎛️ Modifier les préférences</a>
+            </div>
+        </div>
+
+        <!-- Activité récente -->
+        <div class="profile-card">
+            <div class="card-header">
+                <div class="card-icon">📊</div>
+                <h3 class="card-title">Activité récente</h3>
+            </div>
+            <div class="card-body">
+                <p class="activity-description">
+                    Consultez votre historique complet d'activités pour voir toutes les actions que vous avez effectuées dans le système de gestion de stock.
+                </p>
+                
+                <div class="card-actions">
+                    <a href="{{ path('app_profile_historique') }}" class="btn btn-info">📋 Voir l'historique complet</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

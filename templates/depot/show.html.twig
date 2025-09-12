@@ -59,7 +59,9 @@
                             <div class="equipement-info">
                                 <h3>{{ equipement_data.equipement.typeEquipement }}</h3>
                                 <div class="equipement-details">
-                                    {% if equipement_data.equipement.imei %}
+                                    {% if equipement_data.equipement.typeEquipement == 'Autres' and equipement_data.equipement.description %}
+                                        <small>Description: {{ equipement_data.equipement.description }}</small>
+                                    {% elseif equipement_data.equipement.imei %}
                                         <small>IMEI: {{ equipement_data.equipement.imei }}</small>
                                     {% elseif equipement_data.equipement.sn %}
                                         <small>SN: {{ equipement_data.equipement.sn }}</small>
@@ -68,9 +70,7 @@
                                     {% endif %}
                                 </div>
                             </div>
-                            <div class="quantity-badge-large">
-                                {{ equipement_data.quantite }}
-                            </div>
+                            
                         </div>
                         
                         <div class="equipement-body">
@@ -104,9 +104,9 @@
         <a href="{{ path('app_depot_edit', {'id': depot.id}) }}" class="btn btn-primary">
             ✏️ {{ 'depot.show.edit'|trans([], 'depot') }}
         </a>
-        <a href="{{ path('app_mouvement_stock_new') }}" class="btn btn-success">
+        <button type="button" id="open-add-eq-modal" class="btn btn-success">
             + {{ 'depot.show.add_equipments'|trans([], 'depot') }}
-        </a>
+        </button>
     </div>
 </div>
 
@@ -245,16 +245,7 @@
     font-size: 0.9rem;
 }
 
-.quantity-badge-large {
-    background: linear-gradient(135deg, #48bb78, #38a169);
-    color: white;
-    padding: 0.8rem 1.2rem;
-    border-radius: 25px;
-    font-size: 1.2rem;
-    font-weight: 700;
-    min-width: 50px;
-    text-align: center;
-}
+ 
 
 .equipement-body {
     display: flex;
@@ -330,6 +321,15 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
+/* Modal simple */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; }
+.modal { background: #fff; width: min(1000px, 95vw); height: min(90vh, 800px); border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); display: flex; flex-direction: column; overflow: hidden; }
+.modal-header { padding: 0.8rem 1rem; border-bottom: 1px solid #e5e7eb; display:flex; align-items:center; justify-content: space-between; }
+.modal-title { font-weight: 600; }
+.modal-close { background: transparent; border: none; font-size: 1.2rem; cursor: pointer; }
+.modal-body { flex: 1; }
+.modal-body iframe { width: 100%; height: 100%; border: 0; }
+
 @media (max-width: 768px) {
     .depot-header {
         flex-direction: column;
@@ -354,4 +354,56 @@
     }
 }
 </style>
+
+<div class="modal-overlay" id="add-eq-modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="addEqModalTitle">
+    <div class="modal-header">
+      <div class="modal-title" id="addEqModalTitle">Ajouter des équipements</div>
+      <button class="modal-close" id="add-eq-close" aria-label="Fermer">×</button>
+    </div>
+    <div class="modal-body">
+      <iframe id="add-eq-iframe" src="about:blank" title="Ajouter des équipements"></iframe>
+    </div>
+  </div>
+  </div>
+
+<script>
+  (function(){
+    const openBtn = document.getElementById('open-add-eq-modal');
+    const overlay = document.getElementById('add-eq-modal');
+    const closeBtn = document.getElementById('add-eq-close');
+    const iframe = document.getElementById('add-eq-iframe');
+    if (!openBtn || !overlay || !closeBtn || !iframe) return;
+    // Ouvre le formulaire de création d'équipement en mode embarqué (modale)
+    const depotId = "{{ depot.id }}";
+    const url = "{{ path('app_equipement_new', { embedded: 1, depot_id: depot.id }) }}";
+    function openModal(){
+      iframe.src = url + (url.includes('?') ? '&' : '?') + 'depot_id=' + encodeURIComponent(depotId);
+      overlay.style.display = 'flex';
+    }
+    function closeModal(){
+      overlay.style.display = 'none';
+      iframe.src = 'about:blank';
+      // Optionnel: rafraîchir la page après fermeture pour voir le stock MAJ
+      // location.reload();
+    }
+    openBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeModal(); });
+    // Quand le reçu démarre son téléchargement, on ferme et on rafraîchit
+    window.addEventListener('message', function(ev){
+      try {
+        if (!ev || !ev.data || typeof ev.data !== 'object') return;
+        if (ev.data.type === 'mouvement_stock:receipt_download_started' || ev.data.type === 'equipement:created') {
+          closeModal();
+          // Rafraîchir la page pour voir les changements
+          // Si on a un depotId dans le message, on pourrait aussi faire une mise à jour ciblée
+          setTimeout(function(){ 
+            window.location.reload();
+          }, 400);
+        }
+      } catch (e) { /* ignore */ }
+    });
+  })();
+</script>
 {% endblock %}

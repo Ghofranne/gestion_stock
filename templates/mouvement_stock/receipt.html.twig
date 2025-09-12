@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Reçu Mouvement(s) de Stock</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body { 
+            font-family: DejaVu Sans, Arial, Helvetica, sans-serif; 
+            font-size: 13px; 
+            color: #2c3e50; 
+            line-height: 1.5;
+            background: #ecf0f1;
+            padding: 20px;
+        }
+        
+        .document {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            max-width: 1400px;
+            margin: 0 auto;
+            border: 1px solid #bdc3c7;
+        }
+        
+        /* EN-TÊTE AMÉLIORÉ */
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start;
+            margin-bottom: 14px; 
+            padding-bottom: 12px;
+            border-bottom: 3px solid #3498db;
+            position: relative;
+        }
+        
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: #e74c3c;
+        }
+        
+        .brand-section { 
+            flex: 1;
+        }
+        
+        .brand { 
+            font-size: 24px; 
+            font-weight: 700; 
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .brand::before { content: none; }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-style: italic;
+            font-size: 14px;
+        }
+        
+        .meta { 
+            text-align: right; 
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 18px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            min-width: 250px;
+        }
+        
+        .meta-item {
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .meta-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-right: 10px;
+        }
+        
+        .meta-value {
+            color: #34495e;
+            font-weight: 500;
+        }
+        
+        .ref-number {
+            background: #3498db;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        /* SECTION TYPES */
+        .types-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 18px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .types-label {
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .badge { 
+            display: inline-block; 
+            padding: 6px 15px; 
+            border-radius: 25px; 
+            font-size: 11px; 
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0 5px;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        /* TITRE SECTION DÉTAILS */
+        h2 { 
+            margin: 10px 0 10px 0; 
+            font-size: 20px; 
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            position: relative;
+        }
+        
+        h2::before { content: none; }
+        
+        /* TABLEAU AMÉLIORÉ */
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: 1px solid #bdc3c7;
+        }
+        
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            background: white;
+            table-layout: auto;
+        }
+        
+        thead {
+            background: #e9edf3;
+            color: #2c3e50;
+        }
+        /* sticky désactivé pour éviter le recouvrement */
+        thead th { position: static; }
+        
+        th { 
+            padding: 10px 10px; 
+            text-align: left;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-right: 1px solid #d5dbe3;
+            position: relative;
+        }
+        
+        th:last-child {
+            border-right: none;
+        }
+        
+        th::after { content: none; }
+        
+        tbody tr {
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        tbody tr:hover {
+            background: linear-gradient(90deg, rgba(52, 152, 219, 0.05), rgba(155, 89, 182, 0.05));
+            transform: translateY(-1px);
+        }
+        
+        tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        tbody tr:nth-child(even):hover {
+            background: linear-gradient(90deg, rgba(52, 152, 219, 0.08), rgba(155, 89, 182, 0.08));
+        }
+        
+        td { 
+            padding: 10px 10px; 
+            vertical-align: top;
+            border-right: 1px solid #ecf0f1;
+            font-size: 12px;
+            white-space: normal;
+            word-wrap: break-word; /* legacy */
+            overflow-wrap: anywhere; /* modern */
+            word-break: break-word; /* dompdf compatibility */
+        }
+        
+        td:last-child {
+            border-right: none;
+        }
+        
+        /* STYLES SPÉCIFIQUES AUX COLONNES */
+        .col-num {
+            width: 5%;
+            text-align: center;
+            font-weight: 700;
+            color: #3498db;
+            font-size: 14px;
+        }
+        
+        .col-date {
+            width: 12%;
+            font-family: monospace;
+            font-size: 11px;
+        }
+        
+        .col-type {
+            width: 10%;
+        }
+        
+        .col-equipment {
+            width: 28%;
+            font-weight: 600;
+        }
+        
+        .col-id {
+            width: 18%;
+            font-family: monospace;
+            font-size: 11px;
+            word-break: break-all;
+        }
+        
+        .col-depot {
+            width: 12%;
+        }
+        .col-depot-dest {
+            width: 12%;
+        }
+        
+        .col-status {
+            width: 10%;
+            text-align: center;
+        }
+        
+        .col-reason {
+            width: 12%;
+        }
+        
+        .col-comment {
+            width: 16%;
+        }
+        .col-user {
+            width: 16%;
+            font-size: 11px;
+        }
+        
+        /* BADGES DE TYPE */
+        .type-badge {
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .type-retour {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            background-color: #c0392b; /* fallback for dompdf */
+            color: #ffffff;
+        }
+        
+        .type-ajustement {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            background-color: #e67e22; /* fallback for dompdf */
+            color: #ffffff;
+        }
+        
+        .type-transfert {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            background-color: #2980b9; /* fallback for dompdf */
+            color: #ffffff;
+        }
+        
+        .type-entree {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            background-color: #27ae60; /* fallback for dompdf */
+            color: #ffffff;
+        }
+        
+        /* ICÔNES ÉQUIPEMENT */
+        .equipment-icon { display: none; }
+        
+        /* STATUTS */
+        .status {
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-disponible {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            background-color: #27ae60; /* fallback */
+            color: #ffffff;
+        }
+        
+        .status-retour {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            background-color: #d35400; /* fallback */
+            color: #ffffff;
+        }
+        
+        .status-maintenance {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            background-color: #e67e22; /* fallback */
+            color: #ffffff;
+        }
+        
+        /* PIED DE PAGE */
+        .footer { 
+            margin-top: 40px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            padding-top: 25px;
+            border-top: 3px solid #bdc3c7;
+        }
+        
+        .count-badge {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .signature-box {
+            border: 2px dashed #bdc3c7;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            background: #f8f9fa;
+            min-width: 250px;
+        }
+        
+        .signature-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .signature-line {
+            height: 50px;
+            border-bottom: 1px solid #7f8c8d;
+            margin: 15px 0;
+        }
+        
+        .signature-date {
+            font-size: 11px;
+            color: #7f8c8d;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 1200px) {
+            .document { 
+                padding: 25px;
+                margin: 10px;
+            }
+            table { width: 100%; }
+        }
+        
+        @media (max-width: 768px) {
+            body { 
+                font-size: 11px; 
+                padding: 10px; 
+            }
+            .document { 
+                padding: 20px; 
+                margin: 5px;
+            }
+            .header { 
+                flex-direction: column; 
+                align-items: stretch; 
+                gap: 20px; 
+            }
+            .meta { 
+                text-align: left;
+                min-width: auto;
+            }
+            .brand { 
+                font-size: 20px; 
+            }
+            .footer { 
+                flex-direction: column; 
+                gap: 20px; 
+                text-align: center; 
+            }
+            table { 
+                min-width: 800px;
+                font-size: 10px;
+            }
+            th, td { 
+                padding: 8px 6px; 
+            }
+        }
+        
+        /* IMPRESSION */
+        @media print {
+            body { 
+                background: white; 
+                padding: 0; 
+            }
+            .document { 
+                box-shadow: none; 
+                border: none;
+                padding: 20px; 
+            }
+            thead th { position: static; }
+            tbody tr { page-break-inside: avoid; }
+            .types-section { 
+                background: #f0f0f0 !important; 
+                color: black !important; 
+            }
+            thead { 
+                background: #f0f0f0 !important; 
+                color: black !important; 
+            }
+            .type-badge, .status {
+                background: #e0e0e0 !important;
+                color: black !important;
+                border: 1px solid #999;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="document">
+        <!-- EN-TÊTE -->
+        <div class="header">
+            <div class="brand-section">
+                <div class="brand">Reçu des mouvements de stock</div>
+                <div class="subtitle">Document de traçabilité des équipements</div>
+            </div>
+            <div class="meta">
+                <div class="meta-item">
+                    <span class="meta-label">Date:</span>
+                    <span class="meta-value">{{ (mouvements|first).date|date('d/m/Y') }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Généré le:</span>
+                    <span class="meta-value">{{ "now"|date('d/m/Y H:i') }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Réf:</span>
+                    <span class="ref-number">#{{ random(1000, 9999) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TYPES DE MOUVEMENTS (calcul conservé; rendu déplacé sous le tableau) -->
+        {% set types = [] %}
+        {% set hasComments = false %}
+        {% for m in mouvements %}
+            {% if m.typeMouvement not in types %}
+                {% set types = types|merge([m.typeMouvement]) %}
+            {% endif %}
+            {% if m.commentaire is not empty %}
+                {% set hasComments = true %}
+            {% endif %}
+        {% endfor %}
+
+        <!-- TITRE SECTION -->
+        <h2>Détails des mouvements</h2>
+
+        <!-- TABLEAU PRINCIPAL -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-num">#</th>
+                        <th class="col-type">Type</th>
+                        <th class="col-equipment">Équipement</th>
+                        <th class="col-depot">Dépôt source</th>
+                        <th class="col-depot-dest">Dépôt destination</th>
+                        <th class="col-status">État</th>
+                        <th class="col-reason">Sens/Raison</th>
+                        {% if hasComments %}<th class="col-comment">Commentaire</th>{% endif %}
+                        <th class="col-user">Créé par</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for m in mouvements %}
+                    {% set eq = m.equipement %}
+                    {% set idMain = eq.imei ?: (eq.sn ?: (eq.referenceCarte ?: ('ID:' ~ eq.id))) %}
+                    {% set infoMain = (eq.description is not empty) ? eq.description : idMain %}
+                    <tr>
+                        <td class="col-num">{{ loop.index }}</td>
+                        <td class="col-type">
+                            <span class="type-badge type-{{ m.typeMouvement|lower }}">
+                                {{ m.typeMouvement|upper }}
+                            </span>
+                        </td>
+                        <td class="col-equipment">
+                            <div>{{ eq.typeEquipement }}</div>
+                            <div style="font-weight: normal; color: #7f8c8d; font-size: 11px; margin-top: 2px;">{{ infoMain }}</div>
+                        </td>
+                        <td class="col-depot">{{ m.depotSource ? m.depotSource.nom : '-' }}</td>
+                        <td class="col-depot-dest">{{ m.depotDestination ? m.depotDestination.nom : '-' }}</td>
+                        <td class="col-status">
+                            {% if eq.etat %}
+                                <span class="status status-{{ eq.etat|lower|replace({' ': '-'}) }}">
+                                    {{ eq.etat }}
+                                </span>
+                            {% else %}-{% endif %}
+                        </td>
+                        <td class="col-reason">
+                            {% if m.typeMouvement == 'ajustement' %}
+                                <strong>{{ m.sensAjustement ?: '-' }}</strong><br>
+                                <small style="color: #7f8c8d;">{{ m.raisonAjustement ?: '-' }}</small>
+                            {% else %}
+                                <span style="color: #7f8c8d;">{{ m.typeMouvement|capitalize }}</span>
+                            {% endif %}
+                        </td>
+                        {% if hasComments %}
+                        <td class="col-comment">{{ m.commentaire ?: '-' }}</td>
+                        {% endif %}
+                        <td class="col-user">{{ m.createdBy ? m.createdBy.email : '-' }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if types|length > 0 %}
+        <div class="types-section">
+            <div class="types-label">Type(s) de mouvement traité(s)</div>
+            {% for t in types %}
+                <span class="badge">{{ t|upper }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- PIED DE PAGE -->
+        <div class="footer">
+            <div class="count-badge">
+                📊 Total: {{ mouvements|length }} mouvement{{ mouvements|length > 1 ? 's' : '' }}
+            </div>
+            <div class="signature-box">
+                <div class="signature-title">Signature du responsable</div>
+                <div class="signature-line"></div>
+                <div class="signature-date">Date: ___/___/______</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

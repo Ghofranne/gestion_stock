@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\RegistrationFormType;
+use App\Service\UserActivityLogger;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,8 +15,12 @@ use Symfony\Component\Routing\Attribute\Route;
 class RegistrationController extends AbstractController
 {
     #[Route('/register', name: 'app_register')]
-    public function register(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
-    {
+    public function register(
+        Request $request, 
+        EntityManagerInterface $entityManager, 
+        UserPasswordHasherInterface $passwordHasher,
+        UserActivityLogger $activityLogger
+    ): Response {
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
@@ -24,8 +29,22 @@ class RegistrationController extends AbstractController
             $plainPassword = $form->get('plainPassword')->getData();
             $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
             $user->setPassword($hashedPassword);
+            
             $entityManager->persist($user);
             $entityManager->flush();
+            
+            // Log the user registration
+            $activityLogger->log(
+                $user,
+                'create',
+                sprintf('Nouvel utilisateur enregistré: %s (ID: %d)', $user->getUserIdentifier(), $user->getId()),
+                [
+                    'email' => $user->getEmail(),
+                    'roles' => $user->getRoles(),
+                    'isVerified' => $user->isVerified()
+                ]
+            );
+            
             $this->addFlash('success', 'Votre compte a été créé. Vous pouvez maintenant vous connecter.');
             return $this->redirectToRoute('app_login');
         }

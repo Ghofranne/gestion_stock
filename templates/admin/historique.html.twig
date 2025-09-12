@@ -1,0 +1,1146 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}{{ 'history.admin.title'|trans }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* === VARIABLES === */
+        :root {
+            --primary-color: #4e73df;
+            --primary-dark: #224abe;
+            --success-color: #1cc88a;
+            --success-dark: #13855c;
+            --warning-color: #f6c23e;
+            --warning-dark: #dda20a;
+            --danger-color: #e74a3b;
+            --danger-dark: #be2617;
+            --info-color: #36b9cc;
+            --info-dark: #258391;
+            --light-bg: #f8fafc;
+            --light-gray: #e9ecef;
+            --border-color: #e3e6f0;
+            --text-color: #2c3e50;
+            --text-muted: #6c757d;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 15px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+            --border-radius: 0.5rem;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        /* === BASE STYLES === */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* === LAYOUT === */
+        .container-fluid {
+            background-color: var(--light-bg);
+            min-height: calc(100vh - 56px);
+            padding: 1.5rem;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        /* === CARDS === */
+        .card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            overflow: hidden;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-bottom: none;
+            font-weight: 600;
+        }
+
+        /* Stats dans l'en-tête violet */
+        .history-header-stats { display:grid; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap:.5rem; margin-top:.75rem; }
+        .history-header-chip { color:#fff; background: rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25); border-radius:.5rem; padding:.5rem .75rem; }
+        .history-header-chip .label { opacity:.9; font-size:.8rem; }
+        .history-header-chip .value { font-weight:700; font-size:1.1rem; }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .card-footer {
+            background: var(--light-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+        }
+
+        /* === NAVIGATION TABS === */
+        .nav-tabs {
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 0;
+        }
+
+        .nav-tabs .nav-link {
+            border: none;
+            border-radius: 0;
+            color: var(--text-muted);
+            font-weight: 500;
+            padding: 1rem 1.5rem;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: var(--primary-color);
+            background: transparent;
+            border: none;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            background: transparent;
+            border: none;
+            font-weight: 600;
+        }
+
+        .nav-tabs .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary-color);
+        }
+
+        /* === STATISTICS CARDS === */
+        .border-left-primary {
+            border-left: 4px solid var(--primary-color) !important;
+        }
+
+        .border-left-success {
+            border-left: 4px solid var(--success-color) !important;
+        }
+
+        .border-left-info {
+            border-left: 4px solid var(--info-color) !important;
+        }
+
+        .border-left-warning {
+            border-left: 4px solid var(--warning-color) !important;
+        }
+
+        /* === ACTIVITY ITEMS === */
+        .date-group {
+            margin-bottom: 2rem;
+        }
+
+        .date-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .date-title {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .activity-count {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .activity-item {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .activity-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--border-color);
+            transition: var(--transition);
+        }
+
+        .activity-item[data-action="create"]::before {
+            background: var(--success-color);
+        }
+
+        .activity-item[data-action="update"]::before {
+            background: var(--warning-color);
+        }
+
+        .activity-item[data-action="delete"]::before {
+            background: var(--danger-color);
+        }
+
+        .activity-item[data-action="view"]::before {
+            background: var(--info-color);
+        }
+
+        .activity-item:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+            border-color: var(--primary-color);
+        }
+
+        .activity-item.selected {
+            background: linear-gradient(135deg, rgba(78, 115, 223, 0.05), rgba(118, 75, 162, 0.05));
+            border-color: var(--primary-color);
+        }
+
+        .activity-checkbox {
+            display: flex;
+            align-items: center;
+        }
+
+        .activity-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .activity-icon.create {
+            background: linear-gradient(135deg, var(--success-color), var(--success-dark));
+        }
+
+        .activity-icon.update {
+            background: linear-gradient(135deg, var(--warning-color), var(--warning-dark));
+        }
+
+        .activity-icon.delete {
+            background: linear-gradient(135deg, var(--danger-color), var(--danger-dark));
+        }
+
+        .activity-icon.view {
+            background: linear-gradient(135deg, var(--info-color), var(--info-dark));
+        }
+
+        .activity-content {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .activity-main {
+            flex: 1;
+        }
+
+        .activity-title {
+            margin: 0 0 0.5rem 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-color);
+            line-height: 1.3;
+        }
+
+        .activity-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .activity-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .activity-meta i {
+            font-size: 0.8rem;
+        }
+
+        .activity-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.8rem;
+            border-radius: calc(var(--border-radius) * 0.75);
+            font-weight: 500;
+            transition: var(--transition);
+            border: 1px solid transparent;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            background: transparent;
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* === BADGES === */
+        .badge {
+            display: inline-block;
+            padding: 0.35em 0.65em;
+            font-size: 75%;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 0.375rem;
+        }
+
+        .badge-success {
+            color: white;
+            background-color: var(--success-color);
+        }
+
+        .badge-warning {
+            color: white;
+            background-color: var(--warning-color);
+        }
+
+        .badge-danger {
+            color: white;
+            background-color: var(--danger-color);
+        }
+
+        .badge-info {
+            color: white;
+            background-color: var(--info-color);
+        }
+
+        /* === ACTIVITY DETAILS === */
+        .activity-details {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--light-bg);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+        }
+
+        .activity-details.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .details-content h6 {
+            margin: 0 0 0.75rem 0;
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            font-size: 0.9rem;
+            color: var(--text-color);
+            word-break: break-word;
+        }
+
+        /* === BULK ACTIONS === */
+        .bulk-actions {
+            position: fixed;
+            top: 6rem; /* sous le header */
+            right: 2rem;
+            left: auto;
+            bottom: auto;
+            transform: none;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            z-index: 1000;
+            animation: slideDown 0.2s ease-out;
+        }
+
+        .bulk-actions-info {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .bulk-actions-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* === EMPTY STATE === */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .empty-description {
+            font-size: 0.95rem;
+            max-width: 400px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        /* === ANIMATIONS === */
+        @keyframes slideDown {
+            from { 
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 768px) {
+            .container-fluid {
+                padding: 1rem;
+            }
+
+            .activity-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+
+            .activity-content {
+                width: 100%;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .activity-meta {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+
+            .bulk-actions {
+                position: fixed;
+                top: auto;
+                bottom: 1rem;
+                right: 1rem;
+                left: 1rem;
+                transform: none;
+                margin-top: 0;
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+
+            .bulk-actions-buttons {
+                justify-content: center;
+            }
+        }
+
+        /* === UTILITY CLASSES === */
+        .text-primary { color: var(--primary-color) !important; }
+        .text-success { color: var(--success-color) !important; }
+        .text-warning { color: var(--warning-color) !important; }
+        .text-danger { color: var(--danger-color) !important; }
+        .text-info { color: var(--info-color) !important; }
+        .text-muted { color: var(--text-muted) !important; }
+
+        .bg-primary { background-color: var(--primary-color) !important; }
+        .bg-success { background-color: var(--success-color) !important; }
+        .bg-warning { background-color: var(--warning-color) !important; }
+        .bg-danger { background-color: var(--danger-color) !important; }
+        .bg-info { background-color: var(--info-color) !important; }
+        .bg-light { background-color: var(--light-bg) !important; }
+
+        .shadow { box-shadow: var(--shadow-md) !important; }
+        .shadow-sm { box-shadow: var(--shadow-sm) !important; }
+        .shadow-lg { box-shadow: var(--shadow-lg) !important; }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">{{ 'history.admin.heading'|trans }}</h1>
+    </div>
+    {# Statistiques AVANT la bande mauve et AVANT le tableau #}
+    {% set total = activities|length %}
+    {% set creations = 0 %}
+    {% set modifications = 0 %}
+    {% set suppressions = 0 %}
+    {% set connexions = 0 %}
+    {% set today = 0 %}
+    {% set todayStr = 'now'|date('Y-m-d') %}
+    {% for a in activities %}
+        {% if a.action == 'create' %}{% set creations = creations + 1 %}{% endif %}
+        {% if a.action == 'update' %}{% set modifications = modifications + 1 %}{% endif %}
+        {% if a.action == 'delete' %}{% set suppressions = suppressions + 1 %}{% endif %}
+        {% if a.action == 'login' %}{% set connexions = connexions + 1 %}{% endif %}
+        {% if a.createdAt and a.createdAt|date('Y-m-d') == todayStr %}{% set today = today + 1 %}{% endif %}
+    {% endfor %}
+    <div class="history-stats">
+        <div class="history-stat"><div class="label">{{ 'history.admin.stats.total'|trans }}</div><div class="value">{{ total }}</div></div>
+        <div class="history-stat"><div class="label">{{ 'history.action.create'|trans }}</div><div class="value text-success">{{ creations }}</div></div>
+        <div class="history-stat"><div class="label">{{ 'history.action.update'|trans }}</div><div class="value text-info">{{ modifications }}</div></div>
+        <div class="history-stat"><div class="label">{{ 'history.action.delete'|trans }}</div><div class="value text-danger">{{ suppressions }}</div></div>
+        <div class="history-stat"><div class="label">{{ 'history.admin.stats.today'|trans }}</div><div class="value">{{ today }}</div></div>
+    </div>
+
+    <!-- Liste des activités -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold">
+                    <i class="fas fa-history mr-2"></i>{{ 'history.admin.table.title'|trans({'%count%': activities|length}) }}
+                </h6>
+                <div class="d-flex align-items-center">
+                    <input type="checkbox" id="select-all-table" class="form-check-input mr-2">
+                    <label for="select-all-table" class="text-white mb-0">{{ 'history.select_all'|trans }}</label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-body p-0">
+            {% if activities is empty %}
+                <div class="empty-state text-center py-5">
+                    <div class="empty-icon">
+                        <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                    </div>
+                    <h5 class="empty-title">{{ 'history.empty.title'|trans }}</h5>
+                    <p class="empty-description text-muted">{{ 'history.empty.subtitle'|trans }}</p>
+                </div>
+            {% else %}
+                <style>
+                    /* Aligner les intitulés d'en-tête avec le contenu des colonnes */
+                    .history-table thead th { padding-left: 0 !important; }
+                    .history-table thead th .d-flex { margin-left: 0 !important; }
+                    .history-table thead th i { margin-right: .25rem !important; }
+                    /* Aligne précisément "Action" avec le badge "Création" */
+                    .history-table thead th:nth-child(2) { padding-left: .5rem !important; }
+                    .history-table thead th:nth-child(2) i { display: none !important; }
+                    /* Aligne précisément "Entité" avec le texte (masque l'icône) */
+                    .history-table thead th:nth-child(3) { padding-left: .75rem !important; }
+                    .history-table thead th:nth-child(3) i { display: none !important; }
+                    /* Aligne précisément "Utilisateur" avec le nom (plus d'avatar) */
+                    .history-table thead th:nth-child(4) { padding-left: .75rem !important; }
+                    .history-table thead th:nth-child(4) i { display: none !important; }
+                    /* Aligne "Date & Heure" avec le contenu (masque l'icône) */
+                    .history-table thead th:nth-child(5) { padding-left: .75rem !important; }
+                    .history-table thead th:nth-child(5) i { display: none !important; }
+
+                    /* --- Améliorations de lisibilité globales --- */
+                    .history-table { border-collapse: separate; border-spacing: 0; }
+                    .history-table thead th,
+                    .history-table tbody td {
+                        vertical-align: middle !important; /* centrage vertical */
+                        text-align: center; /* centrage horizontal par défaut */
+                        padding: 0.9rem 1rem; /* plus d'espace */
+                    }
+                    /* Colonne Action alignée comme le texte Entité (gauche) et un peu plus étroite */
+                    .history-table thead th:nth-child(2),
+                    .history-table tbody td:nth-child(2) { text-align: left; }
+                    .history-table thead th:nth-child(2) { width: 120px; }
+
+                    /* Colonnes texte longues à gauche pour lisibilité */
+                    .history-table thead th:nth-child(3),
+                    .history-table tbody td:nth-child(3),
+                    .history-table thead th:nth-child(4),
+                    .history-table tbody td:nth-child(4) {
+                        text-align: left;
+                    }
+                    /* Largeurs cohérentes pour éviter tassement */
+                    .history-table thead th:nth-child(1) { width: 60px; }
+                    /* nth-child(2) défini à 120px plus haut */
+                    .history-table thead th:nth-child(3) { width: 240px; }
+                    .history-table thead th:nth-child(4) { width: 240px; }
+                    .history-table thead th:nth-child(5) { width: 170px; }
+                    .history-table thead th:nth-child(6) { width: 110px; text-align: center; }
+                    .history-table tbody td:nth-child(6) { text-align: center; }
+
+                    /* Zebra striping gris pour meilleure lisibilité */
+                    .history-table tbody tr:nth-child(odd) { background-color: #fbfbfb; }
+                    .history-table tbody tr:nth-child(even) { background-color: #ffffff; }
+                    .history-table tbody tr:hover { background-color: #f3f6f9; }
+
+                    /* Style des sous-infos (email, sous-libellés) en gris plus clair */
+                    .history-table .user-email { font-size: 0.85rem; color: #aeb5bf; }
+                    .history-table tbody small.text-muted { color: #aeb5bf !important; }
+
+                    /* Badges centrés et parfaitement alignés verticalement */
+                    .history-table .badge { display: inline-flex; align-items: center; justify-content: center; font-weight: 600; line-height: 1; vertical-align: middle; }
+
+                    /* Barre de recherche/tri */
+                    .history-controls { display:flex; gap:.75rem; align-items:center; justify-content:space-between; margin: .75rem 1rem 1rem; flex-wrap: wrap; }
+                    .history-controls .left { display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; }
+                    .history-controls input[type="search"] { max-width: 340px; padding:.5rem .75rem; border:1px solid #dee2e6; border-radius:.375rem; }
+                    .history-controls select { padding:.5rem .75rem; border:1px solid #dee2e6; border-radius:.375rem; }
+
+                    /* Stats */
+                    .history-stats { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: .75rem; margin: 1rem; }
+                    .history-stat { background: white; border-radius:.75rem; padding:1rem; box-shadow: 0 1px 3px rgba(0,0,0,.06); border:1px solid #edf2f7; }
+                    .history-stat .label { color:#718096; font-size:.85rem; }
+                    .history-stat .value { font-size:1.4rem; font-weight:700; color:#2d3748; }
+                    .history-stat .trend { font-size:.75rem; color:#a0aec0; }
+                </style>
+                <!-- Recherche et tri -->
+                <div class="history-controls">
+                    <div class="left">
+                        <input id="history-search" type="search" placeholder="{{ 'history.admin.search_placeholder'|trans }}" />
+                    </div>
+                    <div class="right">
+                        <select id="history-sort" aria-label="{{ 'history.admin.sort.aria'|trans }}">
+                            <option value="date_desc">{{ 'history.admin.sort.date_desc'|trans }}</option>
+                            <option value="date_asc">{{ 'history.admin.sort.date_asc'|trans }}</option>
+                            <option value="action_asc">{{ 'history.admin.sort.action_asc'|trans }}</option>
+                            <option value="entity_asc">{{ 'history.admin.sort.entity_asc'|trans }}</option>
+                            <option value="user_asc">{{ 'history.admin.sort.user_asc'|trans }}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 history-table">
+                        <thead class="thead-dark">
+                            <tr style="height: 60px;">
+                                <th width="60" class="text-center align-middle">
+                                    <i class="fas fa-tasks text-white-50"></i>
+                                </th>
+                                <th width="140" class="align-middle">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-cog text-white-50"></i>
+                                        <strong>{{ 'history.admin.table.columns.action'|trans }}</strong>
+                                    </div>
+                                </th>
+                                <th width="220" class="align-middle">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-cube text-white-50"></i>
+                                        <strong>{{ 'history.admin.table.columns.entity'|trans }}</strong>
+                                    </div>
+                                </th>
+                                <th width="200" class="align-middle">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-user text-white-50"></i>
+                                        <strong>{{ 'history.admin.table.columns.user'|trans }}</strong>
+                                    </div>
+                                </th>
+                                <th width="160" class="align-middle">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-clock text-white-50"></i>
+                                        <strong>{{ 'history.admin.table.columns.datetime'|trans }}</strong>
+                                    </div>
+                                </th>
+                                <th width="100" class="text-center align-middle">
+                                    <div class="d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-info-circle text-white-50"></i>
+                                        <strong>{{ 'history.admin.table.columns.details'|trans }}</strong>
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for activity in activities|reverse %}
+                                <tr class="activity-row" data-activity-id="{{ activity.id }}" data-action="{{ activity.action }}" data-entity="{{ activity.entityType|split('\\')|last }}" data-user="{{ activity.user ? (activity.user.prenom ~ ' ' ~ activity.user.nom ~ ' ' ~ activity.user.email) : ('history.system'|trans) }}" data-date="{{ activity.createdAt|date('U') }}">
+                                    <td class="text-center align-middle">
+                                        <input type="checkbox" class="form-check-input activity-select" data-activity-id="{{ activity.id }}">
+                                    </td>
+                                    <td class="align-middle">
+                                        {% if activity.action == 'create' %}
+                                            <span class="badge badge-success px-2 py-1">
+                                                <i class="fas fa-plus mr-1"></i>{{ 'history.action.create'|trans }}
+                                            </span>
+                                        {% elseif activity.action == 'update' %}
+                                            <span class="badge badge-info px-2 py-1">
+                                                <i class="fas fa-pen mr-1"></i>{{ 'history.action.update'|trans }}
+                                            </span>
+                                        {% elseif activity.action == 'delete' %}
+                                            <span class="badge badge-danger px-2 py-1">
+                                                <i class="fas fa-trash mr-1"></i>{{ 'history.action.delete'|trans }}
+                                            </span>
+                                        {% elseif activity.action == 'login' %}
+                                            <span class="badge badge-primary px-2 py-1">
+                                                <i class="fas fa-sign-in-alt mr-1"></i>{{ 'history.action.login'|trans }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge badge-secondary px-2 py-1">
+                                                <i class="fas fa-info-circle mr-1"></i>{{ activity.action|title }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="align-middle">
+                                        <div class="d-flex align-items-center">
+                                            {% if 'User' in activity.entityType %}
+                                                <i class="fas fa-user text-primary mr-2"></i>
+                                                <div>
+                                                    <strong>{{ 'history.entity.user'|trans }}</strong>
+                                                    {% if activity.entityName %}
+                                                        <br><small class="text-muted">{{ activity.entityName }}</small>
+                                                    {% endif %}
+                                                </div>
+                                            {% elseif 'Societe' in activity.entityType %}
+                                                <i class="fas fa-building text-success mr-2"></i>
+                                                <div>
+                                                    <strong>{{ 'history.entity.societe'|trans }}</strong>
+                                                    {% if activity.entityName %}
+                                                        <br><small class="text-muted">{{ activity.entityName }}</small>
+                                                    {% endif %}
+                                                </div>
+                                            {% elseif 'Depot' in activity.entityType %}
+                                                <i class="fas fa-warehouse text-info mr-2"></i>
+                                                <div>
+                                                    <strong>{{ 'history.entity.depot'|trans }}</strong>
+                                                    {% if activity.entityName %}
+                                                        <br><small class="text-muted">{{ activity.entityName }}</small>
+                                                    {% endif %}
+                                                </div>
+                                            {% elseif 'Equipement' in activity.entityType %}
+                                                <i class="fas fa-laptop-code text-warning mr-2"></i>
+                                                <div>
+                                                    <strong>Équipement</strong>
+                                                    {% if activity.entityName %}
+                                                        <br><small class="text-muted">{{ activity.entityName }}</small>
+                                                    {% endif %}
+                                                </div>
+                                            {% elseif 'MouvementStock' in activity.entityType %}
+                                                <i class="fas fa-exchange-alt text-danger mr-2"></i>
+                                                <div>
+                                                    <strong>Mouvement Stock</strong>
+                                                    {% if activity.entityName %}
+                                                        <br><small class="text-muted">{{ activity.entityName }}</small>
+                                                    {% endif %}
+                                                </div>
+                                            {% else %}
+                                                <i class="fas fa-file text-muted mr-2"></i>
+                                                <div>
+                                                    <strong>{{ activity.entityType|split('\\')|last }}</strong>
+                                                    {% if activity.entityName %}
+                                                        <br><small class="text-muted">{{ activity.entityName }}</small>
+                                                    {% endif %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td class="align-middle">
+                                        {% if activity.user %}
+                                            <div>
+                                                <strong>{{ activity.user.prenom }} {{ activity.user.nom }}</strong>
+                                                <br><small class="text-muted user-email">{{ activity.user.email }}</small>
+                                            </div>
+                                        {% else %}
+                                            <div>
+                                                <strong>Système</strong>
+                                                <br><small class="text-muted">Action automatique</small>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td class="align-middle">
+                                        <div>
+                                            <strong>{{ activity.createdAt|date('d/m/Y') }}</strong>
+                                            <br><small class="text-muted">{{ activity.createdAt|date('H:i:s') }}</small>
+                                        </div>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <button class="btn btn-sm btn-outline-primary toggle-details" data-activity-id="{{ activity.id }}" title="Voir les détails">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="activity-details-row" id="details-row-{{ activity.id }}" style="display: none;">
+                                    <td colspan="6">
+                                        <div class="card border-0 bg-light m-2">
+                                            <div class="card-body">
+                                                {% set actionVerb = {
+                                                    'create': 'créé',
+                                                    'update': 'modifié',
+                                                    'delete': 'supprimé',
+                                                    'login': 'connecté',
+                                                    'logout': 'déconnecté',
+                                                    'preferences': 'préférences mises à jour',
+                                                    'password': 'mot de passe changé',
+                                                    'stock_movement': 'mouvement enregistré'
+                                                }[activity.action] ?? activity.action %}
+
+                                                {% set entityKey = activity.entityType|split('\\')|last %}
+                                                {% set entityLabel = {
+                                                    'Equipement': 'Équipement',
+                                                    'Societe': 'Société',
+                                                    'Depot': 'Dépôt',
+                                                    'MouvementStock': 'Mouvement Stock',
+                                                    'User': 'Utilisateur'
+                                                }[entityKey] ?? entityKey %}
+
+                                                <h6 class="card-title text-primary mb-2">
+                                                    <i class="fas fa-info-circle mr-2"></i>Détails de l'activité
+                                                </h6>
+
+                                                <p class="mb-0" style="font-weight:600;color:#2c3e50;">
+                                                    {{ entityLabel }} {{ activity.entityName ?? ('#' ~ activity.entityId) }} {{ actionVerb }}
+                                                </p>
+                                                {% if activity.details %}
+                                                    <small class="text-muted d-block mt-2">{{ activity.details }}</small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+                
+                <!-- Actions groupées -->
+                <div class="bulk-actions" id="bulk-actions" style="display: none;">
+                    <div class="card-footer bg-light border-top">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="bulk-actions-info">
+                                <span id="selected-count">0</span> activité(s) sélectionnée(s)
+                            </div>
+                            <div class="bulk-actions-buttons">
+                                <button type="button" class="btn btn-danger btn-sm" id="bulk-delete">
+                                    <i class="fas fa-trash mr-2"></i> Supprimer la sélection
+                                </button>
+                                <button type="button" class="btn btn-secondary btn-sm ml-2" id="deselect-all">
+                                    <i class="fas fa-times mr-2"></i> Désélectionner tout
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+// JavaScript intégré directement dans le template
+console.log('🚀 JavaScript chargé pour historique admin');
+
+// Attendre que le DOM soit chargé
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ DOM chargé, initialisation...');
+    
+    // === GESTION DES DÉTAILS ===
+    const detailButtons = document.querySelectorAll('.toggle-details');
+    console.log('👁️ Boutons détails trouvés:', detailButtons.length);
+    
+    detailButtons.forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const activityId = this.getAttribute('data-activity-id');
+            const detailsRow = document.getElementById('details-row-' + activityId);
+            console.log('🔍 Clic détails pour activité:', activityId);
+            
+            if (detailsRow) {
+                if (detailsRow.style.display === 'none' || detailsRow.style.display === '') {
+                    detailsRow.style.display = 'table-row';
+                    this.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                    this.title = 'Masquer les détails';
+                } else {
+                    detailsRow.style.display = 'none';
+                    this.innerHTML = '<i class="fas fa-eye"></i>';
+                    this.title = 'Voir les détails';
+                }
+            }
+        });
+    });
+    
+    // === GESTION DES CHECKBOXES ===
+    const checkboxes = document.querySelectorAll('.activity-select');
+    const selectAllTableCheckbox = document.getElementById('select-all-table');
+    const bulkActionsDiv = document.querySelector('.bulk-actions');
+    
+    console.log('☑️ Checkboxes trouvées:', checkboxes.length);
+    console.log('📋 Select all table:', selectAllTableCheckbox ? 'OUI' : 'NON');
+    console.log('🔧 Bulk actions div:', bulkActionsDiv ? 'OUI' : 'NON');
+    
+    function updateBulkActions() {
+        const selected = document.querySelectorAll('.activity-select:checked');
+        const selectedCount = document.getElementById('selected-count');
+        
+        console.log('✅ Activités sélectionnées:', selected.length);
+        
+        if (selected.length > 0) {
+            if (bulkActionsDiv) {
+                bulkActionsDiv.style.display = 'block';
+            }
+            if (selectedCount) {
+                selectedCount.textContent = selected.length;
+            }
+        } else {
+            if (bulkActionsDiv) {
+                bulkActionsDiv.style.display = 'none';
+            }
+        }
+        
+        // Mettre à jour la case "Tout sélectionner"
+        const allSelected = selected.length === checkboxes.length && checkboxes.length > 0;
+        if (selectAllTableCheckbox) {
+            selectAllTableCheckbox.checked = allSelected;
+        }
+    }
+    
+    // Gestion des cases individuelles
+    checkboxes.forEach(function(checkbox) {
+        checkbox.addEventListener('change', function() {
+            console.log('🔄 Checkbox changée:', this.checked, 'ID:', this.getAttribute('data-activity-id'));
+            updateBulkActions();
+        });
+    });
+    
+    // Gestion "Tout sélectionner" (table uniquement)
+    if (selectAllTableCheckbox) {
+        selectAllTableCheckbox.addEventListener('change', function() {
+            const isChecked = this.checked;
+            console.log('📋 Tout sélectionner (table):', isChecked);
+            
+            checkboxes.forEach(function(checkbox) {
+                checkbox.checked = isChecked;
+            });
+            
+            updateBulkActions();
+        });
+    }
+    
+    // Désélectionner tout
+    const deselectAllBtn = document.getElementById('deselect-all');
+    if (deselectAllBtn) {
+        deselectAllBtn.addEventListener('click', function() {
+            console.log('❌ Désélectionner tout');
+            checkboxes.forEach(function(checkbox) {
+                checkbox.checked = false;
+            });
+            if (selectAllTableCheckbox) {
+                selectAllTableCheckbox.checked = false;
+            }
+            updateBulkActions();
+        });
+    }
+    
+    // Supprimer les éléments sélectionnés
+    const bulkDeleteBtn = document.getElementById('bulk-delete');
+    if (bulkDeleteBtn) {
+        bulkDeleteBtn.addEventListener('click', function() {
+            const selected = document.querySelectorAll('.activity-select:checked');
+            const ids = [];
+            selected.forEach(function(checkbox) {
+                ids.push(checkbox.getAttribute('data-activity-id'));
+            });
+            
+            console.log('🗑️ Suppression demandée pour:', ids);
+            
+            if (ids.length === 0) {
+                alert('Veuillez sélectionner au moins une activité à supprimer.');
+                return;
+            }
+            
+            if (confirm('Êtes-vous sûr de vouloir supprimer ' + ids.length + ' activité(s) ? Cette action est irréversible.')) {
+                // Créer un formulaire pour envoyer les IDs à supprimer
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '{{ path("app_admin_historique_delete_bulk") }}';
+                
+                // Ajouter le token CSRF
+                const csrfToken = document.createElement('input');
+                csrfToken.type = 'hidden';
+                csrfToken.name = '_token';
+                csrfToken.value = '{{ csrf_token("delete_activities") }}';
+                form.appendChild(csrfToken);
+                
+                // Ajouter les IDs
+                ids.forEach(function(id) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'activity_ids[]';
+                    input.value = id;
+                    form.appendChild(input);
+                });
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    }
+
+    // === RECHERCHE & TRI (client) ===
+    const searchInput = document.getElementById('history-search');
+    const sortSelect = document.getElementById('history-sort');
+    const tbody = document.querySelector('.history-table tbody');
+    const rows = Array.from(document.querySelectorAll('.history-table tbody tr.activity-row'));
+
+    function applySearchAndSort() {
+        const q = (searchInput?.value || '').trim().toLowerCase();
+
+        // Filtrer
+        rows.forEach(row => {
+            const hay = [
+                row.dataset.action,
+                row.dataset.entity,
+                row.dataset.user,
+            ].join(' ').toLowerCase();
+
+            // inclure aussi le texte visible de la ligne
+            const text = row.innerText.toLowerCase();
+            const match = !q || hay.includes(q) || text.includes(q);
+            row.style.display = match ? '' : 'none';
+            const details = document.getElementById('details-row-' + row.dataset.activityId) || document.getElementById('details-row-' + row.getAttribute('data-activity-id'));
+            if (details) {
+                // si la ligne est masquée -> masquer aussi les détails
+                if (!match) details.style.display = 'none';
+            }
+        });
+
+        // Trier (ne trie que les lignes visibles)
+        const visibleRows = rows.filter(r => r.style.display !== 'none');
+        const mode = sortSelect?.value || 'date_desc';
+
+        visibleRows.sort((a, b) => {
+            switch (mode) {
+                case 'date_asc':
+                    return Number(a.dataset.date) - Number(b.dataset.date);
+                case 'date_desc':
+                    return Number(b.dataset.date) - Number(a.dataset.date);
+                case 'action_asc':
+                    return (a.dataset.action||'').localeCompare(b.dataset.action||'');
+                case 'entity_asc':
+                    return (a.dataset.entity||'').localeCompare(b.dataset.entity||'');
+                case 'user_asc':
+                    return (a.dataset.user||'').localeCompare(b.dataset.user||'');
+                default:
+                    return 0;
+            }
+        });
+
+        // Réinjection dans le DOM dans l'ordre, en gardant chaque ligne de détails juste après
+        visibleRows.forEach(row => {
+            tbody.appendChild(row);
+            const id = row.getAttribute('data-activity-id');
+            const details = document.getElementById('details-row-' + id);
+            if (details) tbody.appendChild(details);
+        });
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', applySearchAndSort);
+    }
+    if (sortSelect) {
+        sortSelect.addEventListener('change', applySearchAndSort);
+    }
+
+    // Initialiser tri par défaut
+    applySearchAndSort();
+
+    console.log('🎉 Initialisation terminée !');
+});
+</script>
+{% endblock %}

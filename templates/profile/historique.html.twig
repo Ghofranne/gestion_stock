@@ -1,0 +1,718 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Historique d'Activités{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    :root {
+        --primary-color: #1a73e8;
+        --hover-bg: #f1f3f4;
+        --border-color: #dadce0;
+        --text-secondary: #5f6368;
+        --bg-color: #fff;
+        --header-bg: #f8f9fa;
+    }
+    
+    .dark-mode {
+        --primary-color: #8ab4f8;
+        --hover-bg: #3c4043;
+        --border-color: #5f6368;
+        --text-secondary: #9aa0a6;
+        --bg-color: #202124;
+        --header-bg: #303134;
+        color: #e8eaed;
+    }
+    
+    body {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        transition: all 0.3s ease;
+    }
+    
+    .historique-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .historique-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .historique-title {
+        font-size: 24px;
+        font-weight: 500;
+        color: var(--text-color);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .btn-back {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+    
+    .btn-back:hover {
+        background: #1557b0;
+        text-decoration: none;
+    }
+    
+    /* Contrôles de l'historique */
+    .history-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+    
+    .history-tabs {
+        display: flex;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 16px;
+    }
+    
+    .tab {
+        padding: 12px 24px;
+        cursor: pointer;
+        font-weight: 500;
+        color: var(--text-secondary);
+        border-bottom: 2px solid transparent;
+        transition: all 0.2s ease;
+    }
+    
+    .tab.active {
+        color: var(--primary-color);
+        border-bottom-color: var(--primary-color);
+    }
+    
+    .tab:hover:not(.active) {
+        color: var(--text-color);
+    }
+    
+    /* Groupe de date */
+    .date-group {
+        margin-bottom: 32px;
+    }
+    
+    .date-header {
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--text-color);
+        padding: 8px 0;
+        margin: 16px 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    /* Élément d'historique */
+    .history-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 16px;
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
+        position: relative;
+    }
+    
+    .history-item:hover {
+        background-color: var(--hover-bg);
+    }
+    
+    .history-item-checkbox {
+        margin-right: 16px;
+    }
+    
+    .history-item-time {
+        color: var(--text-secondary);
+        font-size: 13px;
+        min-width: 80px;
+        margin-right: 16px;
+    }
+    
+    .history-item-icon {
+        margin-right: 16px;
+        font-size: 18px;
+        width: 24px;
+        text-align: center;
+    }
+    
+    .history-item-details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .history-item-title {
+        font-size: 14px;
+        margin: 0 0 4px 0;
+        color: var(--text-color);
+    }
+    
+    .history-item-description {
+        font-size: 13px;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+    
+    .history-item-actions {
+        margin-left: auto;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+    
+    .history-item:hover .history-item-actions {
+        opacity: 1;
+    }
+    
+    .action-menu {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .action-menu:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Menu déroulant */
+    .dropdown-menu {
+        position: absolute;
+        right: 16px;
+        top: 40px;
+        background: var(--bg-color);
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        min-width: 180px;
+        display: none;
+    }
+    
+    .dropdown-menu.show {
+        display: block;
+    }
+    
+    .dropdown-item {
+        padding: 8px 16px;
+        cursor: pointer;
+        font-size: 14px;
+        color: var(--text-color);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .dropdown-item:hover {
+        background-color: var(--hover-bg);
+    }
+    
+    /* Icônes d'action */
+    .action-icon {
+        font-size: 18px;
+    }
+    
+    .action-icon.create { color: #34a853; }
+    .action-icon.update { color: #fbbc04; }
+    .action-icon.delete { color: #ea4335; }
+    .action-icon.view { color: #4285f4; }
+    .action-icon.login { color: #34a853; }
+    .action-icon.logout { color: #ea4335; }
+    
+    /* Toggle détails (icône oeil) */
+    .toggle-details {
+        background: none;
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 6px 10px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.9rem;
+    }
+    .toggle-details:hover {
+        background-color: var(--hover-bg);
+    }
+    .details-row {
+        display: none;
+        background: rgba(102, 126, 234, 0.04);
+    }
+    .details-content {
+        font-size: 0.95rem;
+        color: #4a5568;
+    }
+    
+    /* Barre d'outils en bas */
+    .toolbar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--header-bg);
+        padding: 12px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid var(--border-color);
+        z-index: 1000;
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .toolbar.visible {
+        transform: translateY(0);
+    }
+    
+    .selected-count {
+        font-size: 14px;
+        color: var(--text-secondary);
+    }
+    
+    .toolbar-actions {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .toolbar-btn {
+        background: none;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 6px 12px;
+        font-size: 13px;
+        color: var(--text-color);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .toolbar-btn:hover {
+        background-color: var(--hover-bg);
+    }
+    
+    .toolbar-btn.delete {
+        color: #ea4335;
+        border-color: #ea4335;
+    }
+    
+    .toolbar-btn.delete:hover {
+        background-color: #fce8e6;
+    }
+    
+    /* Pagination */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 24px;
+        gap: 8px;
+    }
+    
+    .page-btn {
+        padding: 8px 12px;
+        border: 1px solid var(--border-color);
+        background: none;
+        border-radius: 4px;
+        cursor: pointer;
+        color: var(--text-color);
+    }
+    
+    .page-btn.active {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+    
+    .page-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .stat-info h4 {
+        font-size: 2rem;
+        font-weight: bold;
+        margin: 0 0 0.5rem 0;
+        color: #2d3748;
+    }
+    
+    .stat-info p {
+        margin: 0;
+        color: #718096;
+        font-weight: 500;
+    }
+    
+    .stat-icon {
+        font-size: 2.5rem;
+        opacity: 0.7;
+    }
+    
+    .history-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 0;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        overflow: hidden;
+    }
+    
+    .history-header {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        margin: 0;
+    }
+    
+    .history-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin: 0;
+    }
+    
+    .history-body {
+        padding: 0;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #718096;
+    }
+    
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .history-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+    }
+    
+    .history-table th {
+        background: #f7fafc;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #2d3748;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    
+    .history-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+        vertical-align: top;
+    }
+    
+    .history-table tr:hover {
+        background: rgba(102, 126, 234, 0.05);
+    }
+    
+    .date-cell {
+        min-width: 100px;
+        font-size: 0.9rem;
+        color: #718096;
+    }
+    
+    .type-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .type-badge.entree {
+        background: linear-gradient(135deg, #48bb78, #38a169);
+    }
+    
+    .type-badge.sortie {
+        background: linear-gradient(135deg, #f56565, #e53e3e);
+    }
+    
+    .type-badge.transfert {
+        background: linear-gradient(135deg, #f6ad55, #ed8936);
+    }
+    
+    .type-badge.ajustement {
+        background: linear-gradient(135deg, #4299e1, #3182ce);
+    }
+    
+    .type-badge.retour {
+        background: linear-gradient(135deg, #718096, #4a5568);
+    }
+    
+    .equipment-info {
+        font-size: 0.9rem;
+    }
+    
+    .equipment-model {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.25rem;
+    }
+    
+    .equipment-details {
+        color: #718096;
+        font-size: 0.8rem;
+    }
+    
+    .depot-info {
+        font-size: 0.9rem;
+    }
+    
+    .depot-name {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.25rem;
+    }
+    
+    .depot-company {
+        color: #718096;
+        font-size: 0.8rem;
+    }
+    
+    .quantity-badge {
+        background: #f7fafc;
+        color: #2d3748;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .comment-text {
+        font-size: 0.9rem;
+        color: #4a5568;
+        max-width: 200px;
+        word-wrap: break-word;
+    }
+    
+    .pagination-info {
+        text-align: center;
+        padding: 1.5rem;
+        color: #718096;
+        background: #f7fafc;
+        margin: 0;
+        border-top: 1px solid #e2e8f0;
+    }
+    
+    .text-muted {
+        color: #718096;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="historique-container">
+    <div class="historique-header">
+        <h1 class="historique-title">📈 Mon Historique d'Activités</h1>
+        <a href="{{ path('app_profil') }}" class="btn-back">
+            ← Retour au profil
+        </a>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="stats-grid">
+        <div class="stat-card primary">
+            <div class="stat-content">
+                <div class="stat-info">
+                    <h4>{{ totalActivites }}</h4>
+                    <p>Total d'activités</p>
+                </div>
+                <div class="stat-icon">📊</div>
+            </div>
+        </div>
+        <div class="stat-card success">
+            <div class="stat-content">
+                <div class="stat-info">
+                    <h4>{{ historique|length }}</h4>
+                    <p>Activités récentes</p>
+                </div>
+                <div class="stat-icon">🕒</div>
+            </div>
+        </div>
+        <div class="stat-card info">
+            <div class="stat-content">
+                <div class="stat-info">
+                    <h4>{{ user.prenom ~ ' ' ~ user.nom }}</h4>
+                    <p>Utilisateur connecté</p>
+                </div>
+                <div class="stat-icon">👤</div>
+            </div>
+        </div>
+        <div class="stat-card warning">
+            <div class="stat-content">
+                <div class="stat-info">
+                    <h4>{{ user.roles|join(', ') }}</h4>
+                    <p>Rôle</p>
+                </div>
+                <div class="stat-icon">🛡️</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historique des activités -->
+    <div class="history-card">
+        <div class="history-header">
+            <h3 class="history-title">📋 Historique détaillé des activités</h3>
+        </div>
+        <div class="history-body">
+            {% if historique is empty %}
+                <div class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <h5>Aucune activité trouvée</h5>
+                    <p>Vous n'avez encore effectué aucune action dans l'application.</p>
+                </div>
+            {% else %}
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Action</th>
+                            <th>Entité</th>
+                            <th>Description</th>
+                            <th></th>
+                            <th>Détails</th>
+                            <th>IP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for activity in historique %}
+                            <tr class="activity-row" data-activity-id="{{ activity.id }}">
+                                <td class="date-cell">
+                                    {{ activity.createdAt|date('d/m/Y') }}<br>
+                                    <small>{{ activity.createdAt|date('H:i') }}</small>
+                                </td>
+                                <td>
+                                    {% set actionClass = activity.action %}
+                                    <span class="type-badge {{ actionClass }}">
+                                        {{ activity.actionIcon }}
+                                        {{ activity.action|title }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="entity-info">
+                                        <div class="entity-type">{{ activity.entityTypeLabel|title }}</div>
+                                        {% if activity.entityName %}
+                                            <div class="entity-name">{{ activity.entityName }}</div>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="action-description">
+                                        {{ activity.actionDescription }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <button type="button"
+                                            class="toggle-details"
+                                            aria-expanded="false"
+                                            aria-controls="details-{{ activity.id }}"
+                                            data-activity-id="{{ activity.id }}">
+                                        👁️ <span>Voir</span>
+                                    </button>
+                                </td>
+                                <td>
+                                    {% if activity.details %}
+                                        <div class="comment-text">
+                                            {% if activity.details|length > 50 %}
+                                                {{ activity.details|slice(0, 47) }}...
+                                            {% else %}
+                                                {{ activity.details }}
+                                            {% endif %}
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if activity.ipAddress %}
+                                        <span class="ip-address">{{ activity.ipAddress }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr id="details-{{ activity.id }}" class="details-row" data-parent-id="{{ activity.id }}">
+                                <td colspan="7">
+                                    <div class="details-content">
+                                        <div><strong>Résumé:</strong> {{ activity.actionDescription }}</div>
+                                        <div><strong>Date:</strong> {{ activity.createdAt|date('d/m/Y H:i') }}</div>
+                                        <div><strong>Entité:</strong> {{ activity.entityTypeLabel|title }}{% if activity.entityName %} — {{ activity.entityName }}{% endif %}</div>
+                                        {% if activity.details %}
+                                            <div><strong>Détails techniques:</strong> {{ activity.details }}</div>
+                                        {% endif %}
+                                        {% if activity.ipAddress %}
+                                            <div><strong>IP:</strong> {{ activity.ipAddress }}</div>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                {% if totalActivites > historique|length %}
+                    <div class="pagination-info">
+                        Affichage des {{ historique|length }} activités les plus récentes sur {{ totalActivites }} au total.
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const buttons = document.querySelectorAll('.toggle-details');
+    buttons.forEach(btn => {
+        btn.addEventListener('click', function () {
+            const id = this.getAttribute('data-activity-id');
+            const row = document.getElementById('details-' + id);
+            const expanded = this.getAttribute('aria-expanded') === 'true';
+            if (row) {
+                row.style.display = expanded ? 'none' : '';
+                this.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+                this.querySelector('span').textContent = expanded ? 'Voir' : 'Masquer';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

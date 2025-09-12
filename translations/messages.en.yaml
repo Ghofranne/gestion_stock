@@ -64,3 +64,50 @@ dashboard:
     transfer:
       title: Stock Transfer
       desc: Perform transfers between warehouses
+
+# History page
+history:
+  page_title: "My Activity History"
+  header: "Activity history"
+  back_to_profile: "Back to profile"
+  search_placeholder: "Search in history..."
+  filters:
+    all: "All actions"
+    create: "Creations"
+    update: "Updates"
+    delete: "Deletions"
+    login: "Logins"
+    logout: "Logouts"
+  empty:
+    title: "No recent activity"
+    subtitle: "Your actions will appear here"
+  action:
+    create: "Creation"
+    update: "Update"
+    delete: "Deletion"
+    login: "Login"
+    logout: "Logout"
+  no_details: "No details available for this action."
+  see_details: "See details"
+  see: "See"
+  hide: "Hide"
+  select_all: "Select all"
+  bulk:
+    delete: "Delete selected"
+  js:
+    confirm_delete: "Are you sure you want to delete %count% activity(ies)?"
+    delete_success: "%count% activity(ies) successfully deleted"
+    delete_error: "An error occurred while deleting"
+  entity:
+    user: "User"
+    societe: "Company"
+    depot: "Warehouse"
+    equipement: "Equipment"
+    mouvementstock: "Movement"
+  detail:
+    create: "%entity% \"%name%\" created"
+    update: "%entity% \"%name%\" updated"
+    delete: "%entity% \"%name%\" deleted"
+  login_success: "Login successful"
+  latest_activities: "Latest activities"
+  view_full: "View full history"

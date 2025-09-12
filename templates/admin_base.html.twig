@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Administration - StockPro{% endblock %}</title>
+    {% block stylesheets %}{% endblock %}
     <style>
         * {
             margin: 0;
@@ -203,6 +204,10 @@
                     <span class="nav-icon">👥</span>
                     <span class="nav-text">Utilisateurs</span>
                 </div>
+                <div class="nav-item {% if app.request.get('_route') == 'app_admin_historique' %}active{% endif %}" onclick="window.location.href='{{ path('app_admin_historique') }}'">
+                    <span class="nav-icon">📜</span>
+                    <span class="nav-text">Historique</span>
+                </div>
                 <div class="nav-item {% if app.request.get('_route') == 'app_admin_parametres' %}active{% endif %}" onclick="window.location.href='{{ path('app_admin_parametres') }}'">
                     <span class="nav-icon">⚙️</span>
                     <span class="nav-text">Paramètres</span>
@@ -245,5 +250,7 @@
         {% endfor %}
       });
     </script>
+    
+    {% block javascripts %}{% endblock %}
 </body>
 </html>

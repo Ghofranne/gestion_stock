@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Téléchargement du reçu...</title>
+    <meta http-equiv="refresh" content="6;url={{ redirect_url }}">
+    <style>
+        body { font-family: Arial, Helvetica, sans-serif; color:#2c3e50; }
+        .wrap { max-width: 520px; margin: 80px auto; text-align: center; }
+        .card { border:1px solid #dfe6e9; border-radius: 8px; padding: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+        .muted { color:#7f8c8d; font-size: 13px; }
+        .btn { display:inline-block; margin-top: 14px; padding:10px 14px; background:#3498db; color:#fff; text-decoration:none; border-radius:6px; }
+        iframe { display:none; width:0; height:0; }
+    </style>
+</head>
+<body>
+<div class="wrap card">
+    <h2>Téléchargement du reçu…</h2>
+    <p class="muted">Votre reçu PDF est en cours de génération. Le téléchargement va démarrer automatiquement.<br>Vous serez ensuite redirigé vers la liste des mouvements.</p>
+    <p><a class="btn" href="{{ receipt_url }}">Télécharger maintenant</a></p>
+    <p class="muted">Si rien ne se passe, cliquez sur le bouton ci‑dessus.</p>
+</div>
+
+<iframe id="dl" src="{{ receipt_url }}" title="download"></iframe>
+<script>
+  // Redirection après le démarrage du téléchargement ou après un délai de secours
+  const fallbackMs = 3500;
+  let redirected = false;
+  function notifyParent() {
+    try {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'mouvement_stock:receipt_download_started' }, '*');
+      }
+    } catch (e) { /* ignore */ }
+  }
+  function go() {
+    if (redirected) return;
+    redirected = true;
+    notifyParent();
+    window.location.href = "{{ redirect_url }}";
+  }
+  // Sécurité temps
+  setTimeout(go, fallbackMs);
+  // Tentative: si l'iframe charge, on redirige vite
+  const iframe = document.getElementById('dl');
+  iframe.addEventListener('load', () => { notifyParent(); setTimeout(go, 500); });
+</script>
+</body>
+</html>

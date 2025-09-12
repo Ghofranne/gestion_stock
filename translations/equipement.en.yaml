@@ -51,8 +51,11 @@ equipement:
     supplier_placeholder: Enter supplier
     state: Status
     state_placeholder: Enter status
+    description: Description
+    description_placeholder: Add a description (optional)
 
   types:
     tpe: TPE
     sim: SIM
     card: Card
+    other: Other

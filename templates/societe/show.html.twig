@@ -42,12 +42,12 @@
         {% if depots_data is empty %}
             <div class="empty-state">
                 <p>📦 {{ 'societe.show.no_depot'|trans([], 'societe') }}</p>
-                <a href="{{ path('app_depot_new') }}" class="btn btn-primary">{{ 'societe.show.create_depot'|trans([], 'societe') }}</a>
+                <button type="button" class="btn btn-primary open-add-depot-modal">{{ 'societe.show.create_depot'|trans([], 'societe') }}</button>
             </div>
         {% else %}
             <div class="depots-grid">
                 {% for depot_data in depots_data %}
-                    <div class="depot-card">
+                    <div class="depot-card drop-target" data-depot-id="{{ depot_data.depot.id }}">
                         <div class="depot-header">
                             <h3>🏦 {{ depot_data.depot.nom }}</h3>
                             <span class="equipement-count">{{ 'societe.show.equipements_count'|trans({'%count%': depot_data.nb_equipements}, 'societe') }}</span>
@@ -64,7 +64,7 @@
                             {% else %}
                                 <div class="equipements-list">
                                     {% for equipement_data in depot_data.equipements %}
-                                        <div class="equipement-item">
+                                        <div class="equipement-item" draggable="true" data-equipement-id="{{ equipement_data.equipement.id }}" data-source-depot-id="{{ depot_data.depot.id }}">
                                             <div class="equipement-icon">
                                                 {% if equipement_data.equipement.typeEquipement == 'SIM' %}
                                                     📱
@@ -85,12 +85,12 @@
                                                         <small>{{ 'societe.equipment.sn_prefix'|trans([], 'societe') }} {{ equipement_data.equipement.sn }}</small>
                                                     {% elseif equipement_data.equipement.referenceCarte %}
                                                         <small>{{ 'societe.equipment.ref_prefix'|trans([], 'societe') }} {{ equipement_data.equipement.referenceCarte }}</small>
+                                                    {% elseif equipement_data.equipement.typeEquipement == 'Autres' and equipement_data.equipement.description %}
+                                                        <small>{{ 'societe.equipment.description_prefix'|trans([], 'societe')|default('Description :') }} {{ equipement_data.equipement.description }}</small>
                                                     {% endif %}
                                                 </div>
                                             </div>
-                                            <div class="equipement-quantity">
-                                                <span class="quantity-badge">{{ equipement_data.quantite }}</span>
-                                            </div>
+                                            
                                             <div class="equipement-status status-{{ equipement_data.equipement.etat|lower }}">
                                                 {{ equipement_data.equipement.etat }}
                                             </div>
@@ -113,11 +113,25 @@
         <a href="{{ path('app_societe_edit', {'id': societe.id}) }}" class="btn btn-primary">
             ✏️ {{ 'societe.actions.edit'|trans([], 'societe') }}
         </a>
-        <a href="{{ path('app_depot_new') }}" class="btn btn-success">
+        <button type="button" class="btn btn-success open-add-depot-modal">
             + {{ 'societe.show.add_depot'|trans([], 'societe') }}
-        </a>
+        </button>
     </div>
 </div>
+
+<!-- Modal Add Depot -->
+<div id="addDepotModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="addDepotModalTitle">
+        <div class="modal-header">
+            <h3 id="addDepotModalTitle">🏦 {{ 'societe.show.add_depot'|trans([], 'societe') }}</h3>
+            <button type="button" class="modal-close" aria-label="Close">✖</button>
+        </div>
+        <div id="addDepotModalBody" class="modal-body">
+            <div class="modal-loading">{{ 'societe.loading'|trans([], 'societe')|default('Chargement...') }}</div>
+        </div>
+    </div>
+    <div class="modal-overlay"></div>
+    </div>
 
 <style>
 .societe-details {
@@ -271,6 +285,15 @@
     border-left: 4px solid #667eea;
 }
 
+/* Multi-select visual cues */
+.equipement-item { user-select: none; cursor: grab; }
+.equipement-item:active { cursor: grabbing; }
+.equipement-item.selected {
+    outline: 2px solid #38a169;
+    outline-offset: 2px;
+    background: #ecfdf5;
+}
+
 .equipement-icon {
     font-size: 1.5rem;
     width: 30px;
@@ -291,21 +314,7 @@
     font-size: 0.85rem;
 }
 
-.equipement-quantity {
-    display: flex;
-    align-items: center;
-}
-
-.quantity-badge {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
-    padding: 0.4rem 0.8rem;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    min-width: 30px;
-    text-align: center;
-}
+ 
 
 .equipement-status {
     padding: 0.3rem 0.8rem;
@@ -328,6 +337,13 @@
 .status-maintenance {
     background: #feebc8;
     color: #7b341e;
+}
+
+/* DnD highlight for drop target */
+.drop-target.drag-over {
+    outline: 2px dashed #667eea;
+    outline-offset: 4px;
+    background-color: #f0f4ff;
 }
 
 .actions-section {
@@ -367,6 +383,55 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
+/* Modal styles */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(3px);
+}
+.modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+}
+.modal-content {
+    position: relative;
+    background: #fff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 600px;
+    padding: 0; /* header/body handle padding */
+    z-index: 1001;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    border: 1px solid #e2e8f0;
+    animation: modalIn 200ms ease-out;
+}
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1.2rem;
+    border-bottom: 1px solid #edf2f7;
+}
+.modal-header h3 { margin: 0; font-size: 1.15rem; color: #1f2937; }
+.modal-body { padding: 1rem 1.2rem 1.2rem; }
+.modal-close {
+    border: none; background: transparent; cursor: pointer; font-size: 1.1rem;
+    width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+    color: #4b5563;
+}
+.modal-close:hover { background: #f1f5f9; color: #111827; }
+.modal-loading { color: #718096; }
+
+@keyframes modalIn {
+    from { opacity: 0; transform: translateY(6px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 @media (max-width: 768px) {
     .societe-header {
         flex-direction: column;
@@ -386,4 +451,339 @@
     }
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('addDepotModal');
+    const modalBody = document.getElementById('addDepotModalBody');
+    const closeBtn = modal.querySelector('.modal-close');
+    const overlay = modal.querySelector('.modal-overlay');
+    const openButtons = document.querySelectorAll('.open-add-depot-modal');
+
+    const openModal = async () => {
+        modal.style.display = 'flex';
+        modalBody.innerHTML = '<div class="modal-loading">{{ 'societe.loading'|trans([], 'societe')|default('Chargement...') }}</div>';
+        try {
+            const url = '{{ path('app_depot_new') }}?societe={{ societe.id }}&embedded=1';
+            const resp = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'text/html' } });
+            const html = await resp.text();
+            modalBody.innerHTML = html;
+            // Force form action to the depot creation route with societe and embedded flags
+            const form = modalBody.querySelector('form');
+            if (form) {
+                try {
+                    const u = new URL('{{ path('app_depot_new') }}', window.location.origin);
+                    u.searchParams.set('societe', String({{ societe.id }}));
+                    u.searchParams.set('embedded', '1');
+                    form.action = u.toString();
+                } catch {}
+            }
+            bindFormSubmit();
+        } catch (e) {
+            modalBody.innerHTML = '<div style="color:#c53030;">Erreur de chargement du formulaire.</div>';
+        }
+    };
+
+    const closeModal = () => {
+        modal.style.display = 'none';
+        modalBody.innerHTML = '';
+    };
+
+    const bindFormSubmit = () => {
+        const form = modalBody.querySelector('form');
+        if (!form) return;
+        form.addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            const formData = new FormData(form);
+            try {
+                const resp = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+                });
+                const ct = resp.headers.get('content-type') || '';
+                // If server redirected (non-AJAX fallback), reload the page
+                if (resp.redirected) {
+                    closeModal();
+                    window.location.reload();
+                    return;
+                }
+                if (ct.includes('application/json')) {
+                    const data = await resp.json();
+                    if (data && data.success) {
+                        // Close modal
+                        closeModal();
+
+                        // Ensure grid exists (replace empty state if needed)
+                        let grid = document.querySelector('.depots-grid');
+                        const emptyState = document.querySelector('.empty-state');
+                        if (!grid) {
+                            if (emptyState) {
+                                const section = emptyState.parentElement; // .depots-section
+                                emptyState.remove();
+                                grid = document.createElement('div');
+                                grid.className = 'depots-grid';
+                                section.appendChild(grid);
+                            }
+                        }
+
+                        // Build a minimal depot card (0 equipements initially)
+                        const card = document.createElement('div');
+                        card.className = 'depot-card';
+                        card.innerHTML = `
+                            <div class="depot-header">
+                                <h3>🏦 ${data.nom}</h3>
+                                <span class="equipement-count">{{ 'societe.show.equipements_count'|trans({'%count%': '__COUNT__'}, 'societe')|e('js') }}</span>
+                            </div>
+                            <div class="depot-info">
+                                <p><strong>{{ 'societe.index.address'|trans([], 'societe') }}:</strong> ${data.adresse ?? ''}</p>
+                            </div>
+                            <div class="equipements-section">
+                                <h4>🔧 {{ 'societe.sections.equipements'|trans([], 'societe') }}</h4>
+                                <p class="no-equipements">{{ 'societe.show.no_equipement_in_depot'|trans([], 'societe')|e('js') }}</p>
+                            </div>
+                        `;
+                        // Replace placeholder for count
+                        const countEl = card.querySelector('.equipement-count');
+                        countEl.textContent = countEl.textContent.replace('__COUNT__', '0');
+
+                        if (grid) {
+                            grid.append(card);
+                            try { card.scrollIntoView({ behavior: 'smooth', block: 'end' }); } catch {}
+                        }
+
+                        // Increment depots stat number in header
+                        const depotsStat = document.querySelector('.societe-stats .stat-card .stat-number');
+                        if (depotsStat) {
+                            const current = parseInt(depotsStat.textContent.trim(), 10);
+                            if (!isNaN(current)) depotsStat.textContent = String(current + 1);
+                        }
+
+                        return; // handled
+                    } else {
+                        // Show error message if provided
+                        try {
+                            const notyf = new Notyf({ duration: 3500, ripple: true, dismissible: true });
+                            notyf.error((data && (data.message || data.error)) ? String(data.message || data.error) : 'Erreur lors de la création du dépôt');
+                        } catch {}
+                        return; // do not attempt to read body again
+                    }
+                }
+                // If not JSON (likely validation errors), replace body with returned HTML
+                const html = await resp.text();
+                modalBody.innerHTML = html;
+                // Re-apply action to the depot creation route after validation re-render
+                const form2 = modalBody.querySelector('form');
+                if (form2) {
+                    try {
+                        const u2 = new URL('{{ path('app_depot_new') }}', window.location.origin);
+                        u2.searchParams.set('societe', String({{ societe.id }}));
+                        u2.searchParams.set('embedded', '1');
+                        form2.action = u2.toString();
+                    } catch {}
+                }
+                bindFormSubmit();
+            } catch (e) {
+                console.error(e);
+            }
+        }, { once: true });
+    };
+
+    openButtons.forEach(btn => btn.addEventListener('click', openModal));
+    closeBtn.addEventListener('click', closeModal);
+    overlay.addEventListener('click', closeModal);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+    
+    // ---------- Drag & Drop equipements entre dépôts ----------
+    const routeQuickTransfer = '{{ path('app_mouvement_quick_transfer') }}';
+
+    const updateDepotCount = (card, delta) => {
+        const countEl = card.querySelector('.equipement-count');
+        if (!countEl) return;
+        const text = countEl.textContent;
+        const m = text.match(/\d+/);
+        if (!m) return;
+        const current = parseInt(m[0], 10);
+        const next = Math.max(0, current + delta);
+        countEl.textContent = text.replace(m[0], String(next));
+    };
+
+    const ensureEquipementsList = (card) => {
+        let list = card.querySelector('.equipements-list');
+        if (!list) {
+            // Remove empty note if present
+            const p = card.querySelector('.no-equipements');
+            if (p) p.remove();
+            list = document.createElement('div');
+            list.className = 'equipements-list';
+            const section = card.querySelector('.equipements-section');
+            if (section) section.appendChild(list);
+        }
+        return list;
+    };
+
+    const maybeShowEmptyMessage = (card) => {
+        const list = card.querySelector('.equipements-list');
+        if (list && list.children.length === 0) {
+            const p = document.createElement('p');
+            p.className = 'no-equipements';
+            p.textContent = '{{ 'societe.show.no_equipement_in_depot'|trans([], 'societe')|e('js') }}';
+            list.replaceWith(p);
+        }
+    };
+
+    // ----- Multi-select support (Ctrl/Cmd click to toggle) -----
+    const selectedSet = new Set(); // of DOM elements
+
+    const clearSelection = () => {
+        selectedSet.forEach(el => el.classList.remove('selected'));
+        selectedSet.clear();
+    };
+    const getItemId = (el) => el.getAttribute('data-equipement-id');
+    const getItemSourceDepotId = (el) => el.getAttribute('data-source-depot-id');
+    const getSelectedSourceDepotId = () => {
+        let id = null;
+        selectedSet.forEach(el => { if (id === null) id = getItemSourceDepotId(el); });
+        return id;
+    };
+    const addToSelection = (el) => {
+        if (!el) return;
+        const currentSrc = getSelectedSourceDepotId();
+        const itemSrc = getItemSourceDepotId(el);
+        if (currentSrc && itemSrc !== currentSrc) {
+            // Different source depot -> reset to this single item
+            clearSelection();
+        }
+        el.classList.add('selected');
+        selectedSet.add(el);
+    };
+    const removeFromSelection = (el) => {
+        if (!el) return;
+        el.classList.remove('selected');
+        selectedSet.delete(el);
+    };
+
+    document.querySelectorAll('.equipement-item[draggable="true"]').forEach(item => {
+        // Click toggles selection (Ctrl/Cmd for multi). Without modifier, select single.
+        item.addEventListener('click', (e) => {
+            const isModifier = e.ctrlKey || e.metaKey;
+            if (!isModifier) {
+                // Single selection
+                clearSelection();
+                addToSelection(item);
+                return;
+            }
+            // Toggle within same source depot
+            if (selectedSet.has(item)) {
+                removeFromSelection(item);
+            } else {
+                addToSelection(item);
+            }
+        });
+
+        // Drag start packs all selected items from same source depot
+        item.addEventListener('dragstart', (ev) => {
+            // If item is not selected, use it alone
+            if (!selectedSet.has(item)) {
+                clearSelection();
+                addToSelection(item);
+            }
+            const ids = Array.from(selectedSet).map(el => Number(getItemId(el)));
+            const src = getItemSourceDepotId(item);
+            ev.dataTransfer.setData('text/plain', JSON.stringify({ equipementIds: ids, sourceDepotId: Number(src) }));
+            ev.dataTransfer.effectAllowed = 'move';
+        });
+    });
+
+    // Drop targets on depot cards
+    document.querySelectorAll('.depot-card.drop-target').forEach(card => {
+        card.addEventListener('dragover', (ev) => {
+            ev.preventDefault();
+            ev.dataTransfer.dropEffect = 'move';
+        });
+        card.addEventListener('dragenter', () => card.classList.add('drag-over'));
+        card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+        card.addEventListener('drop', async (ev) => {
+            ev.preventDefault();
+            card.classList.remove('drag-over');
+            const destDepotId = card.getAttribute('data-depot-id');
+            let payload;
+            try {
+                payload = JSON.parse(ev.dataTransfer.getData('text/plain'));
+            } catch { return; }
+            if (!payload || !payload.sourceDepotId) return;
+            if (String(payload.sourceDepotId) === String(destDepotId)) return; // no-op
+
+            // Determine list of equipment IDs (array or single)
+            const ids = Array.isArray(payload.equipementIds) && payload.equipementIds.length
+                ? payload.equipementIds.map(Number)
+                : (payload.equipementId ? [Number(payload.equipementId)] : []);
+            if (!ids.length) return;
+
+            // Find DOM nodes and source card (from the first item)
+            const first = document.querySelector(`.equipement-item[data-equipement-id="${ids[0]}"]`);
+            if (!first) return;
+            const sourceCard = first.closest('.depot-card');
+
+            // Call backend
+            try {
+                const resp = await fetch(routeQuickTransfer, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        equipementIds: ids,
+                        sourceDepotId: Number(payload.sourceDepotId),
+                        destDepotId: Number(destDepotId)
+                    })
+                });
+                const data = await resp.json().catch(() => null);
+                if (!resp.ok || !data || !data.success) {
+                    try { new Notyf().error((data && (data.message || data.code)) || 'Transfert échoué'); } catch {}
+                    return;
+                }
+
+                // Update UI: move each element
+                const destList = ensureEquipementsList(card);
+                let moved = 0;
+                ids.forEach(eid => {
+                    const node = document.querySelector(`.equipement-item[data-equipement-id="${eid}"]`);
+                    if (!node) return;
+                    const parentBefore = node.parentElement;
+                    node.remove();
+                    node.setAttribute('data-source-depot-id', String(destDepotId));
+                    node.classList.remove('selected');
+                    destList.appendChild(node);
+                    moved += 1;
+                    if (parentBefore && parentBefore.children.length === 0) {
+                        // show empty message for that source card
+                        const sc = node.closest('.depot-card'); // not reliable after move; handle after loop via sourceCard
+                    }
+                });
+
+                // Update counters
+                if (sourceCard) updateDepotCount(sourceCard, -moved);
+                updateDepotCount(card, +moved);
+
+                // Empty messages
+                if (sourceCard) maybeShowEmptyMessage(sourceCard);
+
+                // Clear selection after move
+                clearSelection();
+
+                // Trigger PDF receipt download/open if provided by backend
+                if (data && data.receiptUrl) {
+                    try { window.open(data.receiptUrl, '_blank'); } catch {}
+                }
+
+                try { new Notyf().success('Transfert réussi'); } catch {}
+            } catch (e) {
+                try { new Notyf().error('Erreur réseau pendant le transfert'); } catch {}
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

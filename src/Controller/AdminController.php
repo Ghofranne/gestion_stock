@@ -2,10 +2,13 @@
 
 namespace App\Controller;
 
+use App\Entity\UserActivity;
 use App\Repository\SocieteRepository;
 use App\Repository\DepotRepository;
 use App\Repository\EquipementRepository;
 use App\Repository\MouvementStockRepository;
+use App\Repository\UserActivityRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -512,6 +515,10 @@ class AdminController extends AbstractController
             $email = $request->request->get('email');
             $password = $request->request->get('password');
             $roles = $request->request->all('roles') ?? [];
+            $enabled = $request->request->has('enabled');
+            $twoFAEnabled = $request->request->has('two_factor_enabled');
+            $twoFADefault = $this->sanitizeTwoFactorMethod((string) $request->request->get('two_factor_default_method', 'email'));
+            $generateBackup = $request->request->has('generate_backup_codes');
             
             // Validation basique
             if (empty($email) || empty($password)) {
@@ -535,6 +542,17 @@ class AdminController extends AbstractController
             $user->setEmail($email);
             $user->setPassword($passwordHasher->hashPassword($user, $password));
             $user->setRoles($roles);
+            $user->setEnabled($enabled);
+
+            // 2FA settings
+            $user->setTwoFactorEnabled($twoFAEnabled);
+            $user->setTwoFactorDefaultMethod($twoFADefault);
+
+            if ($twoFAEnabled && $generateBackup) {
+                [$plainCodes, $hashedCodes] = $this->generateBackupCodes();
+                $user->setTwoFactorBackupCodes($hashedCodes);
+                $this->addFlash('success', 'Codes de secours générés: ' . implode(' ', $plainCodes));
+            }
             
             $entityManager->persist($user);
             $entityManager->flush();
@@ -562,6 +580,10 @@ class AdminController extends AbstractController
             $email = $request->request->get('email');
             $password = $request->request->get('password');
             $roles = $request->request->all('roles') ?? [];
+            $enabled = $request->request->has('enabled');
+            $twoFAEnabled = $request->request->has('two_factor_enabled');
+            $twoFADefault = $this->sanitizeTwoFactorMethod((string) $request->request->get('two_factor_default_method', 'email'));
+            $generateBackup = $request->request->has('generate_backup_codes');
             
             if (empty($email)) {
                 $this->addFlash('error', 'L\'email est obligatoire.');
@@ -581,12 +603,32 @@ class AdminController extends AbstractController
                 ]);
             }
             
+            // Empêcher de désactiver son propre compte
+            if ($user === $this->getUser() && $enabled === false) {
+                $this->addFlash('error', 'Vous ne pouvez pas désactiver votre propre compte.');
+                return $this->render('admin/utilisateur_form.html.twig', [
+                    'user' => $user,
+                    'mode' => 'edit'
+                ]);
+            }
+
             $user->setEmail($email);
             $user->setRoles($roles);
+            $user->setEnabled($enabled);
             
             // Mettre à jour le mot de passe seulement s'il est fourni
             if (!empty($password)) {
                 $user->setPassword($passwordHasher->hashPassword($user, $password));
+            }
+
+            // 2FA settings
+            $user->setTwoFactorEnabled($twoFAEnabled);
+            $user->setTwoFactorDefaultMethod($twoFADefault);
+
+            if ($twoFAEnabled && $generateBackup) {
+                [$plainCodes, $hashedCodes] = $this->generateBackupCodes();
+                $user->setTwoFactorBackupCodes($hashedCodes);
+                $this->addFlash('success', 'Nouveaux codes de secours: ' . implode(' ', $plainCodes));
             }
             
             $entityManager->flush();
@@ -599,6 +641,27 @@ class AdminController extends AbstractController
             'user' => $user,
             'mode' => 'edit'
         ]);
+    }
+
+    private function sanitizeTwoFactorMethod(string $method): string
+    {
+        $allowed = ['email', 'totp', 'sms'];
+        return in_array($method, $allowed, true) ? $method : 'email';
+    }
+
+    /**
+     * @return array{0: array<int,string>, 1: array<int,string>} [plainCodes, hashedCodes]
+     */
+    private function generateBackupCodes(int $count = 10): array
+    {
+        $plain = [];
+        $hashed = [];
+        for ($i = 0; $i < $count; $i++) {
+            $code = strtoupper(bin2hex(random_bytes(4))); // 8 hex chars
+            $plain[] = $code;
+            $hashed[] = password_hash($code, PASSWORD_DEFAULT);
+        }
+        return [$plain, $hashed];
     }
 
     #[Route('/utilisateurs/{id}/supprimer', name: 'app_admin_utilisateur_supprimer', methods: ['POST'])]
@@ -709,7 +772,7 @@ class AdminController extends AbstractController
                 'Equipement' => $mouvement->getEquipement() ? $mouvement->getEquipement()->getModel() : 'N/A',
                 'Dépôt Source' => $mouvement->getDepotSource() ? $mouvement->getDepotSource()->getNom() : 'N/A',
                 'Dépôt Destination' => $mouvement->getDepotDestination() ? $mouvement->getDepotDestination()->getNom() : 'N/A',
-                'Quantité' => $mouvement->getQuantite() ?? 1,
+                // Quantité supprimée: chaque mouvement correspond à 1 unité implicite
                 'Commentaire' => $mouvement->getCommentaire() ?? ''
             ];
         }
@@ -857,7 +920,7 @@ class AdminController extends AbstractController
                 'Dépôt Destination' => $mouvement->getDepotDestination() ? $mouvement->getDepotDestination()->getNom() : 'N/A',
                 'Société' => $mouvement->getDepotDestination() && $mouvement->getDepotDestination()->getSociete() ? 
                     $mouvement->getDepotDestination()->getSociete()->getNom() : 'N/A',
-                'Quantité' => $mouvement->getQuantite() ?? 1,
+                // Quantité supprimée: chaque mouvement = 1 unité implicite
                 'Commentaire' => $mouvement->getCommentaire() ?? ''
             ];
         }
@@ -1103,15 +1166,13 @@ class AdminController extends AbstractController
         // Récupérer tous les mouvements d'entrée dans ce dépôt
         $mouvementsEntree = $mouvementRepository->findBy(['depotDestination' => $depot]);
         foreach ($mouvementsEntree as $mouvement) {
-            $quantite = $mouvement->getQuantite() ?? 1;
-            $stockTotal += $quantite;
+            $stockTotal += 1; // chaque mouvement = 1 unité
         }
         
         // Soustraire tous les mouvements de sortie de ce dépôt
         $mouvementsSortie = $mouvementRepository->findBy(['depotSource' => $depot]);
         foreach ($mouvementsSortie as $mouvement) {
-            $quantite = $mouvement->getQuantite() ?? 1;
-            $stockTotal -= $quantite;
+            $stockTotal -= 1; // chaque mouvement = 1 unité
         }
         
         return max(0, $stockTotal); // Ne pas retourner de stock négatif
@@ -1146,5 +1207,92 @@ class AdminController extends AbstractController
         
         // Par défaut, retourner le dépôt de destination du dernier mouvement
         return $dernierMouvement->getDepotDestination();
+    }
+
+    /**
+     * Affiche l'historique des activités de tous les utilisateurs
+     */
+    #[Route('/historique', name: 'app_admin_historique', methods: ['GET'])]
+    public function historique(UserActivityRepository $activityRepository): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        
+        // Récupérer toutes les activités, triées par date décroissante
+        $activities = $activityRepository->createQueryBuilder('a')
+            ->leftJoin('a.user', 'u')
+            ->addSelect('u')
+            // Exclure l'historique de connexion/déconnexion
+            ->andWhere('a.action NOT IN (:excludedActions)')
+            ->setParameter('excludedActions', [UserActivity::ACTION_LOGIN, UserActivity::ACTION_LOGOUT])
+            ->orderBy('a.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        return $this->render('admin/historique.html.twig', [
+            'activities' => $activities,
+        ]);
+    }
+
+    /**
+     * Supprime une activité de l'historique
+     */
+    #[Route('/historique/{id}/supprimer', name: 'app_admin_historique_delete', methods: ['POST'])]
+    public function deleteActivity(int $id, UserActivityRepository $activityRepository, EntityManagerInterface $entityManager): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        
+        $activity = $activityRepository->find($id);
+        
+        if (!$activity) {
+            $this->addFlash('error', 'Activité introuvable.');
+            return $this->redirectToRoute('app_admin_historique');
+        }
+        
+        $entityManager->remove($activity);
+        $entityManager->flush();
+        
+        $this->addFlash('success', 'L\'activité a été supprimée avec succès.');
+        return $this->redirectToRoute('app_admin_historique');
+    }
+
+    /**
+     * Supprime plusieurs activités de l'historique en lot
+     */
+    #[Route('/historique/supprimer-selection', name: 'app_admin_historique_delete_bulk', methods: ['POST'])]
+    public function deleteBulkActivities(Request $request, UserActivityRepository $activityRepository, EntityManagerInterface $entityManager): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        
+        // Vérifier le token CSRF
+        if (!$this->isCsrfTokenValid('delete_activities', $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token de sécurité invalide.');
+            return $this->redirectToRoute('app_admin_historique');
+        }
+        
+        $activityIds = $request->request->all('activity_ids');
+        
+        if (empty($activityIds)) {
+            $this->addFlash('error', 'Aucune activité sélectionnée pour la suppression.');
+            return $this->redirectToRoute('app_admin_historique');
+        }
+        
+        $deletedCount = 0;
+        
+        foreach ($activityIds as $id) {
+            $activity = $activityRepository->find((int)$id);
+            if ($activity) {
+                $entityManager->remove($activity);
+                $deletedCount++;
+            }
+        }
+        
+        if ($deletedCount > 0) {
+            $entityManager->flush();
+            $this->addFlash('success', sprintf('%d activité(s) supprimée(s) avec succès.', $deletedCount));
+        } else {
+            $this->addFlash('warning', 'Aucune activité n\'a pu être supprimée.');
+        }
+        
+        return $this->redirectToRoute('app_admin_historique');
     }
 }

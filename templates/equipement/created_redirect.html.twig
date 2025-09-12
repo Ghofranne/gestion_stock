@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Équipement créé</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; color:#2c3e50; background: #f8f9fa; }
+    .wrap { max-width: 420px; margin: 60px auto; text-align: center; }
+    .card { border:1px solid #e0e0e0; border-radius: 12px; padding: 2rem; background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+    h2 { color: #5d5fef; margin: 0 0 1rem 0; font-size: 1.5rem; }
+    .muted { color: #6b7280; font-size: 0.95rem; margin: 1rem 0 0; line-height: 1.5; }
+    .loader { 
+      display: inline-block; width: 24px; height: 24px; border: 3px solid rgba(93, 95, 239, 0.3);
+      border-radius: 50%; border-top-color: #5d5fef; animation: spin 1s ease-in-out infinite; 
+      margin-right: 10px; vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+<div class="wrap card">
+  <h2>✓ Équipement créé</h2>
+  <div id="status">
+    <div class="loader"></div>
+    <span class="muted">Fermeture de la fenêtre...</span>
+  </div>
+</div>
+<script>
+  (function() {
+    try {
+      // Récupérer l'ID du dépôt si disponible
+      const urlParams = new URLSearchParams(window.location.search);
+      const depotId = urlParams.get('depot_id');
+      
+      // Notifier le parent que l'équipement a été créé avec succès
+      window.parent.postMessage({ 
+        type: 'equipement:created',
+        depotId: depotId
+      }, '*');
+      
+      // Mettre à jour l'interface utilisateur
+      const statusEl = document.getElementById('status');
+      if (statusEl) {
+        statusEl.innerHTML = '✓ Redirection en cours...';
+      }
+      
+      // Fermer la fenêtre après un court délai
+      setTimeout(function() {
+        try {
+          window.close();
+        } catch (e) {
+          console.warn('Impossible de fermer la fenêtre automatiquement');
+          if (statusEl) {
+            statusEl.innerHTML = '✓ Terminé. Vous pouvez fermer cette fenêtre.';
+          }
+        }
+      }, 1200);
+      
+    } catch (e) {
+      console.error('Erreur lors de la notification du parent:', e);
+      
+      // Afficher un message d'erreur convivial
+      const statusEl = document.getElementById('status');
+      if (statusEl) {
+        statusEl.innerHTML = '✓ Terminé. Vous pouvez fermer cette fenêtre.';
+      }
+    }
+  })();
+</script>
+</body>
+</html>

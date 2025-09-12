@@ -7,6 +7,7 @@ use App\Form\SocieteType;
 use App\Repository\SocieteRepository;
 use App\Repository\MouvementStockRepository;
 use App\Repository\EquipementRepository;
+use App\Service\UserActivityLogger;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -82,7 +83,7 @@ final class SocieteController extends AbstractController
     }
 
     #[Route('/new', name: 'app_societe_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, UserActivityLogger $activityLogger): Response
     {
         $societe = new Societe();
         $form = $this->createForm(SocieteType::class, $societe);
@@ -91,6 +92,10 @@ final class SocieteController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($societe);
             $entityManager->flush();
+            
+            // Logger l'activité
+            $activityLogger->logCreate($societe, sprintf('Société "%s" créée', $societe->getNom()));
+            
             $this->addFlash('success', 'notifications.societe.created');
             return $this->redirectToRoute('app_societe_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -127,9 +132,8 @@ final class SocieteController extends AbstractController
                         $stockParEquipement[$equipementId] = 0;
                         $equipementsDetails[$equipementId] = $equipement;
                     }
-                    // Ajouter la quantité d'entrée
-                    $quantite = $mouvement->getQuantite() ?? 1;
-                    $stockParEquipement[$equipementId] += $quantite;
+                    // Chaque mouvement concerne une unité (quantité implicite = 1)
+                    $stockParEquipement[$equipementId] += 1;
                 }
             }
             
@@ -139,9 +143,8 @@ final class SocieteController extends AbstractController
                 if ($equipement) {
                     $equipementId = $equipement->getId();
                     if (isset($stockParEquipement[$equipementId])) {
-                        // Soustraire la quantité de sortie
-                        $quantite = $mouvement->getQuantite() ?? 1;
-                        $stockParEquipement[$equipementId] -= $quantite;
+                        // Chaque mouvement concerne une unité (quantité implicite = 1)
+                        $stockParEquipement[$equipementId] -= 1;
                         
                         // Supprimer si le stock devient négatif ou nul
                         if ($stockParEquipement[$equipementId] <= 0) {
@@ -182,13 +185,21 @@ final class SocieteController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_societe_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Societe $societe, EntityManagerInterface $entityManager): Response
-    {
+    public function edit(
+        Request $request, 
+        Societe $societe, 
+        EntityManagerInterface $entityManager,
+        UserActivityLogger $activityLogger
+    ): Response {
         $form = $this->createForm(SocieteType::class, $societe);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
+            
+            // Log the update activity
+            $activityLogger->logUpdate($societe, sprintf('Société "%s" mise à jour', $societe->getNom()));
+            
             $this->addFlash('success', 'notifications.societe.updated');
             return $this->redirectToRoute('app_societe_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -200,9 +211,16 @@ final class SocieteController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_societe_delete', methods: ['POST'])]
-    public function delete(Request $request, Societe $societe, EntityManagerInterface $entityManager): Response
-    {
+    public function delete(
+        Request $request, 
+        Societe $societe, 
+        EntityManagerInterface $entityManager,
+        UserActivityLogger $activityLogger
+    ): Response {
         if ($this->isCsrfTokenValid('delete'.$societe->getId(), $request->getPayload()->getString('_token'))) {
+            // Log the delete activity before removing the entity
+            $activityLogger->logDelete($societe, sprintf('Société "%s" supprimée', $societe->getNom()));
+            
             $entityManager->remove($societe);
             $entityManager->flush();
             $this->addFlash('success', 'notifications.societe.deleted');

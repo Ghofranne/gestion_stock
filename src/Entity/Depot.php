@@ -28,11 +28,18 @@ class Depot
      * @var Collection<int, MouvementStock>
      */
     #[ORM\OneToMany(targetEntity: MouvementStock::class, mappedBy: 'depotSource')]
-    private Collection $mouvementStocks;
+    private Collection $mouvementStocksSource;
+
+    /**
+     * @var Collection<int, MouvementStock>
+     */
+    #[ORM\OneToMany(targetEntity: MouvementStock::class, mappedBy: 'depotDestination')]
+    private Collection $mouvementStocksDestination;
 
     public function __construct()
     {
-        $this->mouvementStocks = new ArrayCollection();
+        $this->mouvementStocksSource = new ArrayCollection();
+        $this->mouvementStocksDestination = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -79,27 +86,57 @@ class Depot
     /**
      * @return Collection<int, MouvementStock>
      */
-    public function getMouvementStocks(): Collection
+    public function getMouvementStocksSource(): Collection
     {
-        return $this->mouvementStocks;
+        return $this->mouvementStocksSource;
     }
 
-    public function addMouvementStock(MouvementStock $mouvementStock): static
+    public function addMouvementStocksSource(MouvementStock $mouvementStock): static
     {
-        if (!$this->mouvementStocks->contains($mouvementStock)) {
-            $this->mouvementStocks->add($mouvementStock);
+        if (!$this->mouvementStocksSource->contains($mouvementStock)) {
+            $this->mouvementStocksSource->add($mouvementStock);
             $mouvementStock->setDepotSource($this);
         }
 
         return $this;
     }
 
-    public function removeMouvementStock(MouvementStock $mouvementStock): static
+    public function removeMouvementStocksSource(MouvementStock $mouvementStock): static
     {
-        if ($this->mouvementStocks->removeElement($mouvementStock)) {
+        if ($this->mouvementStocksSource->removeElement($mouvementStock)) {
             // set the owning side to null (unless already changed)
             if ($mouvementStock->getDepotSource() === $this) {
                 $mouvementStock->setDepotSource(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MouvementStock>
+     */
+    public function getMouvementStocksDestination(): Collection
+    {
+        return $this->mouvementStocksDestination;
+    }
+
+    public function addMouvementStocksDestination(MouvementStock $mouvementStock): static
+    {
+        if (!$this->mouvementStocksDestination->contains($mouvementStock)) {
+            $this->mouvementStocksDestination->add($mouvementStock);
+            $mouvementStock->setDepotDestination($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMouvementStocksDestination(MouvementStock $mouvementStock): static
+    {
+        if ($this->mouvementStocksDestination->removeElement($mouvementStock)) {
+            // set the owning side to null (unless already changed)
+            if ($mouvementStock->getDepotDestination() === $this) {
+                $mouvementStock->setDepotDestination(null);
             }
         }
 

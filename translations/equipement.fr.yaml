@@ -51,8 +51,11 @@ equipement:
     supplier_placeholder: Saisissez le fournisseur
     state: État
     state_placeholder: Saisissez l'état
+    description: Description
+    description_placeholder: Ajoutez une description
 
   types:
     tpe: TPE
     sim: SIM
     card: Carte
+    other: Autres

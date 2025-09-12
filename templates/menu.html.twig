@@ -43,7 +43,7 @@
             <div class="menu-icon">🚛</div>
             <h3>{{ 'dashboard.cards.transfer.title'|trans }}</h3>
             <p>{{ 'dashboard.cards.transfer.desc'|trans }}</p>
-            <a href="{{ path('app_depot_index') }}" class="btn btn-outline" style="margin-top:1rem;">{{ 'dashboard.actions.access'|trans }}</a>
+            <a href="{{ path('app_mouvement_stock_new') }}" class="btn btn-outline" style="margin-top:1rem;">{{ 'dashboard.actions.access'|trans }}</a>
         </div>
     </div>
 <style>
@@ -296,6 +296,8 @@
         document.addEventListener('click', function(e) {
             const navMenu = document.getElementById('navMenu');
             const mobileBtn = document.querySelector('.mobile-menu-btn');
+            // Si l'un des éléments n'existe pas sur cette page, ne rien faire
+            if (!navMenu || !mobileBtn) return;
             if (!navMenu.contains(e.target) && !mobileBtn.contains(e.target)) {
                 navMenu.classList.remove('active');
             }

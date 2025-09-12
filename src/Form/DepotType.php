@@ -36,6 +36,7 @@ class DepotType extends AbstractType
                 'label' => 'depot.form.company',
                 'translation_domain' => 'depot',
                 'required' => false,
+                'disabled' => (bool) ($options['lock_societe'] ?? false),
             ])
         ;
     }
@@ -44,6 +45,7 @@ class DepotType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Depot::class,
+            'lock_societe' => false,
         ]);
     }
 }

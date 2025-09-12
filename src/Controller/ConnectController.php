@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Service\UserActivityLogger;
 use Doctrine\ORM\EntityManagerInterface;
 use League\OAuth2\Client\Provider\Google;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,6 +24,7 @@ class ConnectController extends AbstractController
         private readonly Security $security,
         private readonly UserPasswordHasherInterface $hasher,
         private readonly ParameterBagInterface $params,
+        private readonly UserActivityLogger $activityLogger,
     ) {}
 
     private function getEnv(string $key, ?string $default = null): ?string
@@ -57,6 +59,19 @@ class ConnectController extends AbstractController
         $provider = $this->makeGoogleProvider();
         $state = $request->query->get('state');
         $saved = $request->getSession()->get('oauth2state');
+        
+        // Log the OAuth callback attempt
+        $this->activityLogger->log(
+            null,
+            'auth',
+            'Tentative de connexion Google OAuth',
+            [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'state_matches' => ($state && $state === $saved)
+            ]
+        );
+        
         if (!$state || $state !== $saved) {
             $request->getSession()->remove('oauth2state');
             $this->addFlash('error', 'notifications.generic_error');
@@ -77,6 +92,8 @@ class ConnectController extends AbstractController
             }
 
             $user = $this->users->findOneBy(['email' => $email]);
+            $isNewUser = false;
+            
             if (!$user) {
                 $user = new User();
                 $user->setEmail($email);
@@ -94,13 +111,51 @@ class ConnectController extends AbstractController
                 }
                 $this->em->persist($user);
                 $this->em->flush();
+                $isNewUser = true;
+                
+                // Log new user creation via OAuth
+                $this->activityLogger->log(
+                    $user,
+                    'create',
+                    'Nouvel utilisateur créé via Google OAuth',
+                    [
+                        'email' => $email,
+                        'name' => $name,
+                        'source' => 'google_oauth'
+                    ]
+                );
             }
 
             // Log in programmatically (Symfony 7+)
             $this->security->login($user, 'main');
+            
+            // Log successful OAuth login
+            $this->activityLogger->log(
+                $user,
+                'login',
+                'Connexion réussie via Google OAuth',
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'is_new_user' => $isNewUser
+                ]
+            );
+            
             $this->addFlash('success', 'notifications.login_success');
             return $this->redirectToRoute('app_menu');
         } catch (\Throwable $e) {
+            // Log OAuth error
+            $this->activityLogger->log(
+                null,
+                'auth_error',
+                'Échec de la connexion Google OAuth',
+                [
+                    'error' => $e->getMessage(),
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent')
+                ]
+            );
+            
             $this->addFlash('error', 'notifications.generic_error');
             return $this->redirectToRoute('app_login');
         }

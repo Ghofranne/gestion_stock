@@ -6,6 +6,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use App\Service\TwoFactorService;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 use Symfony\Component\Security\Http\Authenticator\AbstractLoginFormAuthenticator;
@@ -21,7 +22,7 @@ class AppCustomAuthenticator extends AbstractLoginFormAuthenticator
 
     public const LOGIN_ROUTE = 'app_login';
 
-    public function __construct(private UrlGeneratorInterface $urlGenerator)
+    public function __construct(private UrlGeneratorInterface $urlGenerator, private TwoFactorService $twoFactorService)
     {
     }
 
@@ -50,6 +51,20 @@ class AppCustomAuthenticator extends AbstractLoginFormAuthenticator
 
         // Récupérer l'utilisateur connecté
         $user = $token->getUser();
+
+        // 2FA: si activé et non vérifié dans cette session, envoyer code et rediriger vers challenge
+        $session = $request->getSession();
+        if (is_object($user) && method_exists($user, 'isTwoFactorEnabled') && $user->isTwoFactorEnabled() && !$session->get('2fa_passed')) {
+            // Envoyer le code email (par défaut)
+            if (method_exists($user, 'getTwoFactorDefaultMethod') && $user->getTwoFactorDefaultMethod() === 'email') {
+                $this->twoFactorService->sendEmailCode($user);
+            }
+            // Sauver chemin cible et rediriger
+            if ($targetPath = $this->getTargetPath($session, $firewallName)) {
+                $session->set('2fa_target_path', $targetPath);
+            }
+            return new RedirectResponse($this->urlGenerator->generate('app_2fa_challenge'));
+        }
         
         // Si l'utilisateur est un admin, le rediriger vers la page d'administration
         if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {

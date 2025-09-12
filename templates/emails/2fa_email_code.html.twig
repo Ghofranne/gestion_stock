@@ -1,0 +1,11 @@
+<p>Bonjour {{ user.prenom ?? user.email }},</p>
+
+<p>Votre code d'authentification à deux facteurs est:</p>
+
+<h2 style="letter-spacing:4px;">{{ code }}</h2>
+
+<p>Ce code expire dans {{ expires_in }} minutes.</p>
+
+<p>Si vous n'êtes pas à l'origine de cette tentative de connexion, veuillez ignorer cet email.</p>
+
+<p>— L'équipe StockPro</p>

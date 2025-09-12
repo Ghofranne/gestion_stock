@@ -4,6 +4,10 @@
 
 {% block body %}
     <div class="list-container">
+        <div class="equip-search">
+            <input type="text" id="equipSearch" class="search-input" placeholder="Rechercher...">
+            <span class="search-icon">🔍</span>
+        </div>
         <h2 class="list-title">{{ 'equipement.index.heading'|trans([], 'equipement') }}</h2>
         <div class="cards-wrapper">
             {% for equipement in equipements %}
@@ -14,17 +18,84 @@
                             <div><span class="attr-label">{{ 'equipement.labels.imei'|trans([], 'equipement') }}</span> {{ equipement.imei }}</div>
                             <div><span class="attr-label">{{ 'equipement.labels.num_call'|trans([], 'equipement') }}</span> {{ equipement.numAppel }}</div>
                             <div><span class="attr-label">{{ 'equipement.labels.operator'|trans([], 'equipement') }}</span> {{ equipement.operateur }}</div>
-                            
-                            <div><span class="attr-label">{{ 'equipement.labels.state'|trans([], 'equipement') }}</span> {{ equipement.etat }}</div>
+                            {% set etat = statusById[equipement.id]|default(equipement.etat) %}
+                            <div>
+                                <span class="attr-label">{{ 'equipement.labels.state'|trans([], 'equipement') }}</span>
+                                <span class="state-badge 
+                                    {{ etat == 'Disponible' ? 'state-success' : 
+                                       (etat in ['Affecté', 'Affecte'] ? 'state-info' : 
+                                       (etat == 'Non disponible' ? 'state-danger' : 
+                                       (etat == 'Retour' ? 'state-warning' : 'state-neutral'))) }}">
+                                    {{ etat }}
+                                </span>
+                            </div>
                         {% elseif equipement.typeEquipement == 'TPE' %}
                             <div><span class="attr-label">{{ 'equipement.labels.sn'|trans([], 'equipement') }}</span> {{ equipement.sn }}</div>
                             <div><span class="attr-label">{{ 'equipement.labels.model'|trans([], 'equipement') }}</span> {{ equipement.model }}</div>
                             <div><span class="attr-label">{{ 'equipement.labels.supplier'|trans([], 'equipement') }}</span> {{ equipement.fournisseur }}</div>
-                            <div><span class="attr-label">{{ 'equipement.labels.state'|trans([], 'equipement') }}</span> {{ equipement.etat }}</div>
+                            {% set etat = statusById[equipement.id]|default(equipement.etat) %}
+                            <div>
+                                <span class="attr-label">{{ 'equipement.labels.state'|trans([], 'equipement') }}</span>
+                                <span class="state-badge 
+                                    {{ etat == 'Disponible' ? 'state-success' : 
+                                       (etat in ['Affecté', 'Affecte'] ? 'state-info' : 
+                                       (etat == 'Non disponible' ? 'state-danger' : 
+                                       (etat == 'Retour' ? 'state-warning' : 'state-neutral'))) }}">
+                                    {{ etat }}
+                                </span>
+                            </div>
                         {% elseif equipement.typeEquipement == 'Carte' %}
                             <div><span class="attr-label">{{ 'equipement.labels.card_ref'|trans([], 'equipement') }}</span> {{ equipement.referenceCarte }}</div>
-                            
-                            <div><span class="attr-label">{{ 'equipement.labels.state'|trans([], 'equipement') }}</span> {{ equipement.etat }}</div>
+                            {% set etat = statusById[equipement.id]|default(equipement.etat) %}
+                            <div>
+                                <span class="attr-label">{{ 'equipement.labels.state'|trans([], 'equipement') }}</span>
+                                <span class="state-badge 
+                                    {{ etat == 'Disponible' ? 'state-success' : 
+                                       (etat in ['Affecté', 'Affecte'] ? 'state-info' : 
+                                       (etat == 'Non disponible' ? 'state-danger' : 
+                                       (etat == 'Retour' ? 'state-warning' : 'state-neutral'))) }}">
+                                    {{ etat }}
+                                </span>
+                            </div>
+                        {% elseif equipement.typeEquipement == 'Autres' %}
+                            {% if equipement.fournisseur %}
+                                <div><span class="attr-label">{{ 'equipement.labels.supplier'|trans([], 'equipement') }}</span> {{ equipement.fournisseur }}</div>
+                            {% endif %}
+                            {% if equipement.description %}
+                                <div><span class="attr-label">{{ 'equipement.form.description'|trans([], 'equipement') }}</span> {{ equipement.description }}</div>
+                            {% endif %}
+                            {% set etat = statusById[equipement.id]|default(equipement.etat) %}
+                            <div>
+                                <span class="attr-label">{{ 'equipement.labels.state'|trans([], 'equipement') }}</span>
+                                <span class="state-badge 
+                                    {{ etat == 'Disponible' ? 'state-success' : 
+                                       (etat in ['Affecté', 'Affecte'] ? 'state-info' : 
+                                       (etat == 'Non disponible' ? 'state-danger' : 
+                                       (etat == 'Retour' ? 'state-warning' : 'state-neutral'))) }}">
+                                    {{ etat }}
+                                </span>
+                            </div>
+                        {% else %}
+                            {# Sécurité: afficher toute info disponible par défaut pour autres cas imprévus #}
+                            {% if equipement.fournisseur %}
+                                <div><span class="attr-label">{{ 'equipement.labels.supplier'|trans([], 'equipement') }}</span> {{ equipement.fournisseur }}</div>
+                            {% endif %}
+                            {% if equipement.description %}
+                                <div><span class="attr-label">{{ 'equipement.form.description'|trans([], 'equipement') }}</span> {{ equipement.description }}</div>
+                            {% endif %}
+                            {% set etatCourant = statusById[equipement.id]|default(equipement.etat) %}
+                            {% if etatCourant %}
+                                <div>
+                                    <span class="attr-label">{{ 'equipement.labels.state'|trans([], 'equipement') }}</span>
+                                    <span class="state-badge 
+                                        {{ etatCourant == 'Disponible' ? 'state-success' : 
+                                           (etatCourant in ['Affecté', 'Affecte'] ? 'state-info' : 
+                                           (etatCourant == 'Non disponible' ? 'state-danger' : 
+                                           (etatCourant == 'Retour' ? 'state-warning' : 'state-neutral'))) }}">
+                                        {{ etatCourant }}
+                                    </span>
+                                </div>
+                            {% endif %}
                         {% endif %}
                     </div>
                     <div class="equip-actions">
@@ -39,9 +110,13 @@
                 <div style="text-align:center;width:100%;color:#764ba2;font-weight:600;">{{ 'equipement.index.none'|trans([], 'equipement') }}</div>
             {% endfor %}
         </div>
+        <div id="equipEmpty" style="display:none;text-align:center;width:100%;color:#6b7280;margin-top:1rem;">Aucun équipement trouvé</div>
         <a href="{{ path('app_equipement_new') }}" class="btn-create">+ {{ 'equipement.index.add'|trans([], 'equipement') }}</a>
     </div>
     <style>
+        .equip-search { position: relative; max-width: 360px; margin: .25rem 0 1rem auto; }
+        .equip-search .search-input { width:100%; padding:.45rem .75rem .45rem 2rem; border:1px solid rgba(0,0,0,.15); border-radius:999px; outline:none; box-shadow: inset 0 1px 2px rgba(0,0,0,.04); }
+        .equip-search .search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); pointer-events:none; opacity:.85; color:#764ba2; }
         .cards-wrapper {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -122,6 +197,28 @@
             }
         }
     </style>
+    <script>
+        (function(){
+            const input = document.getElementById('equipSearch');
+            const grid = document.querySelector('.cards-wrapper');
+            const cards = () => Array.from(grid ? grid.querySelectorAll('.equip-card') : []);
+            const emptyMsg = document.getElementById('equipEmpty');
+            if(!input || !grid) return;
+            let timer;
+            const filter = () => {
+                const q = input.value.trim().toLowerCase();
+                let visible = 0;
+                cards().forEach(card => {
+                    const text = card.textContent.toLowerCase();
+                    const show = q === '' || text.includes(q);
+                    card.style.display = show ? '' : 'none';
+                    if(show) visible++;
+                });
+                if(emptyMsg){ emptyMsg.style.display = visible === 0 ? '' : 'none'; }
+            };
+            input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(filter, 160); });
+        })();
+    </script>
 
     <style>
         .list-container {
@@ -199,6 +296,13 @@
         .btn-create:hover {
             background: linear-gradient(135deg, #764ba2, #667eea);
         }
+        /* Etat badges */
+        .state-badge { display:inline-block; padding: 2px 10px; border-radius: 999px; font-weight: 700; font-size: .82rem; border: 1px solid transparent; }
+        .state-success { background:#ecfdf5; color:#047857; border-color:#a7f3d0; }
+        .state-info { background:#eef2ff; color:#3730a3; border-color:#c7d2fe; }
+        .state-danger { background:#fef2f2; color:#b91c1c; border-color:#fecaca; }
+        .state-warning { background:#fffbeb; color:#92400e; border-color:#fde68a; }
+        .state-neutral { background:#f3f4f6; color:#374151; border-color:#e5e7eb; }
         @media (max-width: 700px) {
             .list-container {
                 padding: 0.7rem 0.2rem;
